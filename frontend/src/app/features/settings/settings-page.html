@@ -1,4 +1,6 @@
 <m-page-header title="সেটিংস" description="মাদরাসার তথ্য, শিক্ষাবর্ষ, ইউজার, অনুমতি, ফি ও গ্রেড" />
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <div class="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] items-start">
   <nav aria-label="সেটিংসের অংশ" class="flex lg:flex-col gap-1 overflow-x-auto max-lg:pb-1">

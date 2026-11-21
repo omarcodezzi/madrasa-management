@@ -25,6 +25,8 @@ export class DashboardPage {
   protected feePercent = computed(() => { const d = this.d(); return d && d.expectedThisMonth ? Math.min(100, Math.round((d.collectedThisMonth * 100) / d.expectedThisMonth)) : 0; });
   protected attDelta = computed(() => { const d = this.d(); return d ? Math.round(d.todayPercent - d.yesterdayPercent) : 0; });
   protected deptMax = computed(() => Math.max(1, ...(this.d()?.byDepartment.map((x) => x.count) ?? [])));
+  protected hasTrend = computed(() => (this.d()?.attendanceTrend ?? []).some((p) => p.percent > 0));
+  protected hasMoney = computed(() => (this.d()?.incomeExpense ?? []).some((m) => m.income > 0 || m.expense > 0));
   protected actions = computed(() => ([
     { icon: 'scan', label: 'হাজিরা নিন', link: '/attendance', perm: P.attendance },
     { icon: 'wallet', label: 'বেতন নিন', link: '/fees', perm: P.fees },

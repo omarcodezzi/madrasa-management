@@ -14,3 +14,4 @@ export * from './toaster';
 export * from './data-table';
 export * from './qr-code';
 export * from './photo';
+export * from './load-error';

@@ -1,6 +1,8 @@
 <m-page-header title="উস্তাদ ও স্টাফ" description="শিক্ষক ও কর্মচারীর তথ্য, দৈনিক হাজিরা ও মাসিক বেতন">
   @if (tab() === 'list') { <button mButton (click)="create()"><m-icon name="plus" [size]="18" /> নতুন যোগ করুন</button> }
 </m-page-header>
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="স্টাফ অংশ" />
 
@@ -66,7 +68,7 @@
     </div>
     <m-card [padded]="false">
       @if (sheet(); as s) {
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" aria-label="বেতন শিট">
           <table class="w-full text-sm">
             <thead><tr class="text-left text-mut border-b border-line">
               <th class="px-4 py-2.5 font-semibold">নাম</th><th class="px-3 py-2.5 font-semibold text-right">উপস্থিতি</th><th class="px-3 py-2.5 font-semibold text-right">মূল</th>

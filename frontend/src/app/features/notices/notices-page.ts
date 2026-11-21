@@ -4,7 +4,7 @@ import { errorMessage } from '../../core/api';
 import { AuthService, P } from '../../core/auth/auth.service';
 import { DatePipe, DigitsPipe, MONTHS_BN, NumPipe, todayIso } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
-import { Badge, BadgeTone, Button, Card, ConfirmService, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
+import { Badge, BadgeTone, Button, Card, ConfirmService, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Audience, AUDIENCE_LABEL, EVENT_LABEL, EventKind, MessageRow, Notice, NoticeInput, SchoolEvent } from '../office/office.models';
@@ -15,7 +15,7 @@ const EVENT_TONE: Record<EventKind, BadgeTone> = { General: 'success', Exam: 'wa
 @Component({
   selector: 'app-notices-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton],
+  imports: [FormsModule, DatePipe, DigitsPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './notices-page.html',
 })
 export class NoticesPage {
@@ -55,6 +55,10 @@ export class NoticesPage {
   protected eForm = signal({ title: '', startDate: todayIso(), endDate: '', kind: 'General' as EventKind });
   protected eErrs = signal<Record<string, string>>({});
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.load(this.tab()); }
+
   constructor() {
     effect(() => { const t = this.tab(); untracked(() => this.load(t)); });
   }
@@ -63,7 +67,7 @@ export class NoticesPage {
       if (t === 'board') this.notices.set(await this.api.notices());
       if (t === 'events') this.events.set(await this.api.events(this.today.slice(0, 7) + '-01'));
       if (t === 'sms') this.messages.set(await this.api.messages());
-    } catch (e) { this.toast.error(errorMessage(e)); }
+    } catch (e) { this.failed(e); }
   }
 
   protected newNotice() { this.nId.set(null); this.nErrs.set({}); this.nForm.set({ title: '', body: '', date: todayIso(), audience: 'All', isPublic: true, sendSms: false }); this.nOpen.set(true); }

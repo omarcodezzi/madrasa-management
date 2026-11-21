@@ -34,7 +34,7 @@
         </div>
         @for (g of groups(); track g.name) {
           <m-card [padded]="false" class="mb-4 block">
-            <div class="px-4 py-3 border-b border-line flex items-center justify-between"><h3 class="!text-lg">{{ g.name }}</h3><span class="text-sm text-mut">{{ g.rows.length | num }} জন</span></div>
+            <div class="px-4 py-3 border-b border-line flex items-center justify-between"><h2 class="!text-lg">{{ g.name }}</h2><span class="text-sm text-mut">{{ g.rows.length | num }} জন</span></div>
             <ul class="m-0 p-0 list-none">
               @for (r of g.rows; track r.studentId) {
                 <li class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 border-b border-line last:border-0">

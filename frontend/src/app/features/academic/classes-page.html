@@ -49,10 +49,10 @@
             @if (canEdit()) { <button cardActions mButton size="sm" (click)="newSubject()"><m-icon name="plus" [size]="16" /> কিতাব যোগ</button> }
             @if (subjects(); as list) {
               @if (list.length) {
-                <div class="overflow-x-auto"><table class="w-full text-[15px] border-collapse">
+                <div class="overflow-x-auto scroll-region" tabindex="0" role="region" aria-label="বিষয়ের তালিকা"><table class="w-full text-[15px] border-collapse">
                   <thead><tr class="text-left text-sm text-mut border-y border-line bg-soft/50">
                     <th class="px-5 py-2.5 font-medium">কিতাব</th><th class="px-3 py-2.5 font-medium">উস্তাদ</th>
-                    <th class="px-3 py-2.5 font-medium text-right">পূর্ণমান</th><th class="px-3 py-2.5 font-medium text-right">পাস</th><th class="px-3"></th></tr></thead>
+                    <th class="px-3 py-2.5 font-medium text-right">পূর্ণমান</th><th class="px-3 py-2.5 font-medium text-right">পাস</th><th class="px-3 relative"><span class="sr-only">কাজ</span></th></tr></thead>
                   <tbody>
                     @for (s of list; track s.id) {
                       <tr class="border-b border-line last:border-0">
@@ -84,7 +84,7 @@
               }
             </div>
             @if (routine(); as r) {
-              <div class="overflow-x-auto">
+              <div class="overflow-x-auto scroll-region" tabindex="0" role="region" aria-label="রুটিন">
                 <table class="routine w-full border-collapse text-[14px] min-w-[720px]">
                   <thead>
                     <tr>
@@ -142,7 +142,13 @@
         }
       </div>
     } @else {
-      <m-card><m-empty-state title="একটি শ্রেণি বেছে নিন" icon="calendar" /></m-card>
+      @if (!hasClasses()) {
+        <m-card><m-empty-state title="এখনো কোনো শ্রেণি নেই" description="প্রথমে একটি শ্রেণি যোগ করুন, তারপর কিতাব, উস্তাদ ও রুটিন সাজান।" icon="calendar">
+          @if (canEdit()) { <button mButton (click)="newClass()"><m-icon name="plus" /> নতুন শ্রেণি</button> }
+        </m-empty-state></m-card>
+      } @else {
+        <m-card><m-empty-state title="একটি শ্রেণি বেছে নিন" icon="calendar" /></m-card>
+      }
     }
   </div>
 } @else if (!error()) {

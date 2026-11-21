@@ -99,10 +99,10 @@
           </div>
 
           <m-card [padded]="false" title="পড়ার খাতা" subtitle="সাম্প্রতিক ৩০ দিন">
-            <div class="overflow-x-auto"><table class="w-full text-[14px] border-collapse min-w-[640px]">
+            <div class="overflow-x-auto scroll-region" tabindex="0" role="region" aria-label="হিফজের খাতা"><table class="w-full text-[14px] border-collapse min-w-[640px]">
               <thead><tr class="text-left text-[13px] text-mut border-y border-line bg-soft/50">
                 <th class="px-5 py-2.5 font-medium">তারিখ</th><th class="px-3 py-2.5 font-medium">সবক</th><th class="px-3 py-2.5 font-medium">সাবকি</th>
-                <th class="px-3 py-2.5 font-medium">মানজিল</th><th class="px-3 py-2.5 font-medium text-right">ভুল</th><th class="px-3 py-2.5 font-medium">মান</th><th></th></tr></thead>
+                <th class="px-3 py-2.5 font-medium">মানজিল</th><th class="px-3 py-2.5 font-medium text-right">ভুল</th><th class="px-3 py-2.5 font-medium">মান</th><th class="relative"><span class="sr-only">কাজ</span></th></tr></thead>
               <tbody>
                 @for (l of d.logs; track l.id) {
                   <tr class="border-b border-line last:border-0 align-top">
