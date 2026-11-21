@@ -3,11 +3,14 @@ namespace Madrasa.Application.Auth;
 public record LoginRequest(string UserName, string Password);
 public record AuthUser(string Id, string UserName, string FullName, string[] Roles, string[] Permissions, string Language);
 public record LoginResponse(string AccessToken, DateTime ExpiresAt, AuthUser User);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
 public interface IAuthService
 {
     Task<LoginResponse?> LoginAsync(LoginRequest req, CancellationToken ct = default);
     Task<AuthUser?> GetUserAsync(string userId, CancellationToken ct = default);
+    /// <summary>Returns null on success, otherwise a Bangla error message.</summary>
+    Task<string?> ChangePasswordAsync(string userId, ChangePasswordRequest req, CancellationToken ct = default);
 }
 
 /// <summary>Permission keys. The Angular app hides menu items using these.</summary>

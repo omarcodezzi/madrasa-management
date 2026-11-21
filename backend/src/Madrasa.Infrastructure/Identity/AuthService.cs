@@ -21,7 +21,13 @@ public class AuthService(UserManager<AppUser> users, RoleManager<IdentityRole> r
     public async Task<LoginResponse?> LoginAsync(LoginRequest req, CancellationToken ct = default)
     {
         var user = await users.FindByNameAsync(req.UserName);
-        if (user is null || !user.IsActive || !await users.CheckPasswordAsync(user, req.Password)) return null;
+        if (user is null || !user.IsActive || await users.IsLockedOutAsync(user)) return null;
+        if (!await users.CheckPasswordAsync(user, req.Password))
+        {
+            await users.AccessFailedAsync(user);   // locks after 5 wrong tries (see DependencyInjection)
+            return null;
+        }
+        await users.ResetAccessFailedCountAsync(user);
         var info = await BuildAsync(user);
         var o = jwt.Value;
         var expires = DateTime.UtcNow.AddMinutes(o.ExpiryMinutes);
@@ -37,6 +43,16 @@ public class AuthService(UserManager<AppUser> users, RoleManager<IdentityRole> r
     {
         var u = await users.FindByIdAsync(userId);
         return u is null ? null : await BuildAsync(u);
+    }
+
+    public async Task<string?> ChangePasswordAsync(string userId, ChangePasswordRequest req, CancellationToken ct = default)
+    {
+        var u = await users.FindByIdAsync(userId);
+        if (u is null) return "ব্যবহারকারী পাওয়া যায়নি";
+        if (string.IsNullOrWhiteSpace(req.NewPassword) || req.NewPassword.Length < 8) return "নতুন পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে";
+        var r = await users.ChangePasswordAsync(u, req.CurrentPassword, req.NewPassword);
+        if (r.Succeeded) return null;
+        return r.Errors.Any(e => e.Code == "PasswordMismatch") ? "বর্তমান পাসওয়ার্ড সঠিক নয়" : "পাসওয়ার্ড পরিবর্তন করা যায়নি";
     }
 
     private async Task<AuthUser> BuildAsync(AppUser u)

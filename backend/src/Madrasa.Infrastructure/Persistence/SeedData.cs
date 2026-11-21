@@ -12,7 +12,7 @@ internal static class SeedData
         b.Entity<MadrasaProfile>().HasData(new MadrasaProfile
         {
             Id = 1, NameBn = "রামারবাগ তা'মীরুল কুরআন মাদরাসা", NameAr = "رماربغ تعمير القرآن مدرسة",
-            Address = "রামারবাগ, লাকসাম, কুমিল্লা", StudentIdPrefix = "RM"
+            Address = "রামারবাগ কেন্দ্রিয় ঈদগা, রামারবাগ, উত্তরদা, লাকসাম, কুমিল্লা", Phone = "01975448094", StudentIdPrefix = "RM"
         });
         b.Entity<AcademicSession>().HasData(new AcademicSession
         { Id = 1, Name = "2026", StartDate = new DateOnly(2026, 1, 1), EndDate = new DateOnly(2026, 12, 31), IsCurrent = true });

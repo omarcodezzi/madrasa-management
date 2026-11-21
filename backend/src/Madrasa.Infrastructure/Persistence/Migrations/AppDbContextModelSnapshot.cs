@@ -1216,9 +1216,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Address = "রামারবাগ, লাকসাম, কুমিল্লা",
+                            Address = "রামারবাগ কেন্দ্রিয় ঈদগা, রামারবাগ, উত্তরদা, লাকসাম, কুমিল্লা",
                             NameAr = "رماربغ تعمير القرآن مدرسة",
                             NameBn = "রামারবাগ তা'মীরুল কুরআন মাদরাসা",
+                            Phone = "01975448094",
                             StudentIdPrefix = "RM"
                         });
                 });

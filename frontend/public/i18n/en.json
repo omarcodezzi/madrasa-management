@@ -1,18 +1,131 @@
 {
-  "app": { "name": "Madrasa Management", "session": "Session" },
+  "app": {
+    "name": "Madrasa Management",
+    "session": "Session"
+  },
   "common": {
-    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit", "add": "Add",
-    "search": "Search", "print": "Print", "download": "Download", "retry": "Try again", "loading": "Loading…",
-    "required": "This field is required", "invalidPhone": "Enter a valid 11-digit mobile number"
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "print": "Print",
+    "download": "Download",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "required": "This field is required",
+    "invalidPhone": "Enter a valid 11-digit mobile number"
   },
   "nav": {
-    "dashboard": "Dashboard", "students": "Students", "admission": "Admission", "attendance": "Attendance", "idcards": "ID cards",
-    "fees": "Fees & accounts", "exams": "Exams & results", "hifz": "Hifz progress", "notices": "Notices", "reports": "Reports", "settings": "Settings"
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "admission": "Admission",
+    "attendance": "Attendance",
+    "idcards": "ID cards",
+    "fees": "Fees & accounts",
+    "exams": "Exams & results",
+    "hifz": "Hifz progress",
+    "notices": "Notices",
+    "reports": "Reports",
+    "settings": "Settings",
+    "classes": "Classes & routine",
+    "accounts": "Accounts & donations",
+    "staff": "Teachers & staff",
+    "hostel": "Hostel",
+    "library": "Library",
+    "portal": "My page",
+    "more": "More",
+    "home": "Home"
   },
-  "status": { "present": "Present", "absent": "Absent", "late": "Late", "leave": "Leave", "paid": "Paid", "due": "Due" },
-  "prefs": { "theme": "Theme", "system": "System", "light": "Light", "dark": "Dark", "language": "Language", "digits": "Digits" },
+  "status": {
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "leave": "Leave",
+    "paid": "Paid",
+    "due": "Due"
+  },
+  "prefs": {
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "digits": "Digits"
+  },
   "ds": {
     "title": "Design system",
     "desc": "Every page uses the same colours, type, buttons, forms and tables. They are all shown together here."
+  },
+  "navGroup": {
+    "daily": "Daily work",
+    "academic": "Academic",
+    "office": "Office",
+    "portal": "Portal"
+  },
+  "shell": {
+    "search": "Search students, pages or actions",
+    "searchShort": "Search",
+    "session": "Session",
+    "notifications": "Notices",
+    "noNotifications": "No new notices",
+    "profile": "Profile",
+    "changePassword": "Change password",
+    "logout": "Sign out",
+    "openMenu": "Open menu",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "theme": "Change theme",
+    "language": "Change language"
+  },
+  "palette": {
+    "pages": "Pages",
+    "actions": "Actions",
+    "students": "Students",
+    "noResults": "Nothing found",
+    "hint": "↑↓ choose · Enter open · Esc close",
+    "searching": "Searching…",
+    "addStudent": "Admit a new student",
+    "takeAttendance": "Take today's attendance",
+    "collectFee": "Collect a fee",
+    "publishNotice": "Write a notice"
+  },
+  "auth": {
+    "welcome": "Assalamu alaikum",
+    "signInTitle": "Sign in",
+    "signInDesc": "Enter your user name and password.",
+    "userName": "User name",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "forgot": "Forgot password?",
+    "forgotTitle": "Forgot your password?",
+    "forgotDesc": "For security, passwords are only reset by the madrasa office. Call the number below or visit the office.",
+    "callOffice": "Call the office",
+    "back": "Back to sign in",
+    "badCredentials": "User name or password is incorrect",
+    "locked": "After 5 wrong tries, sign-in is blocked for 15 minutes.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordHint": "At least 8 characters",
+    "passwordChanged": "Password changed"
+  },
+  "placeholder": {
+    "comingIn": "This page is built in phase {{phase}}",
+    "comingDesc": "The app frame, sign-in and menu are ready. This page comes in a later phase.",
+    "designSystem": "See the design system"
+  },
+  "roles": {
+    "SuperAdmin": "Super admin",
+    "Muhtamim": "Muhtamim",
+    "Office": "Office staff",
+    "Teacher": "Teacher",
+    "Accountant": "Accountant",
+    "HostelSupervisor": "Hostel supervisor",
+    "Librarian": "Librarian",
+    "Student": "Student",
+    "Guardian": "Guardian"
   }
 }

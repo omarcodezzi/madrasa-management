@@ -39,6 +39,13 @@ export const ICONS = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   columns: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/>',
   rows: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M14 14h2M8 17.5h2"/>',
+  quran: '<path d="M4 5.5C6.5 5 9.5 5.5 12 7c2.5-1.5 5.5-2 8-1.5V19c-2.5-.5-5.5 0-8 1.5-2.5-1.5-5.5-2-8-1.5zM12 7v13.5"/><path d="M15 10.5l1 .8 1.2-.3-.3 1.2.8 1-1.3.1-.6 1.1-.6-1.1-1.3-.1.8-1-.3-1.2 1.2.3z"/>',
+  bed: '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',
+  library: '<path d="M4 4h3v16H4zM9 4h3v16H9zM14.5 4.6l2.9-.8 3.9 15.5-2.9.8z"/>',
+  coins: '<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v4c0 1.7 2.7 3 6 3s6-1.3 6-3V7M3 11v4c0 1.7 2.7 3 6 3 1.2 0 2.3-.2 3.2-.5"/><circle cx="17" cy="16" r="4"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/>',
   refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>',
 } as const;
 export type IconName = keyof typeof ICONS;
