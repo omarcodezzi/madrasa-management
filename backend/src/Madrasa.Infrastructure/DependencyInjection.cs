@@ -23,6 +23,7 @@ public static class DependencyInjection
                 o.Password.RequireNonAlphanumeric = false;
                 o.User.RequireUniqueEmail = false;
                 o.Lockout.MaxFailedAccessAttempts = 5;
+                o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();

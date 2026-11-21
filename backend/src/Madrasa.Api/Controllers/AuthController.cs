@@ -22,4 +22,13 @@ public class AuthController(IAuthService auth) : ControllerBase
         var u = id is null ? null : await auth.GetUserAsync(id, ct);
         return u is null ? Unauthorized() : Ok(u);
     }
+
+    [HttpPost("change-password"), Authorize]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest req, CancellationToken ct)
+    {
+        var id = User.FindFirst("sub")?.Value;
+        if (id is null) return Unauthorized();
+        var err = await auth.ChangePasswordAsync(id, req, ct);
+        return err is null ? NoContent() : Problem(title: err, statusCode: 400);
+    }
 }

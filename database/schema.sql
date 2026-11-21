@@ -1540,3 +1540,30 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121204226_SeedProfileContact'
+)
+BEGIN
+    EXEC(N'UPDATE [MadrasaProfile] SET [Address] = N''রামারবাগ কেন্দ্রিয় ঈদগা, রামারবাগ, উত্তরদা, লাকসাম, কুমিল্লা'', [Phone] = N''01975448094''
+    WHERE [Id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121204226_SeedProfileContact'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261121204226_SeedProfileContact', N'8.0.11');
+END;
+GO
+
+COMMIT;
+GO
+

@@ -2,7 +2,7 @@
 
 স্ট্যাক: **Angular** (ফ্রন্টএন্ড) · **.NET 8 Web API** (ব্যাকএন্ড) · **Microsoft SQL Server** (ডাটাবেস)
 
-ডাটাবেস ডিজাইন: [`database/InitialCreate.sql`](../database/InitialCreate.sql) (EF Core migration থেকে তৈরি) — ৪৪টি টেবিল (লগইনের Identity টেবিল বাদে), ১৩টি অংশে ভাগ করা।
+ডাটাবেস ডিজাইন: [`database/schema.sql`](../database/schema.sql) (EF Core migration থেকে তৈরি) — ৪৪টি টেবিল (লগইনের Identity টেবিল বাদে), ১৩টি অংশে ভাগ করা।
 
 ---
 
