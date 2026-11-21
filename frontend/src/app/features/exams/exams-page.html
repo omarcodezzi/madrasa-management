@@ -1,0 +1,144 @@
+<m-page-header title="পরীক্ষা ও ফলাফল" description="নম্বর লিখলেই মোট, গড়, বিভাগ ও মেধাক্রম নিজে থেকে হিসাব হয়। কোনো কিতাবে পাস নম্বরের কম হলে রাসিব।">
+  @if (canManage()) { <button mButton (click)="newExam()"><m-icon name="plus" /> নতুন পরীক্ষা</button> }
+</m-page-header>
+
+@if (error()) {
+  <div class="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
+    <m-icon name="alert" /><span class="flex-1">{{ error() }}</span><button mButton size="sm" variant="outline" (click)="loadExams()">আবার চেষ্টা করুন</button>
+  </div>
+}
+
+@if (exams(); as list) {
+  @if (!list.length) {
+    <m-card><m-empty-state title="এখনো কোনো পরীক্ষা নেই" description="নতুন পরীক্ষা যোগ করে নম্বর দেওয়া শুরু করুন।" icon="exam" /></m-card>
+  } @else {
+    <!-- Exams -->
+    <div class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(240px,100%),1fr))] mb-5" role="radiogroup" aria-label="পরীক্ষা">
+      @for (e of list; track e.id) {
+        <button type="button" role="radio" [attr.aria-checked]="e.id === examId()" (click)="pickExam(e.id)"
+          class="text-left p-4 rounded-[var(--radius-card)] border cursor-pointer transition-colors text-ink"
+          [class]="e.id === examId() ? 'border-g2 bg-okbg' : 'border-line bg-card hover:bg-soft'">
+          <span class="flex items-start justify-between gap-2">
+            <b class="font-semibold leading-tight">{{ e.name }}</b>
+            @if (e.isPublished) { <m-badge tone="success" [dot]="true">প্রকাশিত</m-badge> } @else if (e.marksEntered) { <m-badge tone="gold">চলছে</m-badge> } @else { <m-badge>আসন্ন</m-badge> }
+          </span>
+          <small class="block text-mut mt-1">{{ e.startDate ? (e.startDate | bdate) : 'তারিখ ঠিক হয়নি' }}</small>
+          <span class="mt-2.5 block h-1.5 rounded-full bg-soft overflow-hidden" aria-hidden="true"><i class="block h-full bg-g2 rounded-full" [style.width.%]="progress(e)"></i></span>
+          <small class="block text-mut text-[12px] mt-1">নম্বর দেওয়া {{ progress(e) | num }}%</small>
+        </button>
+      }
+    </div>
+
+    @if (exam(); as e) {
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <m-chips [options]="classOptions()" [value]="classId()" (valueChange)="pickClass($event)" aria-label="শ্রেণি" />
+      </div>
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        @if (!e.isPublished) {
+          <span class="text-sm" aria-live="polite" [class.text-red]="save() === 'error'" [class.text-mut]="save() !== 'error'">
+            @switch (save()) { @case ('saving') { সংরক্ষণ হচ্ছে… } @case ('saved') { ✓ সব নম্বর সংরক্ষিত } @case ('error') { {{ errText() || 'কিছু নম্বর সংরক্ষণ হয়নি' }} } @default { নম্বর লিখলে নিজে থেকে সংরক্ষণ হবে। Enter চাপলে নিচের ঘরে যাবে, অনুপস্থিত হলে "অ" লিখুন। } }
+          </span>
+        } @else {
+          <span class="text-sm text-g2 inline-flex items-center gap-1.5"><m-icon name="check" [size]="16" /> ফলাফল প্রকাশিত। নম্বর বদলাতে আগে প্রকাশ বাতিল করুন।</span>
+        }
+        <span class="flex flex-wrap gap-2 ml-auto">
+          <button mButton variant="outline" size="sm" (click)="printSheet()" [disabled]="!sheet()"><m-icon name="print" [size]="16" /> টেবুলেশন শিট</button>
+          <button mButton variant="outline" size="sm" (click)="printAllMarkSheets()" [disabled]="!sheet()?.rows?.length"><m-icon name="print" [size]="16" /> সব মার্কশিট</button>
+          @if (canManage()) {
+            @if (e.isPublished) { <button mButton variant="ghost" size="sm" (click)="publish(false)">প্রকাশ বাতিল</button> }
+            @else { <button mButton variant="gold" size="sm" (click)="publish(true)" [disabled]="!e.marksEntered"><m-icon name="mega" [size]="16" /> ফলাফল প্রকাশ</button> }
+            <button mIconButton (click)="editExam(e)" aria-label="পরীক্ষা সম্পাদনা"><m-icon name="edit" [size]="18" /></button>
+            @if (!e.isPublished && !e.marksEntered) { <button mIconButton (click)="removeExam(e)" aria-label="পরীক্ষা মুছুন"><m-icon name="trash" [size]="18" /></button> }
+          }
+        </span>
+      </div>
+
+      @if (sheet(); as s) {
+        @if (!s.subjects.length) {
+          <m-card><m-empty-state title="এই শ্রেণিতে কোনো কিতাব নেই" description="শ্রেণি ও রুটিন পাতায় কিতাব যোগ করলে নম্বর দেওয়া যাবে।" icon="book"><a mButton variant="outline" routerLink="/classes">শ্রেণি ও রুটিন</a></m-empty-state></m-card>
+        } @else if (!s.rows.length) {
+          <m-card><m-empty-state title="এই শ্রেণিতে কোনো শিক্ষার্থী নেই" icon="users" /></m-card>
+        } @else {
+          <m-card [padded]="false">
+            <div class="overflow-x-auto">
+              <table class="marks w-full border-collapse text-[14px]">
+                <thead>
+                  <tr>
+                    <th class="text-left sticky left-0 bg-card z-[1] min-w-[180px]">শিক্ষার্থী</th>
+                    @for (sub of s.subjects; track sub.id) {
+                      <th class="min-w-[84px]"><span class="block leading-tight">{{ sub.subjectName }}</span><small class="block text-mut font-normal">{{ sub.fullMarks | num }} / পাস {{ sub.passMarks | num }}</small></th>
+                    }
+                    <th class="text-right">মোট</th><th class="text-right">গড়</th><th class="text-left">বিভাগ</th><th class="text-right">মেধা</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of rows(); track r.studentId; let ri = $index) {
+                    @let c = live().get(r.studentId);
+                    <tr>
+                      <td class="text-left sticky left-0 bg-card z-[1]"><b class="font-semibold">{{ r.name }}</b><small class="block text-mut">রোল {{ r.roll | num }}</small></td>
+                      @for (sub of s.subjects; track sub.id; let ci = $index) {
+                        <td>
+                          <input class="ctl mk" [id]="'mk-' + ri + '-' + ci" [class.bad]="bad(r.studentId, sub.id, sub.passMarks, sub.fullMarks)" inputmode="decimal" autocomplete="off"
+                            [value]="value(r.studentId, sub.id)" [readOnly]="s.isPublished" (input)="onInput(r.studentId, sub.id, $any($event.target).value)"
+                            (keydown)="onKey($event, ri, ci)" (focus)="$any($event.target).select()" (blur)="tidy(r.studentId, sub.id)" [attr.aria-label]="r.name + ', ' + sub.subjectName"
+                            [attr.aria-invalid]="!!cellErr()[r.studentId + ':' + sub.id]" [title]="cellErr()[r.studentId + ':' + sub.id] ?? ''">
+                        </td>
+                      }
+                      <td class="text-right tabular font-semibold">{{ c?.total | num }}</td>
+                      <td class="text-right tabular">{{ c?.average | num }}</td>
+                      <td class="text-left">@if (c?.grade) { <m-badge [tone]="tone(c.grade.nameBn)">{{ c.grade.nameBn }}</m-badge> } @else { <span class="text-mut text-[13px]">অসম্পূর্ণ</span> }</td>
+                      <td class="text-right tabular font-semibold">{{ c?.merit ? (c.merit | num) : '—' }}</td>
+                      <td class="text-right"><button mButton variant="ghost" size="sm" (click)="printMarkSheet(r.studentId)">মার্কশিট</button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </m-card>
+
+          <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] mt-5 items-start">
+            <m-card title="মেধা তালিকা" [subtitle]="s.className + ' · ' + s.examName" [padded]="false">
+              <ol class="m-0 p-0 list-none">
+                @for (r of merit(); track r.studentId) {
+                  @let c = live().get(r.studentId)!;
+                  <li class="flex items-center gap-3 px-5 py-2.5 border-b border-line last:border-0">
+                    <span class="size-8 grid place-items-center rounded-full font-bold tabular" [class]="c.merit === 1 ? 'bg-[var(--gold)] text-[#1d1600]' : 'bg-soft text-ink'">{{ c.merit | num }}</span>
+                    <span class="flex-1"><b class="font-semibold">{{ r.name }}</b> <small class="text-mut">· রোল {{ r.roll | num }}</small></span>
+                    <span class="tabular font-semibold">{{ c.total | num }}</span>
+                    <m-badge [tone]="tone(c.grade?.nameBn)">{{ c.grade?.nameBn }}</m-badge>
+                  </li>
+                } @empty { <li class="px-5 py-6 text-center text-mut text-sm">সব কিতাবের নম্বর দিলে মেধা তালিকা তৈরি হবে</li> }
+              </ol>
+            </m-card>
+            <m-card title="বিভাগ অনুযায়ী" subtitle="বেফাক পদ্ধতিতে গড় নম্বর দিয়ে">
+              @for (x of gradeCounts(); track x.g.id) {
+                <div class="flex items-center gap-3 py-2 border-b border-line last:border-0">
+                  <span class="flex-1">{{ x.g.nameBn }} @if (x.g.nameAr) { <span class="ar text-mut text-sm">{{ x.g.nameAr }}</span> }
+                    <small class="block text-mut text-[12px]">@if (x.g.minAverage > 0) { গড় {{ x.g.minAverage | num }} বা বেশি } @else { কোনো কিতাবে ফেল }</small></span>
+                  <m-badge [tone]="tone(x.g.nameBn)">{{ x.n | num }} জন</m-badge>
+                </div>
+              }
+            </m-card>
+          </div>
+        }
+      } @else { <m-skeleton height="320px" /> }
+    }
+  }
+} @else if (!error()) {
+  <div class="grid gap-4"><m-skeleton height="110px" /><m-skeleton height="360px" /></div>
+}
+
+<m-modal [(open)]="examOpen" [title]="examForm().id ? 'পরীক্ষা সম্পাদনা' : 'নতুন পরীক্ষা'">
+  <form id="examForm" class="grid gap-4" (ngSubmit)="saveExam()">
+    <div><label for="ename" class="block text-sm font-medium mb-1.5">পরীক্ষার নাম</label>
+      <input id="ename" class="ctl" name="name" [ngModel]="examForm().name" (ngModelChange)="patchExam({ name: $event })" placeholder="যেমন বার্ষিক পরীক্ষা" [attr.aria-invalid]="!!examErr()['name']">
+      @if (examErr()['name']) { <small class="text-red text-[13px]" role="alert">{{ examErr()['name'] }}</small> }</div>
+    <div><label for="edate" class="block text-sm font-medium mb-1.5">শুরুর তারিখ</label>
+      <input id="edate" type="date" class="ctl" name="startDate" [ngModel]="examForm().startDate" (ngModelChange)="patchExam({ startDate: $event })"></div>
+    <p class="m-0 text-sm text-mut">পরীক্ষাটি চলতি শিক্ষাবর্ষের সব শ্রেণির জন্য। প্রতিটি শ্রেণির কিতাব অনুযায়ী নম্বর দেওয়া হবে।</p>
+  </form>
+  <div modalFooter class="flex gap-2">
+    <button mButton variant="ghost" (click)="examOpen.set(false)">বাতিল</button>
+    <button mButton type="submit" form="examForm" [loading]="savingExam()">সংরক্ষণ</button>
+  </div>
+</m-modal>

@@ -1,0 +1,131 @@
+<m-page-header title="হিফজ অগ্রগতি" description="প্রতিদিনের সবক, সাবকি ও মানজিল লিখে রাখুন। পারা সম্পন্ন হলে ৩০ পারার ঘরে চাপ দিন।" />
+
+@if (error()) {
+  <div class="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
+    <m-icon name="alert" /><span class="flex-1">{{ error() }}</span><button mButton size="sm" variant="outline" (click)="loadOverview()">আবার চেষ্টা করুন</button>
+  </div>
+}
+
+@if (overview(); as o) {
+  <div class="grid grid-cols-3 bg-card border border-line rounded-[var(--radius-card)] mb-5">
+    <div class="px-5 py-4"><span class="text-sm text-mut">আজ পড়া দিয়েছে</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ o.loggedToday | num }}<small class="text-base text-mut font-sans font-medium"> / {{ o.total | num }}</small></b></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">বাকি</span><b class="block font-serif font-extrabold text-[26px]" [class.text-goldink]="pending().length">{{ pending().length | num }} জন</b></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">গড় অগ্রগতি</span><b class="block font-serif font-extrabold text-[26px]">{{ avgJuz() | num }} পারা</b></div>
+  </div>
+
+  @if (!o.students.length) {
+    <m-card><m-empty-state title="হিফজ বিভাগে কোনো শিক্ষার্থী নেই" description="হিফজ বিভাগের কোনো শ্রেণিতে শিক্ষার্থী ভর্তি করলে এখানে দেখাবে।" icon="quran" /></m-card>
+  } @else {
+    <div class="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
+      <!-- Students -->
+      <m-card [padded]="false" title="হাফেজ শিক্ষার্থী">
+        <ul class="m-0 p-0 list-none max-h-[70vh] overflow-y-auto">
+          @for (s of o.students; track s.studentId) {
+            <li><button type="button" class="w-full flex items-center gap-3 px-4 py-3 border-0 border-b border-line text-left cursor-pointer text-ink"
+              [class]="s.studentId === selectedId() ? 'bg-okbg' : 'bg-transparent hover:bg-soft'" [attr.aria-current]="s.studentId === selectedId()" (click)="select(s.studentId)">
+              <m-avatar [name]="s.name" [src]="photo(s.photoPath)" [size]="40" />
+              <span class="flex-1 min-w-0 leading-tight">
+                <b class="font-semibold">{{ s.name }}</b>
+                <small class="block text-mut text-[13px] truncate">@if (s.lastJuz) { পারা {{ s.lastJuz | num }}@if (s.lastFrom) {, পৃ. {{ s.lastFrom | num }}@if (s.lastTo && s.lastTo !== s.lastFrom) {–{{ s.lastTo | num }}} } } @else { {{ s.lastText || 'এখনো সবক নেই' }} }</small>
+                <span class="mt-1.5 block h-1.5 rounded-full bg-soft overflow-hidden"><i class="block h-full bg-g2 rounded-full" [style.width.%]="(s.completedJuz / 30) * 100"></i></span>
+              </span>
+              <span class="text-right">
+                <b class="block font-serif text-lg leading-none">{{ s.completedJuz | num }}<small class="text-mut text-xs font-sans">/৩০</small></b>
+                @if (s.loggedToday) { <m-badge tone="success" class="mt-1">আজ ✓</m-badge> } @else { <m-badge tone="gold" class="mt-1">বাকি</m-badge> }
+              </span>
+            </button></li>
+          }
+        </ul>
+      </m-card>
+
+      <!-- Detail -->
+      @if (detail(); as d) {
+        <div class="grid gap-5 min-w-0">
+          <m-card>
+            <div class="flex flex-wrap items-center gap-5 mb-5">
+              <m-avatar [name]="d.name" [src]="photo(d.photoPath)" [size]="56" />
+              <div class="flex-1 min-w-[160px]">
+                <h2 class="!text-2xl"><a [routerLink]="['/students', d.studentId]" class="no-underline text-ink">{{ d.name }}</a></h2>
+                <p class="m-0 text-mut">{{ d.studentCode }} · {{ d.className }} · রোল {{ d.roll | num }}</p>
+              </div>
+              <app-juz-ring [done]="d.completedJuz" />
+            </div>
+            <app-juz-grid [cells]="d.juz" [editable]="true" (toggle)="toggleJuz($event)" />
+          </m-card>
+
+          <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,340px)] items-start">
+            <m-card [title]="form().date === today ? 'আজকের পড়া' : 'পড়া · ' + (form().date | bdate)" [subtitle]="d.today && form().date === today ? 'আজকের পড়া আগেই লেখা হয়েছে, বদলে সংরক্ষণ করতে পারেন' : ''">
+              <form id="hzForm" class="grid gap-4" (ngSubmit)="save()">
+                <fieldset class="border border-line rounded-xl p-4 m-0">
+                  <legend class="px-1 font-semibold">সবক <span class="font-normal text-mut text-sm">(নতুন পড়া)</span></legend>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div><label for="hzj" class="block text-sm mb-1">পারা</label>
+                      <input id="hzj" class="ctl" inputmode="numeric" name="juz" [ngModel]="form().juz" (ngModelChange)="patch({ juz: $event })" [attr.aria-invalid]="!!err('sabakJuz')"></div>
+                    <div><label for="hzf" class="block text-sm mb-1">পৃষ্ঠা থেকে</label>
+                      <input id="hzf" class="ctl" inputmode="numeric" name="from" [ngModel]="form().from" (ngModelChange)="patch({ from: $event })" [attr.aria-invalid]="!!err('sabakFromPage')"></div>
+                    <div><label for="hzt" class="block text-sm mb-1">পর্যন্ত</label>
+                      <input id="hzt" class="ctl" inputmode="numeric" name="to" [ngModel]="form().to" (ngModelChange)="patch({ to: $event })" [placeholder]="form().from" [attr.aria-invalid]="!!err('sabakToPage')"></div>
+                  </div>
+                  @for (k of ['sabakJuz', 'sabakFromPage', 'sabakToPage']; track k) { @if (err(k)) { <small class="block text-red text-[13px] mt-1" role="alert">{{ err(k) }}</small> } }
+                </fieldset>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label for="hzq" class="block text-sm font-medium mb-1.5">সাবকি <span class="font-normal text-mut">(সাম্প্রতিক পড়া)</span></label>
+                    <input id="hzq" class="ctl" name="sabqi" [ngModel]="form().sabqi" (ngModelChange)="patch({ sabqi: $event })" placeholder="যেমন ১৪ পারার শেষ অর্ধেক"></div>
+                  <div><label for="hzm" class="block text-sm font-medium mb-1.5">মানজিল <span class="font-normal text-mut">(পুরনো পড়া)</span></label>
+                    <input id="hzm" class="ctl" name="manzil" [ngModel]="form().manzil" (ngModelChange)="patch({ manzil: $event })" placeholder="যেমন ৩ পারা পুরো"></div>
+                </div>
+                <div class="grid sm:grid-cols-[120px_1fr] gap-4">
+                  <div><label for="hze" class="block text-sm font-medium mb-1.5">ভুলের সংখ্যা</label>
+                    <input id="hze" class="ctl" inputmode="numeric" name="mistakes" [ngModel]="form().mistakes" (ngModelChange)="patch({ mistakes: $event })" [attr.aria-invalid]="!!err('mistakes')">
+                    @if (err('mistakes')) { <small class="text-red text-[13px]" role="alert">{{ err('mistakes') }}</small> }</div>
+                  <div><span class="block text-sm font-medium mb-1.5">তিলাওয়াতের মান</span>
+                    <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-label="তিলাওয়াতের মান">
+                      @for (q of qualities; track q) {
+                        <button type="button" role="radio" class="px-3 min-h-10 rounded-full border text-sm cursor-pointer" [attr.aria-checked]="form().quality === q"
+                          [class]="form().quality === q ? 'bg-g2 border-g2 text-white' : 'bg-card border-line text-ink hover:bg-soft'" (click)="patch({ quality: form().quality === q ? null : q })">{{ qLabel[q] }}</button>
+                      }
+                    </div></div>
+                </div>
+                <div><label for="hzn" class="block text-sm font-medium mb-1.5">উস্তাদের মন্তব্য</label>
+                  <input id="hzn" class="ctl" name="remarks" [ngModel]="form().remarks" (ngModelChange)="patch({ remarks: $event })" placeholder="যেমন তিলাওয়াত স্পষ্ট হয়েছে"></div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <input type="date" class="ctl !w-auto" name="date" [max]="today" [ngModel]="form().date" (ngModelChange)="patch({ date: $event || today })" aria-label="তারিখ">
+                  @if (err('date')) { <small class="text-red text-[13px]" role="alert">{{ err('date') }}</small> }
+                  <button mButton type="submit" class="ml-auto" [loading]="saving()"><m-icon name="check" [size]="18" /> সংরক্ষণ করুন</button>
+                </div>
+              </form>
+            </m-card>
+            <m-card title="সাপ্তাহিক অগ্রগতি" subtitle="প্রতি সপ্তাহে নতুন সবকের পৃষ্ঠা"><app-week-chart [data]="d.weekly" /></m-card>
+          </div>
+
+          <m-card [padded]="false" title="পড়ার খাতা" subtitle="সাম্প্রতিক ৩০ দিন">
+            <div class="overflow-x-auto"><table class="w-full text-[14px] border-collapse min-w-[640px]">
+              <thead><tr class="text-left text-[13px] text-mut border-y border-line bg-soft/50">
+                <th class="px-5 py-2.5 font-medium">তারিখ</th><th class="px-3 py-2.5 font-medium">সবক</th><th class="px-3 py-2.5 font-medium">সাবকি</th>
+                <th class="px-3 py-2.5 font-medium">মানজিল</th><th class="px-3 py-2.5 font-medium text-right">ভুল</th><th class="px-3 py-2.5 font-medium">মান</th><th></th></tr></thead>
+              <tbody>
+                @for (l of d.logs; track l.id) {
+                  <tr class="border-b border-line last:border-0 align-top">
+                    <td class="px-5 py-2.5 whitespace-nowrap">{{ l.date | bdate }}</td>
+                    <td class="px-3 py-2.5">@if (l.sabakJuz) { পারা {{ l.sabakJuz | num }}@if (l.sabakFromPage) {, পৃ. {{ l.sabakFromPage | num }}@if (l.sabakToPage && l.sabakToPage !== l.sabakFromPage) {–{{ l.sabakToPage | num }}} } } @else { {{ l.sabakText || '—' }} }
+                      @if (l.remarks) { <small class="block text-mut">{{ l.remarks }}</small> }</td>
+                    <td class="px-3 py-2.5">{{ l.sabqiText || '—' }}</td>
+                    <td class="px-3 py-2.5">{{ l.manzilText || '—' }}</td>
+                    <td class="px-3 py-2.5 text-right tabular" [class.text-red]="l.mistakes > 3">{{ l.mistakes | num }}</td>
+                    <td class="px-3 py-2.5">@if (l.quality) { {{ qLabel[l.quality] }} }</td>
+                    <td class="px-3 py-1.5 text-right whitespace-nowrap">
+                      <button mIconButton (click)="edit(l)" aria-label="সম্পাদনা"><m-icon name="edit" [size]="16" /></button>
+                      <button mIconButton (click)="removeLog(l)" aria-label="মুছুন"><m-icon name="trash" [size]="16" /></button>
+                    </td>
+                  </tr>
+                } @empty { <tr><td colspan="7" class="px-5 py-6 text-center text-mut">এখনো কোনো পড়া লেখা হয়নি</td></tr> }
+              </tbody>
+            </table></div>
+          </m-card>
+        </div>
+      } @else { <m-skeleton height="480px" /> }
+    </div>
+  }
+} @else if (!error()) {
+  <div class="grid gap-4"><m-skeleton height="96px" /><m-skeleton height="480px" /></div>
+}

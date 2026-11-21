@@ -42,6 +42,50 @@ import { PrintService } from './print.service';
               </div></div>
             }
           }
+          @case ('tabulation') {
+            @let t = $any(j.data);
+            <div class="doc">
+              <m-doc-header />
+              <h2>টেবুলেশন শিট · {{ t.examName }} · {{ t.className }}</h2>
+              <table class="tab">
+                <tr><th>মেধা</th><th>রোল</th><th style="text-align:left">নাম</th>
+                  @for (s of t.subjects; track s.id) { <th>{{ s.subjectName }}<br><small>{{ s.fullMarks | digits }}</small></th> }
+                  <th>মোট</th><th>গড়</th><th>বিভাগ</th></tr>
+                @for (r of t.rows; track r.studentId) {
+                  <tr><td class="c">{{ r.merit ? (r.merit | digits) : '—' }}</td><td class="c">{{ r.roll | digits }}</td><td>{{ r.name }}</td>
+                    @for (c of r.cells; track c.classSubjectId; let i = $index) { <td class="c" [class.fail]="c.isAbsent || (c.marks ?? 0) < t.subjects[i].passMarks">{{ c.isAbsent ? 'অনু' : c.marks == null ? '' : (c.marks | digits) }}</td> }
+                    <td class="c"><b>{{ r.total | digits }}</b></td><td class="c">{{ r.average | digits }}</td><td>{{ r.grade || 'অসম্পূর্ণ' }}</td></tr>
+                }
+              </table>
+              <div class="signs"><span>পরীক্ষা নিয়ন্ত্রক</span><span>নাযেমে তা'লীমাত</span><span>মুহতামিম</span></div>
+            </div>
+          }
+          @case ('marksheet') {
+            @for (m of $any(j.data); track $index) {
+              <div class="doc">
+                <m-doc-header />
+                <h2>মার্কশিট · {{ m.result.examName }}</h2>
+                <table>
+                  <tr><th style="width:20%">নাম</th><td>{{ m.student.name }}</td><th style="width:16%">আইডি</th><td>{{ m.student.studentCode }}</td></tr>
+                  <tr><th>শ্রেণি</th><td>{{ m.result.className }}</td><th>রোল</th><td>{{ m.student.roll | digits }}</td></tr>
+                  @if (m.student.fatherName) { <tr><th>পিতার নাম</th><td colspan="3">{{ m.student.fatherName }}</td></tr> }
+                </table>
+                <table>
+                  <tr><th style="text-align:left">কিতাব / বিষয়</th><th>পূর্ণমান</th><th>পাস নম্বর</th><th>প্রাপ্ত নম্বর</th></tr>
+                  @for (s of m.result.subjects; track $index) {
+                    <tr><td>{{ s.subject }}@if (s.subjectAr) { <span class="ar"> ({{ s.subjectAr }})</span> }</td><td class="c">{{ s.fullMarks | digits }}</td><td class="c">{{ s.passMarks | digits }}</td>
+                      <td class="c" [class.fail]="s.isAbsent || (s.marks ?? 0) < s.passMarks"><b>{{ s.isAbsent ? 'অনুপস্থিত' : s.marks == null ? '—' : (s.marks | digits) }}</b></td></tr>
+                  }
+                  <tr><th style="text-align:left">মোট</th><td></td><td></td><td class="c"><b>{{ m.result.total | digits }}</b></td></tr>
+                </table>
+                <table>
+                  <tr><th>গড় নম্বর</th><td class="c">{{ m.result.average | digits }}</td><th>বিভাগ</th><td class="c"><b>{{ m.result.grade || 'অসম্পূর্ণ' }}</b>@if (m.result.gradeAr) { <span class="ar"> ({{ m.result.gradeAr }})</span> }</td></tr>
+                  <tr><th>মেধা স্থান</th><td class="c">{{ m.result.merit ? (m.result.merit | digits) : '—' }}</td><th>শ্রেণির শিক্ষার্থী</th><td class="c">{{ m.result.classSize | digits }} জন</td></tr>
+                </table>
+                <div class="signs"><span>শ্রেণি উস্তাদ</span><span>পরীক্ষা নিয়ন্ত্রক</span><span>মুহতামিম</span></div>
+              </div>
+            }
+          }
           @case ('admission') {
             @let s = $any(j.data);
             <div class="doc">
@@ -82,7 +126,7 @@ export class PrintHost {
     for (let i = 0; i < j.data.length; i += 4) out.push(j.data.slice(i, i + 4));   // 4 cards (front + back) per A4
     return out;
   });
-  protected pad = (n: number) => String(n).padStart(4, '0');
+  protected pad = (n: number) => String(n).padStart(6, '0');
   protected method = (m: keyof typeof METHOD_LABEL) => METHOD_LABEL[m];
   protected gender = (g: keyof typeof GENDER_LABEL) => GENDER_LABEL[g];
   protected photo = (p?: string) => fileUrl(p);

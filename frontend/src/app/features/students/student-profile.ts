@@ -7,6 +7,11 @@ import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
 import { Avatar, Badge, Button, Card, ConfirmService, EmptyState, Icon, Segmented, Skeleton } from '../../shared/ui';
 import { StudentDues } from '../fees/fee.models';
+import { ExamsApi } from '../exams/exams.service';
+import { StudentExamResult } from '../exams/exam.models';
+import { HifzApi } from '../hifz/hifz.service';
+import { HifzStudentDetail, QUALITY_LABEL } from '../hifz/hifz.models';
+import { JuzGrid, JuzRing } from '../hifz/juz-grid';
 import { IdCard } from '../idcards/id-card';
 import { AttendanceCalendar } from './attendance-calendar';
 import { GENDER_LABEL, STATUS_LABEL, StudentDetail, StudentMonth } from './student.models';
@@ -17,7 +22,7 @@ type Tab = 'overview' | 'attendance' | 'fees' | 'guardian' | 'academic' | 'hifz'
 @Component({
   selector: 'app-student-profile',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, Segmented, Skeleton, IdCard, AttendanceCalendar],
+  imports: [RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, Segmented, Skeleton, IdCard, AttendanceCalendar, JuzGrid, JuzRing],
   templateUrl: './student-profile.html',
 })
 export class StudentProfilePage {
@@ -28,6 +33,12 @@ export class StudentProfilePage {
   private confirm = inject(ConfirmService);
   private printer = inject(PrintService);
   private auth = inject(AuthService);
+  private examsApi = inject(ExamsApi);
+  private hifzApi = inject(HifzApi);
+  protected results = signal<StudentExamResult[] | null>(null);
+  protected hifz = signal<HifzStudentDetail | null>(null);
+  protected qLabel = QUALITY_LABEL;
+  protected canHifz = computed(() => this.auth.can(P.hifz));
 
   protected s = signal<StudentDetail | null>(null);
   protected att = signal<StudentMonth | null>(null);
@@ -53,20 +64,27 @@ export class StudentProfilePage {
     { value: 'documents' as Tab, label: 'কাগজপত্র' },
   ]);
   protected later: Partial<Record<Tab, { phase: number; text: string }>> = {
-    academic: { phase: 5, text: 'পরীক্ষার নম্বর, বিভাজন ও মার্কশিট এখানে দেখাবে।' },
-    hifz: { phase: 5, text: 'সবক, সবকি, মানযিল ও ৩০ পারার অগ্রগতি এখানে দেখাবে।' },
     hostel: { phase: 6, text: 'রুম, সিট ও ছুটির রেকর্ড এখানে দেখাবে।' },
     documents: { phase: 6, text: 'জন্ম নিবন্ধন, ছাড়পত্র ইত্যাদি কাগজ এখানে রাখা যাবে।' },
   };
 
   constructor() {
     effect(() => { const id = +this.id(); untracked(() => this.load(id)); });
+    // Results and hifz load when their tab is first opened
+    effect(() => {
+      const t = this.tab(), s = this.s();
+      if (!s) return;
+      untracked(() => {
+        if (t === 'academic' && !this.results()) this.examsApi.student(s.id).then((r) => this.results.set(r)).catch(() => this.results.set([]));
+        if (t === 'hifz' && !this.hifz()) this.hifzApi.student(s.id).then((h) => this.hifz.set(h)).catch(() => {});
+      });
+    });
     effect(() => { const m = this.month(); const s = this.s(); if (s) untracked(() => this.api.attendance(s.id, m).then((a) => this.att.set(a)).catch(() => {})); });
   }
 
   async load(id: number) {
     this.error.set(null);
-    this.s.set(null);
+    this.s.set(null); this.results.set(null); this.hifz.set(null);
     try {
       this.s.set(await this.api.get(id));
       if (this.canFees()) this.api.dues(id).then((d) => this.dues.set(d)).catch(() => {});
@@ -74,6 +92,8 @@ export class StudentProfilePage {
   }
   protected moveMonth(n: number) { this.month.update((m) => addMonths(m, n)); }
   protected printCard() { const s = this.s(); if (s) this.printer.print({ kind: 'idcards', data: [s] }); }
+  protected printMarkSheet(r: StudentExamResult) { const s = this.s(); if (s) this.printer.print({ kind: 'marksheet', data: [{ student: s, result: r }] }); }
+  protected failed = (x: { marks?: number | null; isAbsent: boolean; passMarks: number }) => x.isAbsent || (x.marks ?? 0) < x.passMarks;
   protected printForm() { const s = this.s(); if (s) this.printer.print({ kind: 'admission', data: s }); }
   protected async remove() {
     const s = this.s();

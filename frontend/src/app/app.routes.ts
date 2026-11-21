@@ -12,6 +12,9 @@ const BUILT: Record<string, () => Promise<unknown>> = {
   admission: () => import('./features/students/student-form').then((m) => m.StudentFormPage),
   attendance: () => import('./features/attendance/attendance-page').then((m) => m.AttendancePage),
   fees: () => import('./features/fees/fees-page').then((m) => m.FeesPage),
+  classes: () => import('./features/academic/classes-page').then((m) => m.ClassesPage),
+  hifz: () => import('./features/hifz/hifz-page').then((m) => m.HifzPage),
+  exams: () => import('./features/exams/exams-page').then((m) => m.ExamsPage),
   idcards: () => import('./features/idcards/idcards-page').then((m) => m.IdCardsPage),
 };
 
@@ -28,6 +31,8 @@ export const routes: Routes = [
       ...ALL_NAV.map((n) => ({
         path: n.path, canActivate: [permGuard], data: { nav: n.key, perm: n.perm }, loadComponent: (BUILT[n.key] ?? placeholder) as never,
         ...(n.key === 'admission' ? { canDeactivate: [unsavedGuard] } : {}),
+        // Marks autosave: finish the pending save before leaving
+        ...(n.key === 'exams' ? { canDeactivate: [(c: { leave(): Promise<boolean> }) => c.leave()] } : {}),
       })),
       { path: 'students/:id', canActivate: [permGuard], data: { nav: 'students', perm: 'students.view' }, loadComponent: () => import('./features/students/student-profile').then((m) => m.StudentProfilePage) },
       { path: 'students/:id/edit', canActivate: [permGuard], canDeactivate: [unsavedGuard], data: { nav: 'students', perm: 'students.edit' }, loadComponent: BUILT['admission'] as never },

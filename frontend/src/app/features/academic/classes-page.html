@@ -1,0 +1,211 @@
+<m-page-header title="শ্রেণি ও রুটিন" description="বিভাগ, শ্রেণি, কিতাব, উস্তাদ ও সাপ্তাহিক রুটিন">
+  @if (canEdit()) { <button mButton (click)="newClass()"><m-icon name="plus" /> নতুন শ্রেণি</button> }
+</m-page-header>
+
+@if (error()) {
+  <div class="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
+    <m-icon name="alert" /><span class="flex-1">{{ error() }}</span><button mButton size="sm" variant="outline" (click)="load()">আবার চেষ্টা করুন</button>
+  </div>
+}
+
+@if (depts(); as ds) {
+  <div class="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)] items-start">
+    <!-- Departments and classes -->
+    <nav aria-label="শ্রেণি" class="grid gap-4">
+      @for (d of ds; track d.id) {
+        <section>
+          <h2 class="!text-sm !font-sans font-semibold text-mut mb-2 px-1">{{ d.nameBn }} @if (d.nameAr) { <span class="ar font-normal ms-1">{{ d.nameAr }}</span> }</h2>
+          <ul class="m-0 p-0 list-none grid gap-1.5">
+            @for (c of d.classes; track c.id) {
+              <li><button type="button" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border text-left cursor-pointer transition-colors"
+                [class]="c.id === selectedId() ? 'border-g2 bg-okbg text-ink' : 'border-line bg-card hover:bg-soft text-ink'" [attr.aria-current]="c.id === selectedId()" (click)="selectedId.set(c.id)">
+                <span class="flex-1 leading-tight"><b class="font-semibold">{{ c.nameBn }}</b>
+                  <small class="block text-mut text-[13px]">{{ c.studentCount | num }} শিক্ষার্থী · {{ c.subjectCount | num }} কিতাব</small></span>
+                <m-icon name="chevronRight" [size]="16" class="text-mut" />
+              </button></li>
+            } @empty { <li class="px-3 py-2 text-sm text-mut">কোনো শ্রেণি নেই</li> }
+          </ul>
+        </section>
+      }
+    </nav>
+
+    <!-- Selected class -->
+    @if (selected(); as c) {
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-start gap-3 mb-4">
+          <div class="flex-1 min-w-[200px]">
+            <h2 class="!text-[26px]">{{ c.nameBn }} @if (c.nameAr) { <span class="ar text-mut text-xl font-normal">{{ c.nameAr }}</span> }</h2>
+            <p class="m-0 text-mut">{{ deptOf()?.nameBn }} · মাসিক বেতন {{ c.monthlyFee != null ? (c.monthlyFee | money) : 'নির্ধারিত নয়' }}</p>
+          </div>
+          @if (canEdit()) {
+            <button mButton variant="outline" size="sm" (click)="editClass(c)"><m-icon name="edit" [size]="16" /> সম্পাদনা</button>
+            <button mIconButton (click)="removeClass(c)" [attr.aria-label]="c.nameBn + ' মুছুন'"><m-icon name="trash" [size]="18" /></button>
+          }
+        </div>
+        <m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="শ্রেণির অংশ" />
+
+        @if (tab() === 'subjects') {
+          <m-card [padded]="false" title="কিতাব ও উস্তাদ" subtitle="পরীক্ষার নম্বর এই কিতাবগুলোর জন্য নেওয়া হবে">
+            @if (canEdit()) { <button cardActions mButton size="sm" (click)="newSubject()"><m-icon name="plus" [size]="16" /> কিতাব যোগ</button> }
+            @if (subjects(); as list) {
+              @if (list.length) {
+                <div class="overflow-x-auto"><table class="w-full text-[15px] border-collapse">
+                  <thead><tr class="text-left text-sm text-mut border-y border-line bg-soft/50">
+                    <th class="px-5 py-2.5 font-medium">কিতাব</th><th class="px-3 py-2.5 font-medium">উস্তাদ</th>
+                    <th class="px-3 py-2.5 font-medium text-right">পূর্ণমান</th><th class="px-3 py-2.5 font-medium text-right">পাস</th><th class="px-3"></th></tr></thead>
+                  <tbody>
+                    @for (s of list; track s.id) {
+                      <tr class="border-b border-line last:border-0">
+                        <td class="px-5 py-3"><b class="font-semibold">{{ s.subjectName }}</b>@if (s.subjectNameAr) { <span class="ar block text-mut text-left">{{ s.subjectNameAr }}</span> }</td>
+                        <td class="px-3 py-3">{{ s.teacherName || '—' }}</td>
+                        <td class="px-3 py-3 text-right tabular">{{ s.fullMarks | num }}</td>
+                        <td class="px-3 py-3 text-right tabular">{{ s.passMarks | num }}</td>
+                        <td class="px-3 py-3 text-right whitespace-nowrap">
+                          @if (canEdit()) {
+                            <button mIconButton (click)="editSubject(s)" [attr.aria-label]="s.subjectName + ' সম্পাদনা'"><m-icon name="edit" [size]="18" /></button>
+                            <button mIconButton (click)="removeSubject(s)" [attr.aria-label]="s.subjectName + ' সরান'"><m-icon name="trash" [size]="18" /></button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table></div>
+              } @else { <m-empty-state title="এখনো কোনো কিতাব যোগ হয়নি" description="কিতাব যোগ করলে রুটিন ও পরীক্ষার নম্বর দেওয়া যাবে।" icon="book" /> }
+            } @else { <div class="p-5 grid gap-2"><m-skeleton height="44px" /><m-skeleton height="44px" /></div> }
+          </m-card>
+        } @else {
+          <m-card [padded]="false" title="সাপ্তাহিক রুটিন" [subtitle]="editing() ? 'প্রতিটি ঘরে কিতাব বাছাই করুন। একই উস্তাদ একই সময়ে দুই শ্রেণিতে থাকতে পারবেন না।' : 'ঘণ্টার সময় পুরো মাদরাসার জন্য একই'">
+            <div cardActions class="flex gap-2">
+              @if (editing()) {
+                <button mButton size="sm" variant="ghost" (click)="editing.set(false)">বাতিল</button>
+                <button mButton size="sm" [loading]="savingRoutine()" (click)="saveRoutine()"><m-icon name="check" [size]="16" /> সংরক্ষণ</button>
+              } @else if (canEdit() && routine()) {
+                <button mButton size="sm" variant="outline" (click)="startEdit()" [disabled]="!subjects()?.length"><m-icon name="edit" [size]="16" /> রুটিন বদলান</button>
+              }
+            </div>
+            @if (routine(); as r) {
+              <div class="overflow-x-auto">
+                <table class="routine w-full border-collapse text-[14px] min-w-[720px]">
+                  <thead>
+                    <tr>
+                      <th class="w-28 text-left">দিন</th>
+                      @for (p of (editing() ? draftPeriods() : r.periods); track p.periodNo; let i = $index) {
+                        <th [class.bad]="periodErr(p.periodNo)">
+                          <span class="block">{{ p.periodNo | num }} নং ঘণ্টা</span>
+                          @if (editing()) {
+                            <span class="flex gap-1 justify-center mt-1">
+                              <input type="time" class="ctl !min-h-8 !px-1.5 !py-0 text-[13px] w-[88px]" [value]="p.start" (change)="setPeriod(i, 'start', $any($event.target).value)" [attr.aria-label]="p.periodNo + ' নং ঘণ্টা শুরু'">
+                              <input type="time" class="ctl !min-h-8 !px-1.5 !py-0 text-[13px] w-[88px]" [value]="p.end" (change)="setPeriod(i, 'end', $any($event.target).value)" [attr.aria-label]="p.periodNo + ' নং ঘণ্টা শেষ'">
+                            </span>
+                          } @else { <small class="block text-mut font-normal tabular">{{ p.start | btime }}–{{ p.end | btime }}</small> }
+                        </th>
+                      }
+                      @if (editing()) {
+                        <th class="w-20"><span class="flex gap-1 justify-center">
+                          <button mIconButton (click)="addPeriod()" aria-label="ঘণ্টা যোগ"><m-icon name="plus" [size]="16" /></button>
+                          <button mIconButton (click)="removePeriod()" aria-label="শেষ ঘণ্টা সরান" [disabled]="draftPeriods().length < 2"><m-icon name="x" [size]="16" /></button>
+                        </span></th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (d of r.days; track d) {
+                      <tr>
+                        <th class="text-left font-semibold">{{ dayName[d] }}</th>
+                        @for (p of (editing() ? draftPeriods() : r.periods); track p.periodNo) {
+                          <td [class.bad]="slotErr(d, p.periodNo)" [title]="slotErr(d, p.periodNo) ?? ''">
+                            @if (editing()) {
+                              <select class="ctl !min-h-9 !py-1 text-[13px]" [value]="draftCells()[d + ',' + p.periodNo] ?? 0" (change)="setCell(d, p.periodNo, $any($event.target).value)" [attr.aria-label]="dayName[d] + ', ' + p.periodNo + ' নং ঘণ্টা'">
+                                <option [value]="0">—</option>
+                                @for (s of subjects() ?? []; track s.id) { <option [value]="s.id" [selected]="draftCells()[d + ',' + p.periodNo] === s.id">{{ s.subjectName }}</option> }
+                              </select>
+                            } @else {
+                              @if (cell(d, p.periodNo); as s) { <b class="block font-semibold leading-tight">{{ s.subjectName }}</b><small class="text-mut">{{ s.teacherName }}</small> }
+                              @else { <span class="text-mut">—</span> }
+                            }
+                          </td>
+                        }
+                        @if (editing()) { <td></td> }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              @if (!editing() && weekly().length) {
+                <div class="flex flex-wrap gap-2 px-5 py-4 border-t border-line text-sm">
+                  <span class="text-mut">সপ্তাহে ক্লাস:</span>
+                  @for (w of weekly(); track w.name) { <m-badge>{{ w.name }} {{ w.n | num }}টি</m-badge> }
+                </div>
+              }
+            } @else { <div class="p-5"><m-skeleton height="240px" /></div> }
+          </m-card>
+        }
+      </div>
+    } @else {
+      <m-card><m-empty-state title="একটি শ্রেণি বেছে নিন" icon="calendar" /></m-card>
+    }
+  </div>
+} @else if (!error()) {
+  <div class="grid gap-5 lg:grid-cols-[300px_1fr]"><m-skeleton height="420px" /><m-skeleton height="420px" /></div>
+}
+
+<!-- Class modal -->
+<m-modal [(open)]="classOpen" [title]="classForm().id ? 'শ্রেণি সম্পাদনা' : 'নতুন শ্রেণি'">
+  <form id="classForm" class="grid gap-4" (ngSubmit)="saveClass()">
+    <div><label for="cdept" class="block text-sm font-medium mb-1.5">বিভাগ</label>
+      <select id="cdept" class="ctl" name="dept" [ngModel]="classForm().departmentId" (ngModelChange)="patchClass({ departmentId: $event })">
+        @for (d of depts() ?? []; track d.id) { <option [ngValue]="d.id">{{ d.nameBn }}</option> }
+      </select></div>
+    <div><label for="cname" class="block text-sm font-medium mb-1.5">শ্রেণির নাম</label>
+      <input id="cname" class="ctl" name="nameBn" [ngModel]="classForm().nameBn" (ngModelChange)="patchClass({ nameBn: $event })" [attr.aria-invalid]="!!classErr()['nameBn']" placeholder="যেমন জামাতে নাহবেমীর">
+      @if (classErr()['nameBn']) { <small class="text-red text-[13px]" role="alert">{{ classErr()['nameBn'] }}</small> }</div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div><label for="car" class="block text-sm font-medium mb-1.5">আরবি নাম (ঐচ্ছিক)</label>
+        <input id="car" class="ctl ar" dir="rtl" name="nameAr" [ngModel]="classForm().nameAr" (ngModelChange)="patchClass({ nameAr: $event })"></div>
+      <div><label for="cfee" class="block text-sm font-medium mb-1.5">মাসিক বেতন (টাকা)</label>
+        <input id="cfee" class="ctl" inputmode="numeric" name="fee" [ngModel]="classForm().monthlyFee" (ngModelChange)="patchClass({ monthlyFee: $event })" [attr.aria-invalid]="!!classErr()['monthlyFee']">
+        @if (classErr()['monthlyFee']) { <small class="text-red text-[13px]" role="alert">{{ classErr()['monthlyFee'] }}</small> }</div>
+    </div>
+  </form>
+  <div modalFooter class="flex gap-2">
+    <button mButton variant="ghost" (click)="classOpen.set(false)">বাতিল</button>
+    <button mButton type="submit" form="classForm" [loading]="savingClass()">সংরক্ষণ</button>
+  </div>
+</m-modal>
+
+<!-- Kitab modal -->
+<m-modal [(open)]="subjOpen" [title]="subjForm().id ? 'কিতাব সম্পাদনা' : 'কিতাব যোগ করুন'">
+  <form id="subjForm" class="grid gap-4" (ngSubmit)="saveSubject()">
+    <div><label for="ssub" class="block text-sm font-medium mb-1.5">কিতাব / বিষয়</label>
+      <select id="ssub" class="ctl" name="subjectId" [ngModel]="subjForm().subjectId" (ngModelChange)="patchSubj({ subjectId: +$event })" [attr.aria-invalid]="!!subjErr()['subjectId']">
+        <option [ngValue]="0">+ নতুন কিতাব লিখুন</option>
+        @for (s of allSubjects(); track s.id) { <option [ngValue]="s.id">{{ s.nameBn }}</option> }
+      </select>
+      @if (subjErr()['subjectId']) { <small class="text-red text-[13px]" role="alert">{{ subjErr()['subjectId'] }}</small> }</div>
+    @if (!subjForm().subjectId) {
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div><label for="snew" class="block text-sm font-medium mb-1.5">নতুন কিতাবের নাম</label>
+          <input id="snew" class="ctl" name="newName" [ngModel]="subjForm().newName" (ngModelChange)="patchSubj({ newName: $event })" placeholder="যেমন কাফিয়া"></div>
+        <div><label for="snewar" class="block text-sm font-medium mb-1.5">আরবি নাম (ঐচ্ছিক)</label>
+          <input id="snewar" class="ctl ar" dir="rtl" name="newNameAr" [ngModel]="subjForm().newNameAr" (ngModelChange)="patchSubj({ newNameAr: $event })"></div>
+      </div>
+    }
+    <div><label for="steach" class="block text-sm font-medium mb-1.5">উস্তাদ</label>
+      <select id="steach" class="ctl" name="teacherId" [ngModel]="subjForm().teacherId" (ngModelChange)="patchSubj({ teacherId: +$event })">
+        <option [ngValue]="0">এখনো নির্ধারিত নয়</option>
+        @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ t.name }} · {{ t.designation }}</option> }
+      </select></div>
+    <div class="grid grid-cols-2 gap-4">
+      <div><label for="sfull" class="block text-sm font-medium mb-1.5">পূর্ণমান</label>
+        <input id="sfull" class="ctl" inputmode="numeric" name="full" [ngModel]="subjForm().fullMarks" (ngModelChange)="patchSubj({ fullMarks: $event })" [attr.aria-invalid]="!!subjErr()['fullMarks']">
+        @if (subjErr()['fullMarks']) { <small class="text-red text-[13px]" role="alert">{{ subjErr()['fullMarks'] }}</small> }</div>
+      <div><label for="spass" class="block text-sm font-medium mb-1.5">পাস নম্বর</label>
+        <input id="spass" class="ctl" inputmode="numeric" name="pass" [ngModel]="subjForm().passMarks" (ngModelChange)="patchSubj({ passMarks: $event })" [attr.aria-invalid]="!!subjErr()['passMarks']">
+        @if (subjErr()['passMarks']) { <small class="text-red text-[13px]" role="alert">{{ subjErr()['passMarks'] }}</small> }</div>
+    </div>
+  </form>
+  <div modalFooter class="flex gap-2">
+    <button mButton variant="ghost" (click)="subjOpen.set(false)">বাতিল</button>
+    <button mButton type="submit" form="subjForm" [loading]="savingSubj()">সংরক্ষণ</button>
+  </div>
+</m-modal>

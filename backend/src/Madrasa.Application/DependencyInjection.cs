@@ -1,4 +1,7 @@
+using Madrasa.Application.Academic;
 using Madrasa.Application.Attendance;
+using Madrasa.Application.Exams;
+using Madrasa.Application.Hifz;
 using Madrasa.Application.Dashboard;
 using Madrasa.Application.Fees;
 using Madrasa.Application.Students;
@@ -12,5 +15,8 @@ public static class DependencyInjection
         .AddScoped<StudentService>()
         .AddScoped<AttendanceService>()
         .AddScoped<FeeService>()
-        .AddScoped<DashboardService>();
+        .AddScoped<DashboardService>()
+        .AddScoped<AcademicService>()
+        .AddScoped<HifzService>()
+        .AddScoped<ExamService>();
 }
