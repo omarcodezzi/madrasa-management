@@ -138,6 +138,56 @@
         } @empty { <m-card><m-empty-state title="কোনো অভিভাবক যোগ করা হয়নি" icon="users" /></m-card> }
       </div>
     }
+    @case ('academic') {
+      @if (results(); as list) {
+        @for (r of list; track r.examId) {
+          <m-card class="mb-4 block" [title]="r.examName" [subtitle]="(r.startDate ? (r.startDate | bdate) + ' · ' : '') + (r.isPublished ? 'প্রকাশিত' : 'এখনো প্রকাশিত হয়নি')">
+            <button cardActions mButton variant="outline" size="sm" (click)="printMarkSheet(r)"><m-icon name="print" [size]="16" /> মার্কশিট</button>
+            <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] items-start">
+              <table class="w-full text-[15px] border-collapse">
+                <thead><tr class="text-left text-sm text-mut border-b border-line"><th class="py-2 font-medium">কিতাব</th><th class="py-2 font-medium text-right">পূর্ণমান</th><th class="py-2 font-medium text-right">প্রাপ্ত</th></tr></thead>
+                <tbody>
+                  @for (x of r.subjects; track $index) {
+                    <tr class="border-b border-line last:border-0"><td class="py-2">{{ x.subject }}</td><td class="py-2 text-right tabular text-mut">{{ x.fullMarks | num }}</td>
+                      <td class="py-2 text-right tabular font-semibold" [class.text-red]="failed(x)">{{ x.isAbsent ? 'অনুপস্থিত' : x.marks == null ? '—' : (x.marks | num) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+              <dl class="grid grid-cols-2 gap-3 m-0">
+                <div class="p-3 rounded-xl bg-soft"><dt class="text-sm text-mut">মোট</dt><dd class="m-0 font-serif text-xl font-bold">{{ r.total | num }}</dd></div>
+                <div class="p-3 rounded-xl bg-soft"><dt class="text-sm text-mut">গড়</dt><dd class="m-0 font-serif text-xl font-bold">{{ r.average | num }}</dd></div>
+                <div class="p-3 rounded-xl col-span-2" [class]="r.failedSubjects ? 'bg-redbg' : 'bg-okbg'"><dt class="text-sm text-mut">বিভাগ</dt>
+                  <dd class="m-0 font-serif text-xl font-bold" [class.text-red]="r.failedSubjects" [class.text-g2]="!r.failedSubjects">{{ r.grade || 'অসম্পূর্ণ' }}</dd></div>
+                <div class="p-3 rounded-xl bg-soft col-span-2"><dt class="text-sm text-mut">মেধা স্থান</dt><dd class="m-0 font-serif text-xl font-bold">@if (r.merit) { {{ r.merit | num }} <small class="text-sm text-mut font-sans font-normal">/ {{ r.classSize | num }} জন</small> } @else { — }</dd></div>
+              </dl>
+            </div>
+          </m-card>
+        } @empty { <m-card><m-empty-state title="এখনো কোনো পরীক্ষার নম্বর নেই" icon="exam" /></m-card> }
+      } @else { <m-skeleton height="240px" /> }
+    }
+    @case ('hifz') {
+      @if (hifz(); as h) {
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-start">
+          <m-card>
+            <div class="flex items-center gap-5 mb-4"><app-juz-ring [done]="h.completedJuz" />
+              <div><b class="font-serif text-xl">৩০ পারার অগ্রগতি</b>
+                @if (canHifz()) { <a mButton variant="outline" size="sm" class="mt-2" routerLink="/hifz" [queryParams]="{ student: h.studentId }"><m-icon name="edit" [size]="16" /> আজকের পড়া লিখুন</a> }</div></div>
+            <app-juz-grid [cells]="h.juz" />
+          </m-card>
+          <m-card title="সাম্প্রতিক পড়া" [padded]="false">
+            <ul class="m-0 p-0 list-none">
+              @for (l of h.logs.slice(0, 8); track l.id) {
+                <li class="px-5 py-2.5 border-b border-line last:border-0">
+                  <div class="flex justify-between gap-2"><b class="font-semibold">@if (l.sabakJuz) { পারা {{ l.sabakJuz | num }}@if (l.sabakFromPage) {, পৃ. {{ l.sabakFromPage | num }}@if (l.sabakToPage && l.sabakToPage !== l.sabakFromPage) {–{{ l.sabakToPage | num }}} } } @else { {{ l.sabakText || '—' }} }</b>
+                    <small class="text-mut whitespace-nowrap">{{ l.date | bdate }}</small></div>
+                  <small class="text-mut">ভুল {{ l.mistakes | num }}@if (l.quality) { · {{ qLabel[l.quality] }} }@if (l.remarks) { · {{ l.remarks }} }</small>
+                </li>
+              } @empty { <li class="px-5 py-6 text-center text-mut text-sm">এখনো কোনো পড়া লেখা হয়নি</li> }
+            </ul>
+          </m-card>
+        </div>
+      } @else { <m-skeleton height="240px" /> }
+    }
     @default {
       <m-card [padded]="false"><m-empty-state [title]="'ধাপ ' + (later[tab()]!.phase | num) + '-এ যুক্ত হবে'" [description]="later[tab()]!.text" icon="book" /></m-card>
     }

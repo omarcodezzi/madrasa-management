@@ -124,6 +124,10 @@ textarea.ctl { min-height: 110px; resize: vertical; }
 .doc td, .doc th { border: 1px solid #777; padding: 6px 8px; color: #000; font-size: 11pt; text-align: left; }
 .doc th { background: #edf5ee; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .doc .r { text-align: right; font-variant-numeric: tabular-nums; }
+.doc .c { text-align: center; font-variant-numeric: tabular-nums; }
+.doc .fail { color: #b42318; }
+.doc .tab td, .doc .tab th { font-size: 9.5pt; padding: 4px 5px; text-align: center; }
+.doc .tab td:nth-child(3) { text-align: left; }
 .signs { display: flex; justify-content: space-between; gap: 12px; margin-top: 56px; }
 .signs span { border-top: 1px solid #333; padding-top: 4px; min-width: 140px; text-align: center; font-size: 10pt; }
 .pr-pos .doc { width: 72mm; margin: 0 auto; font-size: 10pt; }
@@ -177,4 +181,43 @@ textarea.ctl { min-height: 110px; resize: vertical; }
   .tok { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 7px; font-size: 12px; font-weight: 700;
     border: 1px solid rgb(255 255 255 / .35); color: rgb(255 255 255 / .8); font-variant-numeric: tabular-nums; }
   .tok.on { background: var(--gold); border-color: var(--gold); color: #1d1600; }
+}
+
+/* Weekly routine grid */
+@layer components {
+  .routine th, .routine td { border: 1px solid var(--line); padding: 10px; text-align: center; vertical-align: middle; }
+  .routine thead th { background: color-mix(in srgb, var(--soft) 60%, transparent); font-weight: 600; }
+  .routine tbody th { background: color-mix(in srgb, var(--soft) 35%, transparent); }
+  .routine tr > :first-child { border-left: 0; }
+  .routine tr > :last-child { border-right: 0; }
+  .routine tbody tr:last-child > * { border-bottom: 0; }
+  .routine .bad { background: var(--redbg); outline: 2px solid var(--red); outline-offset: -2px; }
+}
+
+/* Hifz: 30-juz map and progress ring (from the prototype) */
+@layer components {
+  .juz { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  @media (max-width: 640px) { .juz { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  .juz button { position: relative; overflow: hidden; aspect-ratio: 1; min-height: 36px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); color: var(--mut); font-weight: 700; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .juz button:disabled { cursor: default; }
+  .juz button:not(:disabled):hover { border-color: var(--g2); }
+  .juz button span { position: relative; }
+  .juz button i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--goldbg); }
+  .juz button.on { background: var(--g2); border-color: var(--g2); color: light-dark(#fff, #0b1410); }
+  .juz button.cur { border: 2px solid var(--gold); color: var(--goldink); }
+  .ring { --p: 0; width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(var(--g2) calc(var(--p) * 1%), var(--soft) 0); display: grid; place-items: center; flex: none; }
+  .ring > div { width: 92px; height: 92px; border-radius: 50%; background: var(--card); display: grid; place-items: center; text-align: center; line-height: 1.1; }
+  .ring b { font: 800 26px "Noto Serif Bengali", serif; }
+}
+
+/* Marks grid (spreadsheet-like) */
+@layer components {
+  .marks th, .marks td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
+  .marks thead th { font-weight: 600; font-size: 13px; background: color-mix(in srgb, var(--soft) 60%, var(--card)); }
+  .marks tbody tr:last-child td { border-bottom: 0; }
+  .marks tbody tr:hover td { background: color-mix(in srgb, var(--soft) 40%, var(--card)); }
+  .mk { width: 68px; min-height: 38px; padding: 6px; text-align: center; margin: 0; font-variant-numeric: tabular-nums; }
+  .mk.bad { border-color: var(--red); color: var(--red); background: var(--redbg); }
+  .mk[readonly] { background: transparent; border-color: transparent; }
 }

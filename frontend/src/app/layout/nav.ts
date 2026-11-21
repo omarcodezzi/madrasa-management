@@ -18,8 +18,8 @@ export const NAV: NavGroup[] = [
   {
     key: 'academic',
     items: [
-      { path: 'classes', key: 'classes', icon: 'calendar', perm: P.settings, phase: 5, desc: 'বিভাগ, শ্রেণি, শাখা, কিতাব ও রুটিন।' },
-      { path: 'hifz', key: 'hifz', icon: 'quran', perm: P.hifz, phase: 5, desc: 'সবক, সবকি, মানযিল ও ৩০ পারার অগ্রগতি।' },
+      { path: 'classes', key: 'classes', icon: 'calendar', perm: P.studentsView, phase: 5, desc: 'বিভাগ, শ্রেণি, শাখা, কিতাব ও রুটিন।' },
+      { path: 'hifz', key: 'hifz', icon: 'quran', perm: P.hifz, phase: 5, desc: 'সবক, সাবকি, মানজিল ও ৩০ পারার অগ্রগতি।' },
       { path: 'exams', key: 'exams', icon: 'exam', perm: P.examsMarks, phase: 5, desc: 'নম্বর এন্ট্রি, ফলাফল, মেধা তালিকা ও মার্কশিট।' },
       { path: 'idcards', key: 'idcards', icon: 'card', perm: P.studentsView, phase: 4, desc: 'QR সহ আইডি কার্ড প্রিন্ট করুন।' },
     ],
