@@ -1,0 +1,106 @@
+/* =====================================================================
+   Madrasa design tokens — taken from the approved prototype
+   (deep madrasa green #0b5d33, gold #e0a50f, Noto Serif Bengali + Hind Siliguri).
+   Light/dark via light-dark(); force a mode with <html data-theme="light|dark">.
+   ===================================================================== */
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#f3f6f1, #0a130e);
+  --card: light-dark(#ffffff, #101d16);
+  --ink: light-dark(#12281b, #e5eee8);
+  --mut: light-dark(#5a6d60, #9bb0a2);
+  --line: light-dark(#dfe7db, #20342a);
+  --soft: light-dark(#edf4ea, #15261d);
+  --g: #0b5d33;
+  --g-hover: #094d2a;
+  --g2: light-dark(#0e7a43, #43b77b);
+  --gold: #e0a50f;
+  --goldink: light-dark(#8a6200, #f0c44d);
+  --goldbg: light-dark(#fff6dc, #2c2410);
+  --red: light-dark(#b42318, #f58b80);
+  --redbg: light-dark(#fdeceb, #3a1916);
+  --okbg: light-dark(#e3f3e8, #12301f);
+  --warn: light-dark(#b45309, #fbbf24);
+  --warnbg: light-dark(#fef3c7, #33260a);
+  --info: light-dark(#1d4ed8, #93c5fd);
+  --infobg: light-dark(#e0ecff, #142542);
+  --side: #0a4729;
+  --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04);
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='none' stroke='%23e0a50f' stroke-opacity='.10'%3E%3Cpath d='M28 6l6 16 16 6-16 6-6 16-6-16-16-6 16-6z'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+
+@theme {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-mut: var(--mut);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-g: var(--g);
+  --color-g2: var(--g2);
+  --color-gold: var(--gold);
+  --color-goldink: var(--goldink);
+  --color-goldbg: var(--goldbg);
+  --color-red: var(--red);
+  --color-redbg: var(--redbg);
+  --color-okbg: var(--okbg);
+  --color-side: var(--side);
+  --font-sans: "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
+  --font-serif: "Noto Serif Bengali", "Hind Siliguri", serif;
+  --font-num: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  --font-arabic: "Amiri", "Noto Naskh Arabic", serif;
+  --radius-card: 16px;
+  --radius-ctl: 10px;
+}
+
+/* Unlayered CSS would beat Tailwind utilities, so base styles live in layers. */
+@layer base {
+*, *::before, *::after { box-sizing: border-box; min-width: 0; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 var(--font-sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-serif); line-height: 1.2; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(26px, 3.2vw, 36px); font-weight: 800; }
+h2 { font-size: 21px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 700; }
+a { color: var(--g2); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.num, .tabular { font-variant-numeric: tabular-nums; }
+.ar { font-family: var(--font-arabic); direction: rtl; unicode-bidi: isolate; }
+.pattern { background-image: var(--pattern); }
+
+}
+
+@layer components {
+/* Form controls share one look everywhere */
+.ctl {
+  display: block; width: 100%; padding: 10px 12px; min-height: 44px;
+  border: 1px solid var(--line); border-radius: var(--radius-ctl);
+  background: var(--card); color: var(--ink); font-size: 16px;
+  transition: border-color .15s, outline-color .15s;
+}
+.ctl:focus { border-color: var(--g2); outline: 3px solid color-mix(in srgb, var(--g2) 25%, transparent); outline-offset: 0; }
+.ctl[aria-invalid='true'] { border-color: var(--red); }
+textarea.ctl { min-height: 110px; resize: vertical; }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+}

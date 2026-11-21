@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>রামারবাগ মাদরাসা ব্যবস্থাপনা</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style id="pagestyle">@page{size:A4;margin:12mm}</style>
+<style>
+/* VOICE  calm, dignified everyday work tool for a Quran madrasa office
+   IDEA   the madrasa's own register book: deep green binding, gold ruling, each student a mark on the roll
+   PICTURE today's roll call: every student drawn as a token, filled when present, grouped by class
+   COLOUR deep madrasa green #0b5d33 (from the logo) dominant, gold #e0a50f accent, white paper, ink green-black
+   TYPE   Noto Serif Bengali for titles, Hind Siliguri for text, Amiri for the Arabic name
+   LAYOUT laptop: green sidebar + wide work area; phone: top bar, content, bottom tab bar */
+:root{color-scheme:light dark;
+--bg:light-dark(#f3f6f1,#0a130e);--card:light-dark(#fff,#101d16);--ink:light-dark(#12281b,#e5eee8);--mut:light-dark(#5a6d60,#9bb0a2);
+--line:light-dark(#dfe7db,#20342a);--soft:light-dark(#edf4ea,#15261d);--g:#0b5d33;--g2:light-dark(#0e7a43,#43b77b);
+--gold:#e0a50f;--goldink:light-dark(#8a6200,#f0c44d);--goldbg:light-dark(#fff6dc,#2c2410);
+--red:light-dark(#b42318,#f58b80);--redbg:light-dark(#fdeceb,#3a1916);--okbg:light-dark(#e3f3e8,#12301f);--side:#0a4729}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Noto Serif Bengali","Hind Siliguri",serif;line-height:1.2;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(26px,3.2vw,36px);font-weight:800}h2{font-size:21px;font-weight:700}h3{font-size:17px;font-weight:700}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--g2)}
+.app{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100%}
+/* sidebar */
+.side{position:sticky;top:0;height:100vh;background:var(--side);color:#e9f3ec;display:flex;flex-direction:column;overflow-y:auto;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='none' stroke='%23e0a50f' stroke-opacity='.10'%3E%3Cpath d='M28 6l6 16 16 6-16 6-6 16-6-16-16-6 16-6z'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E")}
+.brand{display:flex;gap:12px;align-items:center;padding:20px 18px 18px;border-bottom:1px solid #ffffff1a}
+.brand img{width:52px;height:58px;object-fit:contain;background:#fff;border-radius:12px;padding:4px;border:2px solid var(--gold);flex:none}
+.brand b{display:block;font-family:"Noto Serif Bengali",serif;font-size:15.5px;line-height:1.3}
+.brand i{display:block;font:700 14px/1.4 Amiri,serif;color:#f3cf6b;font-style:normal}
+.nav{padding:12px 10px;display:grid;gap:2px}
+.nav small{color:#9fc3ad;font-size:13px;padding:12px 12px 4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#dcebe1;text-decoration:none;font-weight:500;min-height:44px}
+.nav a:hover{background:#ffffff12}
+.nav a.on{background:#fff;color:var(--g);font-weight:700}
+.nav a.on svg{color:var(--gold)}
+.side .foot{margin-top:auto;padding:16px 18px;font-size:13px;color:#a9cbb6;border-top:1px solid #ffffff1a}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* top */
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px clamp(16px,3vw,32px);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.x.menu{display:none}
+.srch{position:relative;flex:1;max-width:460px}
+.srch input{width:100%;padding:10px 14px 10px 40px;border:1px solid var(--line);border-radius:12px;background:var(--card);min-height:44px}
+.srch svg{position:absolute;left:12px;top:12px;color:var(--mut)}
+.res{position:absolute;top:50px;left:0;right:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px #0002;overflow:hidden;display:none}
+.res.on{display:block}
+.res button{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;border:0;background:none;text-align:left;cursor:pointer}
+.res button:hover,.res button:focus{background:var(--soft)}
+.today{margin-left:auto;text-align:right;font-size:14px;color:var(--mut);line-height:1.35;white-space:nowrap}
+.today b{color:var(--ink);display:block;font-weight:600}
+main{padding:24px clamp(16px,3vw,32px) 48px;max-width:1280px;width:100%}
+.head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.head p{margin:6px 0 0;color:var(--mut)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:9px 16px;min-height:44px;font-weight:600;cursor:pointer;background:var(--g);color:#fff;text-decoration:none;white-space:nowrap}
+.btn:hover{background:#094d2a}
+.btn.gh{background:var(--card);color:var(--ink);border-color:var(--line)}
+.btn.gh:hover{border-color:var(--g2);color:var(--g2)}
+.btn.gd{background:var(--gold);color:#2b1f00}
+.btn.dg{background:var(--redbg);color:var(--red)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:14px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mut)}
+input,select,textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:16px;min-height:44px;color:var(--ink)}
+input:focus,select:focus,textarea:focus{border-color:var(--g2);outline:3px solid color-mix(in srgb,var(--g2) 25%,transparent);outline-offset:0}
+textarea{min-height:110px;resize:vertical}
+.req{color:var(--red)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel>h2,.panel>h3{margin-bottom:14px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cols{display:grid;gap:18px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}
+.cols.eq{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cols.l{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}.cols.r{grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr)}
+.stack18{display:grid;gap:18px}
+.mut{color:var(--mut)}.sm{font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer;min-height:38px;font-weight:500}
+.chip.on{background:var(--g);border-color:var(--g);color:#fff}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--okbg);color:var(--g2)}.b-no{background:var(--redbg);color:var(--red)}.b-gd{background:var(--goldbg);color:var(--goldink)}
+.av{width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--g2);display:grid;place-items:center;font-weight:700;flex:none;overflow:hidden;font-size:16px}
+.av img{width:100%;height:100%;object-fit:cover}
+.who{display:flex;gap:10px;align-items:center}
+.who small{display:block;color:var(--mut);font-size:13px;line-height:1.3}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:13.5px;color:var(--mut);font-weight:600;text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:color-mix(in srgb,var(--soft) 60%,transparent)}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:36px 16px;color:var(--mut)}
+.empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:4px}
+.note{font-size:14px;color:var(--goldink);background:var(--goldbg);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:18px}
+/* dashboard */
+.hero{background:var(--g);color:#fff;border-radius:20px;padding:24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 24px;position:relative;overflow:hidden}
+.tally{border:1.5px solid #e0a50f88;border-radius:110px 110px 14px 14px;padding:26px 26px 14px;text-align:center;align-self:start}
+.hero h2{color:#fff}
+.big{font:800 clamp(44px,6vw,64px)/1 "Noto Serif Bengali",serif;color:#fff}
+.big span{font-size:.45em;color:#bfe0cb;font-weight:700}
+.hero .pct{color:#f3cf6b;font-weight:700}
+.roll{grid-column:1/-1;display:grid;gap:10px;position:relative;z-index:1}
+.rrow{display:grid;grid-template-columns:88px minmax(0,1fr) auto;align-items:center;gap:12px;padding-top:10px;border-top:1px solid #ffffff1f}
+.rc{font-weight:600;color:#d7ebde}
+.rn{font-variant-numeric:tabular-nums;color:#bfe0cb;font-size:14px}
+.dots{display:flex;flex-wrap:wrap;gap:6px}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:700;border:2px solid #ffffff55;color:#ffffffa0}
+.dot.on{background:#fff;border-color:#fff;color:var(--g)}
+.legend{display:flex;gap:16px;font-size:14px;color:#cfe6d7;align-items:center;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));background:var(--card);border:1px solid var(--line);border-radius:16px}
+.kpi{padding:16px 20px;border-left:1px solid var(--line)}
+.kpi:first-child{border-left:0}
+.kpi b{display:block;font:800 26px/1.2 "Noto Serif Bengali",serif;white-space:nowrap}
+.kpi span{font-size:14px;color:var(--mut)}
+.kpi em{font-style:normal;font-size:13px;display:block}
+.qa{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:10px}
+.qa a{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-decoration:none;color:var(--ink);font-weight:600;min-height:44px}
+.qa a:hover{border-color:var(--g2)}
+.qa svg{color:var(--g2);width:26px;height:26px}
+.bars{display:flex;align-items:flex-end;gap:6px;flex:1;min-height:150px;padding-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;font-size:12.5px;color:var(--mut)}
+.bar i{display:block;width:100%;max-width:34px;background:var(--g2);border-radius:6px 6px 2px 2px;min-height:2px}
+.bar.t i{background:var(--gold)}
+.list{display:grid}
+.list>div{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.list>div:last-child{border-bottom:0}
+/* attendance */
+.tabs{display:inline-flex;background:var(--soft);border-radius:12px;padding:4px;gap:4px}
+.tabs button{border:0;background:none;padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:600;min-height:40px;color:var(--mut)}
+.tabs button.on{background:var(--card);color:var(--g2);box-shadow:0 1px 3px #0001}
+#qr-reader{width:100%;max-width:420px;margin:0 auto;border-radius:14px;overflow:hidden;background:var(--soft);min-height:220px;display:grid;place-items:center}
+#qr-reader video{border-radius:14px}
+.stat{padding:12px 14px;border-radius:12px;font-weight:600;margin:12px 0;background:var(--soft)}
+.stat.ok{background:var(--okbg);color:var(--g2)}.stat.err{background:var(--redbg);color:var(--red)}.stat.warn{background:var(--goldbg);color:var(--goldink)}
+.rc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tog{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.tog button{border:0;background:var(--card);padding:8px 14px;cursor:pointer;min-height:42px;font-weight:600;color:var(--mut)}
+.tog button.p.on{background:var(--g2);color:#fff}.tog button.a.on{background:var(--red);color:#fff}
+.meter{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--g2);border-radius:99px}
+/* id card */
+.idc{width:340px;height:214px;font-size:11px;border-radius:12px;overflow:hidden;position:relative;background:#fff;color:#12281b;border:1px solid #cfdccf;box-shadow:0 6px 18px #0b5d3318;flex:none;font-family:"Hind Siliguri",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.idc .ct{background:#0b5d33;color:#fff;display:flex;align-items:center;gap:.8em;padding:.7em 1em;height:28%}
+.idc .ct img{height:3.4em;width:3em;object-fit:contain;background:#fff;border-radius:.5em;padding:.15em}
+.idc .ct b{font:700 1.25em/1.15 "Noto Serif Bengali",serif;display:block}
+.idc .ct i{font:700 .95em/1.2 Amiri,serif;color:#f3cf6b;font-style:normal}
+.idc .cb{display:flex;gap:1em;padding:.8em 1em;height:58%}
+.idc .pho{width:5.6em;height:6.8em;border-radius:.5em;background:#edf4ea;border:2px solid #e0a50f;display:grid;place-items:center;font:700 2.2em "Noto Serif Bengali";color:#0e7a43;overflow:hidden;flex:none;margin:0}
+.idc .pho img{width:100%;height:100%;object-fit:cover}
+.idc .cd{flex:1;line-height:1.45}
+.idc .cd b{display:block;font-size:1.3em;line-height:1.25;margin-bottom:.2em}
+.idc .cd span{color:#5a6d60}.idc .cd em{font-style:normal;white-space:nowrap}
+.idc .qr{width:6.2em;height:6.2em;flex:none;align-self:center}
+.idc .qr img{width:100%;height:100%;image-rendering:pixelated}
+.idc .cf{position:absolute;bottom:0;left:0;right:0;height:14%;background:#e0a50f;color:#2b1f00;display:flex;align-items:center;justify-content:space-between;padding:0 1em;font-weight:700}
+.idc.back .bb{padding:1.2em;line-height:1.65}
+.idc.back .bb p{margin:0 0 .5em}
+.idc .sig{position:absolute;right:1.2em;bottom:20%;border-top:1px solid #5a6d60;padding-top:.2em;width:9em;text-align:center;color:#5a6d60}
+.cardpair{display:flex;flex-wrap:wrap;gap:16px}
+.pick{max-height:440px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.pick label{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink);font-weight:500;cursor:pointer}
+.pick input{width:20px;height:20px;min-height:0;margin:0;flex:none;accent-color:var(--g)}
+/* hifz */
+.juz{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.juz button{aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;font-weight:700;color:var(--mut);min-height:36px}
+.juz button.on{background:var(--g2);border-color:var(--g2);color:#fff}
+.juz button.cur{border:2px solid var(--gold);color:var(--goldink)}
+.ring{--p:0;width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--g2) calc(var(--p)*1%),var(--soft) 0);display:grid;place-items:center;flex:none}
+.ring div{width:92px;height:92px;border-radius:50%;background:var(--card);display:grid;place-items:center;text-align:center;line-height:1.1}
+.ring b{font:800 26px "Noto Serif Bengali",serif}
+.sel{cursor:pointer}
+.sel.on{background:var(--soft)}
+/* marks */
+.mk{width:64px;min-height:38px;padding:6px;text-align:center;margin:0}
+.mk.bad{border-color:var(--red);color:var(--red)}
+/* dialog + toast */
+dialog{border:0;border-radius:18px;padding:0;width:min(640px,calc(100% - 24px));background:var(--card);color:var(--ink);box-shadow:0 30px 80px #0005}
+dialog::backdrop{background:#0a1a1180;backdrop-filter:blur(2px)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.db{padding:20px;max-height:70vh;overflow-y:auto}
+.df{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.x{border:0;background:var(--soft);width:40px;height:40px;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;transition:.2s;background:#12281b;color:#fff;padding:12px 18px;border-radius:12px;z-index:50;font-weight:600;pointer-events:none;max-width:calc(100% - 32px)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.err{background:#9b1c13}
+.bnav{display:none}
+.scrim{display:none}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;margin:0}
+.dl dt{color:var(--mut);font-size:14px}.dl dd{margin:0;font-weight:500}
+.photo-in{display:flex;gap:14px;align-items:center}
+.photo-in .av{width:84px;height:96px;border-radius:12px;font-size:28px}
+fieldset{border:0;padding:0;margin:0 0 22px}
+legend{font:700 17px "Noto Serif Bengali",serif;margin-bottom:12px;padding:0}
+@media(max-width:1100px){.cols,.cols.eq,.cols.l,.cols.r{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:900px){
+.app{grid-template-columns:minmax(0,1fr)}
+.side{position:fixed;left:0;top:0;bottom:0;width:272px;z-index:30;transform:translateX(-100%);transition:transform .2s}
+.side.open{transform:none}
+.scrim.on{display:block;position:fixed;inset:0;background:#0006;z-index:20}
+.x.menu{display:grid}
+.today{display:none}
+main{padding-bottom:96px}
+.bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.bnav a,.bnav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;color:var(--mut);text-decoration:none;border:0;background:none;padding:4px;min-height:48px;cursor:pointer}
+.bnav .on{color:var(--g2);font-weight:700}
+}
+@media(max-width:600px){
+.hero{grid-template-columns:minmax(0,1fr);padding:18px}
+.rrow{grid-template-columns:minmax(0,1fr) auto}.rrow .dots{grid-column:1/-1;grid-row:2}
+.dot{width:30px;height:30px;font-size:13px}
+.kpi{border-left:0;border-top:1px solid var(--line)}.kpi:first-child{border-top:0}
+table{font-size:14px}
+.stack thead{display:none}.stack tr{display:grid;padding:10px 0;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:4px 6px;text-align:right}.stack td::before{content:attr(data-l);color:var(--mut);font-size:13px;text-align:left}.stack td:empty{display:none}
+.idc{width:100%;max-width:340px;height:auto;aspect-ratio:85.6/54;font-size:clamp(8px,3vw,11px)}
+.juz{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* print */
+#print-root{display:none}
+.signs{display:flex;justify-content:space-between;gap:12px;margin-top:40px}.signs span{border-top:1px solid currentColor;padding-top:4px;min-width:110px;text-align:center;font-size:13px}
+@media print{
+body{background:#fff}
+body>*:not(#print-root){display:none!important}
+#print-root{display:block!important;color:#000;font:12pt/1.5 "Hind Siliguri",sans-serif}
+.doc{page-break-after:always}.doc:last-child{page-break-after:auto}
+.dhd{display:flex;align-items:center;gap:14px;border-bottom:2px solid #0b5d33;padding-bottom:10px;margin-bottom:14px}
+.dhd img{width:56px;height:64px;object-fit:contain}
+.dhd h1{font-size:20pt;color:#0b5d33}.dhd p{margin:0;font-size:10pt}
+.doc h2{text-align:center;margin:6px 0 14px;font-size:15pt}
+.doc table{width:100%;border-collapse:collapse;margin:8px 0}
+.doc td,.doc th{border:1px solid #777;padding:6px 8px;color:#000;font-size:11pt}
+.doc th{background:#edf5ee;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.signs{display:flex;justify-content:space-between;margin-top:56px}
+.signs span{border-top:1px solid #333;padding-top:4px;min-width:140px;text-align:center;font-size:10pt}
+.pr-pos .doc{width:72mm;margin:0 auto;font-size:10pt}
+.pr-pos .dhd{flex-direction:column;text-align:center;gap:4px}
+.pr-pos .dhd h1{font-size:12pt}.pr-pos .dhd img{width:36px;height:40px}
+.pr-pos td,.pr-pos th{font-size:9pt;padding:3px 4px}
+.sheet{display:grid;grid-template-columns:85.6mm 85.6mm;gap:6mm;justify-content:center}
+.sheet .idc{width:85.6mm;height:54mm;font-size:7.6pt;box-shadow:none;border:.3mm solid #9ab}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side" id="side">
+ <div class="brand"><img class="logo" alt="মাদরাসার লোগো" src="data:image/jpeg;base64,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"><div><b id="sb-name">রামারবাগ তা’মীরুল কোরআন মাদরাসা</b><i>رماربغ تعمير القرآن مدرسة</i></div></div>
+ <nav class="nav" id="nav"></nav>
+ <div class="foot" id="sb-foot"></div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<div>
+ <header class="top">
+  <button class="x menu" id="menuBtn" aria-label="মেনু খুলুন"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <div class="srch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="q" type="search" placeholder="নাম, আইডি বা মোবাইল দিয়ে শিক্ষার্থী খুঁজুন" autocomplete="off" aria-label="শিক্ষার্থী খুঁজুন"><div class="res" id="res"></div></div>
+  <div class="today" id="today"></div>
+ </header>
+ <main id="view"></main>
+</div>
+</div>
+<nav class="bnav" id="bnav"></nav>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="print-root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const BND='০১২৩৪৫৬৭৮৯';
+const bn=v=>String(v??'').replace(/\d/g,d=>BND[d]);
+const en=v=>String(v??'').replace(/[০-৯]/g,d=>BND.indexOf(d));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const ym=(d=new Date())=>ymd(d).slice(0,7);
+const MON=['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+const DAYS=['রবি','সোম','মঙ্গল','বুধ','বৃহঃ','শুক্র','শনি'];
+const mname=k=>{const [y,m]=k.split('-');return MON[m-1]+' '+bn(y)};
+const fdate=k=>{if(!k)return '';const [y,m,d]=k.split('-');return bn(+d)+' '+MON[m-1]+' '+bn(y)};
+const taka=n=>'৳ '+bn(Math.round(Number(n||0)).toLocaleString('en-IN'));
+const ini=n=>Array.from(String(n||'?').trim())[0]||'?';
+const LOGO=$('.logo').src;
+const I={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/>',
+card:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M14 10h4M14 13h3"/>',
+form:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14.5h2"/>',
+exam:'<path d="M9 4h6M9 4a1 1 0 0 0-1 1v1h8V5a1 1 0 0 0-1-1M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2M9 13l2 2 4-4"/>',
+book:'<path d="M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6zM12 6v14.5"/>',
+mega:'<path d="M3 11v3a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
+chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',print:'<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',dl:'<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
+cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',phone:'<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+
+/* ---------- data ---------- */
+const KEY='rtq_mms_v2';
+let S;
+const fresh=()=>({settings:{name:'রামারবাগ তা’মীরুল কোরআন মাদরাসা',address:'রামারবাগ কেন্দ্রিয় ঈদগা, রামারবাগ, উত্তরদা, লাকসাম, কুমিল্লা',phone:'০১৯৭৫৪৪৮০৯৪',est:'২০২৬',session:'2026',fee:500,
+classes:['শিশু','প্রথম','দ্বিতীয়','তৃতীয়','নাজেরা','হিফজ'],subjects:['কুরআন মাজিদ','তাজবীদ','আরবি','বাংলা','ইংরেজি','গণিত'],exams:['প্রথম সাময়িক','দ্বিতীয় সাময়িক','বার্ষিক পরীক্ষা'],logo:null},
+students:[],att:{},pays:[],marks:{},hifz:{},notices:[],sample:false});
+let sv=11;const rnd=()=>(sv=sv*16807%2147483647)/2147483647;
+function seed(){
+ S.sample=true;
+ const N=['আব্দুল্লাহ আল মামুন','মুহাম্মাদ হাসান','উমর ফারুক','তাহমিদ হোসেন','আরিফ বিল্লাহ','ইয়াসিন আরাফাত','সাদিক রহমান','মাহমুদুল হাসান','আনাস ইবনে কাসেম','জুবায়ের আহমদ','ফাতিমা আক্তার','আয়েশা সিদ্দিকা','মারিয়াম খাতুন','খাদিজা ইসলাম','সুমাইয়া আক্তার','হাফসা বিনতে রফিক','নাফিসা তাবাসসুম','রাকিব হাসান'];
+ const F=['আবুল কাশেম','মোঃ রফিকুল ইসলাম','আব্দুর রহিম','মোঃ জসিম উদ্দিন','নুরুল আমিন','মাওলানা ইউসুফ','আলমগীর হোসেন','শফিকুল ইসলাম','আব্দুল মালেক'];
+ const cl=S.settings.classes;
+ S.students=N.map((n,i)=>({id:'RM-2026-'+String(i+1).padStart(3,'0'),name:n,gender:i>=10&&i<17?'ছাত্রী':'ছাত্র',cls:cl[i%6],roll:String(Math.floor(i/6)+1),father:F[i%F.length],mother:'',phone:'01711-0000'+String(10+i),address:'রামারবাগ, লাকসাম, কুমিল্লা',dob:'',admitted:'2026-01-0'+(1+i%8),photo:null}));
+ const t=new Date();
+ for(let k=0;k<20;k++){const d=new Date(t);d.setDate(t.getDate()-k);if(d.getDay()===5)continue;const key=ymd(d),rec={};
+  S.students.forEach(s=>{if(rnd()<(k===0?.72:.88))rec[s.id]=bn('0'+(7)+':'+String(15+Math.floor(rnd()*40)).padStart(2,'0'))});S.att[key]=rec}
+ const m=ym(),pm=new Date(t.getFullYear(),t.getMonth()-1,1);let no=1;
+ S.students.forEach((s,i)=>{if(i%9!==4)S.pays.push({no:no++,id:s.id,month:ym(pm),items:[['মাসিক বেতন',500]],paid:500,date:ymd(new Date(pm.getFullYear(),pm.getMonth(),5+i%10))})});
+ S.students.forEach((s,i)=>{if(i%3!==1&&i!==7)S.pays.push({no:no++,id:s.id,month:m,items:[['মাসিক বেতন',500]],paid:500,date:ymd(new Date(t.getFullYear(),t.getMonth(),Math.min(t.getDate(),2+i%12)))})});
+ S.students.filter(s=>s.cls==='হিফজ').forEach((s,j)=>{const n=[12,7,4][j]||3;S.hifz[s.id]={done:Array.from({length:n},(_,x)=>x+1),log:[0,1,2].map(k=>{const d=new Date(t);d.setDate(t.getDate()-k);return{d:ymd(d),sabak:'পারা '+bn(n+1)+', পৃষ্ঠা '+bn(4-k),sabqi:'পারা '+bn(n),manzil:'পারা '+bn(Math.max(1,n-3)),err:String(k+1),note:k?'':'তিলাওয়াত স্পষ্ট হয়েছে'}})}});
+ const mk={};S.students.filter(s=>s.cls==='প্রথম').forEach((s,i)=>{mk[s.id]={};S.settings.subjects.forEach((sub,j)=>mk[s.id][sub]=String(Math.round(55+rnd()*42)))});S.marks['প্রথম সাময়িক|প্রথম']=mk;
+ S.notices=[{id:2,title:'বার্ষিক পরীক্ষার সময়সূচি',date:ymd(t),body:'সকল শিক্ষার্থী ও অভিভাবকদের অবগতির জন্য জানানো যাচ্ছে যে, আগামী ১৫ ডিসেম্বর থেকে বার্ষিক পরীক্ষা শুরু হবে। পরীক্ষার আগে সকল বকেয়া বেতন পরিশোধ করতে অনুরোধ করা হলো।'},{id:1,title:'অভিভাবক সমাবেশ',date:ymd(new Date(t.getFullYear(),t.getMonth(),1)),body:'আগামী শুক্রবার বাদ জুমা মাদরাসা প্রাঙ্গণে অভিভাবক সমাবেশ অনুষ্ঠিত হবে। সকল অভিভাবকের উপস্থিতি একান্ত কাম্য।'}];
+}
+function migrate(){try{const st=JSON.parse(localStorage.getItem('rmtc_students')||'[]');if(!st.length)return false;
+ S.students=st.map(x=>({id:x.id,name:x.name||'',cls:x.className||'',roll:en(x.roll||''),phone:x.phone||'',father:'',mother:'',address:'',gender:'ছাত্র',admitted:ymd(),photo:null}));
+ JSON.parse(localStorage.getItem('rmtc_attendance')||'[]').forEach(r=>{(S.att[r.date]??={})[r.id]=r.time});
+ S.students.forEach(s=>{if(s.cls&&!S.settings.classes.includes(s.cls))S.settings.classes.push(s.cls)});return true}catch(e){return false}}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
+ if(!S){S=fresh();if(!migrate())seed();save()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('এই ব্রাউজারে তথ্য সংরক্ষণ করা যাচ্ছে না','err')}}
+const stu=id=>S.students.find(s=>s.id===id);
+const avatar=(s,c='av')=>`<span class="${c}">${s&&s.photo?`<img src="${s.photo}" alt="">`:esc(ini(s&&s.name))}</span>`;
+const workDays=(mk)=>Object.keys(S.att).filter(d=>d.startsWith(mk)).sort();
+
+/* ---------- ui helpers ---------- */
+let tt;function toast(m,k){const t=$('#toast');t.textContent=m;t.className='on '+(k||'');clearTimeout(tt);tt=setTimeout(()=>t.className='',2600)}
+function dialog(title,body,foot){const d=$('#dlg');d.innerHTML=`<div class="dh"><h3>${title}</h3><button class="x" data-close aria-label="বন্ধ করুন">${ic('x')}</button></div><div class="db">${body}</div>${foot?`<div class="df">${foot}</div>`:''}`;try{d.showModal()}catch(e){d.setAttribute('open','')}return d}
+function closeDlg(){const d=$('#dlg');try{d.close()}catch(e){d.removeAttribute('open')}}
+function confirmBox(msg,yes,label='মুছে ফেলুন'){dialog('নিশ্চিত করুন',`<p style="margin:0">${msg}</p>`,`<button class="btn gh" data-close>বাতিল</button><button class="btn dg" id="cy">${label}</button>`);$('#cy').onclick=()=>{closeDlg();yes()}}
+function download(name,text,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast('ফাইল ডাউনলোড শুরু হয়েছে')}catch(e){toast('এখানে ডাউনলোড করা যাচ্ছে না','err')}}
+const qrCache={};
+function qr(text){if(qrCache[text])return qrCache[text];if(!window.QRCode)return '';const box=document.createElement('div');try{new QRCode(box,{text,width:160,height:160,correctLevel:QRCode.CorrectLevel.M});const c=box.querySelector('canvas');return qrCache[text]=c?c.toDataURL():''}catch(e){return ''}}
+const qrText=id=>JSON.stringify({type:'RMTC_STUDENT',id});
+function resizePhoto(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),w=240,h=280,s=Math.max(w/im.width,h/im.height);c.width=w;c.height=h;c.getContext('2d').drawImage(im,(w-im.width*s)/2,(h-im.height*s)/2,im.width*s,im.height*s);cb(c.toDataURL('image/jpeg',.82))};im.src=r.result};r.readAsDataURL(file)}
+
+/* ---------- print ---------- */
+const docHead=()=>`<div class="dhd"><img src="${S.settings.logo||LOGO}" alt=""><div><h1>${esc(S.settings.name)}</h1><p>${esc(S.settings.address)}</p><p>মোবাইল: ${esc(S.settings.phone)} | স্থাপিত ${esc(S.settings.est)} ইং</p></div></div>`;
+function printNow(html,mode='a4'){const r=$('#print-root');r.innerHTML=html;r.className='pr-'+mode;$('#pagestyle').textContent=mode==='pos'?'@page{size:80mm auto;margin:3mm}':'@page{size:A4;margin:12mm}';setTimeout(()=>{try{window.print()}catch(e){toast('প্রিন্ট চালু করা যায়নি','err')}},80)}
+function idFront(s){return `<div class="idc"><div class="ct"><img src="${S.settings.logo||LOGO}" alt=""><div><b>${esc(S.settings.name)}</b><i>رماربغ تعمير القرآن مدرسة</i></div></div>
+<div class="cb"><div class="pho">${s.photo?`<img src="${s.photo}" alt="">`:esc(ini(s.name))}</div><div class="cd"><b>${esc(s.name)}</b><span>শ্রেণি:</span> ${esc(s.cls)} &nbsp; <span>রোল:</span> ${bn(s.roll)}<br><span>আইডি:</span> <em>${esc(s.id)}</em><br><span>অভিভাবক:</span> ${esc(bn(s.phone))}</div><div class="qr">${qr(qrText(s.id))?`<img src="${qr(qrText(s.id))}" alt="QR">`:''}</div></div>
+<div class="cf"><span>শিক্ষার্থী পরিচয়পত্র</span><span>সেশন ${bn(S.settings.session)}</span></div></div>`}
+function idBack(s){return `<div class="idc back"><div class="bb"><p><b>পিতা:</b> ${esc(s.father||'')}</p><p><b>ঠিকানা:</b> ${esc(s.address||'')}</p><p><b>জরুরি যোগাযোগ:</b> ${esc(bn(s.phone))}</p><p class="sm" style="color:#5a6d60">কার্ডটি পাওয়া গেলে অনুগ্রহ করে নিচের ঠিকানায় ফেরত দিন।<br>${esc(S.settings.name)}, ${esc(S.settings.phone)}</p></div><div class="sig">মুহতামিমের স্বাক্ষর</div><div class="cf"><span>${esc(S.settings.address.split(',').slice(-2).join(','))}</span></div></div>`}
+function receiptHtml(p){const s=stu(p.id)||{name:'',cls:'',roll:''};const tot=p.items.reduce((a,b)=>a+Number(b[1]||0),0);
+ return `<div class="doc">${docHead()}<h2>বেতন রসিদ</h2><table><tr><th>রসিদ নং</th><td>${bn(String(p.no).padStart(4,'0'))}</td><th>তারিখ</th><td>${fdate(p.date)}</td></tr><tr><th>নাম</th><td colspan="3">${esc(s.name)} (${esc(p.id)})</td></tr><tr><th>শ্রেণি</th><td>${esc(s.cls)}</td><th>রোল</th><td>${bn(s.roll)}</td></tr><tr><th>মাস</th><td colspan="3">${mname(p.month)}</td></tr></table>
+<table><tr><th>বিবরণ</th><th style="text-align:right">টাকা</th></tr>${p.items.map(i=>`<tr><td>${esc(i[0])}</td><td style="text-align:right">${taka(i[1])}</td></tr>`).join('')}<tr><th>মোট</th><th style="text-align:right">${taka(tot)}</th></tr><tr><td>জমা</td><td style="text-align:right">${taka(p.paid)}</td></tr><tr><th>বকেয়া</th><th style="text-align:right">${taka(tot-p.paid)}</th></tr></table><div class="signs"><span>আদায়কারী</span><span>হিসাবরক্ষক</span></div></div>`}
+
+/* ---------- nav ---------- */
+const V={dashboard:['ড্যাশবোর্ড','home'],attendance:['হাজিরা','scan'],students:['শিক্ষার্থী','users'],admission:['নতুন ভর্তি','form'],idcards:['আইডি কার্ড','card'],fees:['বেতন ও হিসাব','wallet'],exams:['পরীক্ষা ও ফলাফল','exam'],hifz:['হিফজ অগ্রগতি','book'],notices:['নোটিশ','mega'],reports:['রিপোর্ট','chart'],setup:['সেটিংস','gear']};
+const GROUPS=[['প্রতিদিনের কাজ',['dashboard','attendance','students','admission']],['শিক্ষা',['exams','hifz','idcards']],['অফিস',['fees','notices','reports','setup']]];
+function drawNav(cur){$('#nav').innerHTML=GROUPS.map(([g,l])=>`<small>${g}</small>`+l.map(k=>`<a href="#${k}" class="${k===cur?'on':''}">${ic(V[k][1])}${V[k][0]}</a>`).join('')).join('');
+ $('#bnav').innerHTML=['dashboard','attendance','students','fees'].map(k=>`<a href="#${k}" class="${k===cur?'on':''}">${ic(V[k][1])}${k==='fees'?'বেতন':V[k][0]}</a>`).join('')+`<button id="moreBtn">${ic('more')}আরও</button>`;
+ $('#moreBtn').onclick=openSide;
+ $('#sb-name').textContent=S.settings.name;$('#sb-foot').innerHTML=`শিক্ষাবর্ষ ${bn(S.settings.session)}<br>মোট শিক্ষার্থী ${bn(S.students.length)} জন`;
+ $$('.logo').forEach(l=>{if(S.settings.logo)l.src=S.settings.logo})}
+function openSide(){$('#side').classList.add('open');$('#scrim').classList.add('on')}
+function closeSide(){$('#side').classList.remove('open');$('#scrim').classList.remove('on')}
+const ui={cls:'',att:'qr',attCls:'',attDate:ymd(),hz:null,exam:null,examCls:null,fm:ym(),rm:ym(),idsel:new Set(),edit:null,idcls:''};
+function go(){const h=location.hash.slice(1);const v=V[h]?h:'dashboard';if(v!=='admission')ui.edit=null;stopScan();closeSide();drawNav(v);
+ const fn={dashboard:vDash,attendance:vAtt,students:vStu,admission:vAdm,idcards:vId,fees:vFee,exams:vExam,hifz:vHifz,notices:vNot,reports:vRep,setup:vSet}[v];
+ $('#view').innerHTML=fn();(AFTER[v]||(()=>{}))();window.scrollTo(0,0);document.title=V[v][0]+' | রামারবাগ মাদরাসা'}
+const AFTER={};
+const sampleNote=()=>S.sample?`<div class="note"><span>এখন নমুনা তথ্য দেখানো হচ্ছে, যাতে প্রতিটি অংশ কেমন কাজ করে দেখতে পান।</span><button class="btn gh sm" data-act="clearSample">নমুনা মুছে নিজের তথ্য দিন</button></div>`:'';
+const head=(t,p,acts='')=>`<div class="head"><div><h1>${t}</h1>${p?`<p>${p}</p>`:''}</div><div class="acts">${acts}</div></div>`;
+const clsOpts=(sel,all)=>(all?`<option value="">সব শ্রেণি</option>`:'')+S.settings.classes.map(c=>`<option ${c===sel?'selected':''}>${esc(c)}</option>`).join('');
+
+/* ---------- dashboard ---------- */
+function vDash(){
+ const t=ymd(),a=S.att[t]||{},st=S.students,pres=st.filter(s=>a[s.id]).length,pct=st.length?Math.round(pres*100/st.length):0;
+ const m=ym(),paid=new Set(S.pays.filter(p=>p.month===m).map(p=>p.id)),coll=S.pays.filter(p=>p.date.startsWith(m)).reduce((x,p)=>x+Number(p.paid),0);
+ const due=st.filter(s=>!paid.has(s.id)).length,hz=st.filter(s=>s.cls==='হিফজ'),hzAvg=hz.length?hz.reduce((x,s)=>x+((S.hifz[s.id]||{}).done||[]).length,0)/hz.length:0;
+ const byC=S.settings.classes.map(c=>[c,st.filter(s=>s.cls===c)]).filter(x=>x[1].length);
+ const days=[];for(let k=0;days.length<12&&k<40;k++){const d=new Date();d.setDate(d.getDate()-k);if(d.getDay()===5)continue;days.unshift(d)}
+ let hijri='';try{hijri=new Intl.DateTimeFormat('bn-BD-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(new Date()).replace(/\s*যুগ/,'')+' হিজরি'}catch(e){}
+ return sampleNote()+head('আসসালামু আলাইকুম',`আজ ${DAYS[new Date().getDay()]}বার, ${fdate(t)}${hijri?' | '+hijri:''}`,`<a class="btn" href="#attendance">${ic('scan')}হাজিরা নিন</a><a class="btn gh" href="#admission">${ic('plus')}নতুন ভর্তি</a>`)+
+ `<div class="stack18"><section class="hero" aria-label="আজকের হাজিরা"><div><h2>আজকের হাজিরা</h2><div class="legend" style="margin-top:8px"><span><i style="background:#fff"></i>উপস্থিত</span><span><i style="border:2px solid #ffffff88"></i>এখনো আসেনি</span></div></div>
+ <div class="tally"><div class="big">${bn(pres)}<span> / ${bn(st.length)}</span></div><div class="pct">${bn(pct)}% উপস্থিত</div></div>
+ <div class="roll">${byC.length?byC.map(([c,l])=>`<div class="rrow"><span class="rc">${esc(c)}</span><div class="dots">${l.map(s=>`<span class="dot ${a[s.id]?'on':''}" title="${esc(s.name)}${a[s.id]?', '+esc(a[s.id]):''}">${esc(ini(s.name))}</span>`).join('')}</div><span class="rn">${bn(l.filter(s=>a[s.id]).length)}/${bn(l.length)}</span></div>`).join(''):'<p>এখনো কোনো শিক্ষার্থী যোগ করা হয়নি। <a class="btn gd sm" href="#admission">প্রথম শিক্ষার্থী ভর্তি করুন</a></p>'}</div></section>
+ <div class="kpis"><div class="kpi"><span>মোট শিক্ষার্থী</span><b>${bn(st.length)} জন</b><em class="mut">${bn(st.filter(s=>s.gender==='ছাত্রী').length)} ছাত্রী, ${bn(st.filter(s=>s.gender!=='ছাত্রী').length)} ছাত্র</em></div>
+ <div class="kpi"><span>${MON[new Date().getMonth()]} মাসে আদায়</span><b>${taka(coll)}</b><em class="mut">${bn(paid.size)} জনের বেতন জমা</em></div>
+ <div class="kpi"><span>এ মাসের বকেয়া</span><b style="color:var(--red)">${bn(due)} জন</b><em><a href="#fees">তালিকা দেখুন</a></em></div>
+ <div class="kpi"><span>হিফজ গড় অগ্রগতি</span><b>${bn(hzAvg.toFixed(1))} পারা</b><em class="mut">${bn(hz.length)} জন হাফেজ শিক্ষার্থী</em></div></div>
+ <div class="qa">${[['attendance','scan','QR দিয়ে হাজিরা'],['fees','wallet','বেতন আদায়'],['idcards','card','আইডি কার্ড প্রিন্ট'],['hifz','book','সবক লিখুন'],['notices','mega','নোটিশ দিন']].map(([h,i,t])=>`<a href="#${h}">${ic(i)}${t}</a>`).join('')}</div>
+ <div class="cols" style="align-items:stretch"><section class="panel" style="display:flex;flex-direction:column"><div class="ph"><h3>গত ১২ কর্মদিবসের উপস্থিতি</h3><span class="sm mut">শুক্রবার বাদে</span></div><div class="bars">${days.map(d=>{const k=ymd(d),r=S.att[k]||{},n=st.filter(s=>r[s.id]).length,p=st.length?n/st.length*100:0;return `<div class="bar ${k===t?'t':''}" title="${fdate(k)}: ${bn(n)} জন"><span>${bn(Math.round(p))}</span><i style="height:${p}%"></i><span>${bn(d.getDate())}</span></div>`}).join('')}</div></section>
+ <section class="panel"><div class="ph"><h3>সাম্প্রতিক আদায়</h3><a href="#fees" class="sm">সব দেখুন</a></div><div class="list">${S.pays.slice(-5).reverse().map(p=>{const s=stu(p.id);return `<div><span class="who">${avatar(s)}<span>${esc(s?s.name:p.id)}<small>${mname(p.month)}</small></span></span><b class="num">${taka(p.paid)}</b></div>`}).join('')||'<p class="mut">এখনো কোনো আদায় হয়নি।</p>'}</div></section></div>
+ <section class="panel"><div class="ph"><h3>সর্বশেষ নোটিশ</h3><a href="#notices" class="sm">নোটিশ বোর্ড</a></div><div class="list">${S.notices.slice(0,2).map(n=>`<div><span><b>${esc(n.title)}</b><br><span class="sm mut">${esc(n.body.slice(0,110))}${n.body.length>110?'...':''}</span></span><span class="badge b-gd">${fdate(n.date)}</span></div>`).join('')||'<p class="mut">কোনো নোটিশ নেই।</p>'}</div></section></div>`}
+
+/* ---------- students ---------- */
+function vStu(){
+ const q=(ui.sq||'').trim().toLowerCase(),a=S.att[ymd()]||{};
+ const list=S.students.filter(s=>(!ui.cls||s.cls===ui.cls)&&(!q||[s.name,s.id,s.phone,en(s.phone),s.father,s.roll].join(' ').toLowerCase().includes(en(q))));
+ return head('শিক্ষার্থী',`মোট ${bn(S.students.length)} জন শিক্ষার্থী, ${bn(S.settings.classes.length)}টি শ্রেণি`,`<a class="btn" href="#admission" data-act="newAdm">${ic('plus')}নতুন শিক্ষার্থী</a><button class="btn gh" data-act="csvStu">${ic('dl')}এক্সেল (CSV)</button>`)+
+ `<section class="panel"><div class="ph"><div class="chips">${['',...S.settings.classes].map(c=>`<button class="chip ${ui.cls===c?'on':''}" data-cls="${esc(c)}">${c?esc(c)+' ('+bn(S.students.filter(s=>s.cls===c).length)+')':'সবাই'}</button>`).join('')}</div>
+ <input id="sq" type="search" placeholder="তালিকায় খুঁজুন" value="${esc(ui.sq||'')}" style="max-width:260px;margin:0"></div>
+ ${list.length?`<div class="scroll"><table class="stack"><thead><tr><th>শিক্ষার্থী</th><th>আইডি</th><th>শ্রেণি</th><th class="num">রোল</th><th>অভিভাবকের মোবাইল</th><th>আজ</th><th></th></tr></thead><tbody>${list.map(s=>`<tr><td data-l="শিক্ষার্থী"><button class="who sel" style="border:0;background:none;padding:0;text-align:left" data-prof="${s.id}">${avatar(s)}<span><b>${esc(s.name)}</b><small>পিতা: ${esc(s.father||'—')}</small></span></button></td><td data-l="আইডি">${esc(s.id)}</td><td data-l="শ্রেণি">${esc(s.cls)}</td><td data-l="রোল" class="num">${bn(s.roll)}</td><td data-l="মোবাইল" class="num">${esc(bn(s.phone))}</td><td data-l="আজ">${a[s.id]?'<span class="badge b-ok">উপস্থিত</span>':'<span class="badge b-no">অনুপস্থিত</span>'}</td><td><button class="btn gh sm" data-prof="${s.id}">বিস্তারিত</button></td></tr>`).join('')}</tbody></table></div>`:
+ `<div class="empty"><b>${S.students.length?'এই খোঁজে কাউকে পাওয়া যায়নি':'এখনো কোনো শিক্ষার্থী নেই'}</b>${S.students.length?'অন্য নাম বা আইডি দিয়ে চেষ্টা করুন।':'প্রথম শিক্ষার্থীকে ভর্তি করে শুরু করুন।'}<br><br><a class="btn" href="#admission">নতুন ভর্তি</a></div>`}</section>`}
+AFTER.students=()=>{const i=$('#sq');i.oninput=()=>{ui.sq=i.value;const p=i.selectionStart;$('#view').innerHTML=vStu();AFTER.students();const n=$('#sq');n.focus();n.setSelectionRange(p,p)}};
+function profile(id){const s=stu(id);if(!s)return;const m=ym(),days=workDays(m),pres=days.filter(d=>S.att[d][id]).length,pays=S.pays.filter(p=>p.id===id),h=S.hifz[id];
+ dialog('শিক্ষার্থীর বিস্তারিত',`<div class="who" style="margin-bottom:18px">${avatar(s,'av" style="width:72px;height:72px;font-size:26px')}<span><h2>${esc(s.name)}</h2><small style="font-size:15px">${esc(s.id)} | ${esc(s.cls)} শ্রেণি | রোল ${bn(s.roll)}</small></span></div>
+ <div class="kpis" style="margin-bottom:18px"><div class="kpi"><span>এ মাসে উপস্থিতি</span><b>${bn(pres)}/${bn(days.length)} দিন</b></div><div class="kpi"><span>এ মাসের বেতন</span><b>${pays.some(p=>p.month===m)?'<span style="color:var(--g2)">পরিশোধিত</span>':'<span style="color:var(--red)">বকেয়া</span>'}</b></div>${h?`<div class="kpi"><span>হিফজ</span><b>${bn(h.done.length)} পারা</b></div>`:''}</div>
+ <dl class="dl"><dt>পিতার নাম</dt><dd>${esc(s.father||'—')}</dd><dt>মাতার নাম</dt><dd>${esc(s.mother||'—')}</dd><dt>মোবাইল</dt><dd><a href="tel:${esc(en(s.phone))}">${esc(bn(s.phone))}</a></dd><dt>ঠিকানা</dt><dd>${esc(s.address||'—')}</dd><dt>জন্মতারিখ</dt><dd>${s.dob?fdate(s.dob):'—'}</dd><dt>ভর্তির তারিখ</dt><dd>${fdate(s.admitted)}</dd></dl>
+ ${pays.length?`<h3 style="margin:18px 0 8px">বেতন পরিশোধের ইতিহাস</h3><div class="list">${pays.slice(-4).reverse().map(p=>`<div><span>${mname(p.month)} <span class="sm mut">(${fdate(p.date)})</span></span><b class="num">${taka(p.paid)}</b></div>`).join('')}</div>`:''}`,
+ `<button class="btn dg" data-del="${id}">মুছুন</button><button class="btn gh" data-edit="${id}">${ic('edit')}তথ্য সম্পাদনা</button><button class="btn gh" data-pay="${id}">${ic('wallet')}বেতন নিন</button><button class="btn" data-idone="${id}">${ic('card')}আইডি কার্ড</button>`)}
+
+/* ---------- admission ---------- */
+function nextId(){const y=S.settings.session;const n=S.students.map(s=>+(String(s.id).split('-').pop())||0);return `RM-${y}-${String((n.length?Math.max(...n):0)+1).padStart(3,'0')}`}
+function nextRoll(c){const r=S.students.filter(s=>s.cls===c).map(s=>+en(s.roll)||0);return String((r.length?Math.max(...r):0)+1)}
+let draftPhoto=null;
+function vAdm(){const e=ui.edit?stu(ui.edit):null,s=e||{id:nextId(),cls:S.settings.classes[0],gender:'ছাত্র',admitted:ymd()};if(!e)s.roll=nextRoll(s.cls);draftPhoto=s.photo||null;
+ const f=(id,l,v,o='')=>`<label>${l}<input id="${id}" value="${esc(v||'')}" ${o}></label>`;
+ return head(e?'শিক্ষার্থীর তথ্য সম্পাদনা':'নতুন ভর্তি',e?esc(e.name):'তারকা (*) চিহ্নিত ঘরগুলো পূরণ করা জরুরি। আইডি ও রোল নিজে থেকেই তৈরি হয়।')+
+ `<form class="panel" id="admForm" style="max-width:860px" novalidate>
+ <fieldset><legend>শিক্ষার্থীর তথ্য</legend><div class="photo-in" style="margin-bottom:14px"><span class="av" id="phPrev">${s.photo?`<img src="${s.photo}" alt="">`:ic('cam')}</span><label style="flex:1">ছবি (ঐচ্ছিক)<input type="file" id="f_photo" accept="image/*"></label></div>
+ <div class="grid"><label>শিক্ষার্থীর নাম <span class="req">*</span><input id="f_name" value="${esc(s.name||'')}" required></label>${f('f_dob','জন্মতারিখ',s.dob,'type="date"')}
+ <label>ছাত্র/ছাত্রী<select id="f_gender">${['ছাত্র','ছাত্রী'].map(g=>`<option ${g===s.gender?'selected':''}>${g}</option>`).join('')}</select></label>
+ <label>শ্রেণি <span class="req">*</span><select id="f_cls">${clsOpts(s.cls)}</select></label>${f('f_roll','রোল',bn(s.roll),'inputmode="numeric"')}${f('f_id','আইডি নম্বর',s.id)}${f('f_adm','ভর্তির তারিখ',s.admitted,'type="date"')}</div></fieldset>
+ <fieldset><legend>অভিভাবকের তথ্য</legend><div class="grid"><label>পিতার নাম <span class="req">*</span><input id="f_father" value="${esc(s.father||'')}" required></label>${f('f_mother','মাতার নাম',s.mother)}<label>অভিভাবকের মোবাইল <span class="req">*</span><input id="f_phone" value="${esc(s.phone||'')}" inputmode="tel" required></label></div>
+ <label style="margin-top:14px">ঠিকানা<input id="f_addr" value="${esc(s.address||'')}"></label></fieldset>
+ <p class="stat err" id="admErr" hidden></p>
+ <div class="acts"><button class="btn" type="submit">${e?'পরিবর্তন সংরক্ষণ':'ভর্তি সম্পন্ন করুন'}</button><button class="btn gh" type="button" data-act="admPrint">${ic('print')}সংরক্ষণ ও ভর্তি ফরম প্রিন্ট</button>${e?`<button class="btn gh" type="button" data-act="cancelEdit">বাতিল</button>`:''}</div></form>`}
+AFTER.admission=()=>{$('#f_photo').onchange=ev=>{const f=ev.target.files[0];if(f)resizePhoto(f,u=>{draftPhoto=u;$('#phPrev').innerHTML=`<img src="${u}" alt="">`})};
+ $('#f_cls').onchange=()=>{if(!ui.edit)$('#f_roll').value=bn(nextRoll($('#f_cls').value))};
+ $('#admForm').onsubmit=ev=>{ev.preventDefault();saveAdm(false)}};
+function saveAdm(print){const v=id=>$('#'+id).value.trim();const miss=[['f_name','নাম'],['f_father','পিতার নাম'],['f_phone','মোবাইল']].filter(x=>!v(x[0]));
+ if(miss.length){const e=$('#admErr');e.hidden=false;e.textContent=miss.map(x=>x[1]).join(', ')+' লিখুন।';$('#'+miss[0][0]).focus();return}
+ const id=v('f_id')||nextId();if(S.students.some(s=>s.id===id&&s.id!==ui.edit)){const e=$('#admErr');e.hidden=false;e.textContent='এই আইডি নম্বর আগেই আরেকজনকে দেওয়া হয়েছে।';return}
+ const rec={id,name:v('f_name'),dob:v('f_dob'),gender:v('f_gender'),cls:v('f_cls'),roll:en(v('f_roll')),admitted:v('f_adm')||ymd(),father:v('f_father'),mother:v('f_mother'),phone:v('f_phone'),address:v('f_addr'),photo:draftPhoto};
+ if(ui.edit){const i=S.students.findIndex(s=>s.id===ui.edit);if(ui.edit!==id)Object.values(S.att).forEach(r=>{if(r[ui.edit]){r[id]=r[ui.edit];delete r[ui.edit]}});S.students[i]=rec}else S.students.push(rec);
+ save();toast(ui.edit?'পরিবর্তন সংরক্ষণ হয়েছে':rec.name+' এর ভর্তি সম্পন্ন হয়েছে');ui.edit=null;
+ if(print)printNow(`<div class="doc">${docHead()}<h2>ভর্তি ফরম</h2><table>${[['আইডি',rec.id],['শিক্ষার্থীর নাম',rec.name],['ছাত্র/ছাত্রী',rec.gender],['জন্মতারিখ',fdate(rec.dob)],['শ্রেণি',rec.cls],['রোল',bn(rec.roll)],['পিতার নাম',rec.father],['মাতার নাম',rec.mother],['অভিভাবকের মোবাইল',bn(rec.phone)],['ঠিকানা',rec.address],['ভর্তির তারিখ',fdate(rec.admitted)]].map(x=>`<tr><th style="width:35%">${x[0]}</th><td>${esc(x[1])}</td></tr>`).join('')}</table>${rec.photo?`<img src="${rec.photo}" style="width:30mm;height:35mm;object-fit:cover;border:1px solid #777">`:''}<div class="signs"><span>অভিভাবকের স্বাক্ষর</span><span>মুহতামিম</span></div></div>`);
+ location.hash='students';if(location.hash==='#students')go()}
+
+/* ---------- attendance ---------- */
+function vAtt(){const st=S.students.filter(s=>!ui.attCls||s.cls===ui.attCls);
+ return head('হাজিরা','আইডি কার্ডের QR স্ক্যান করুন, অথবা রোল কল করে এক চাপে হাজিরা দিন।',`<button class="btn gh" data-act="csvAtt">${ic('dl')}CSV</button><button class="btn gh" data-act="printAtt">${ic('print')}প্রিন্ট</button>`)+
+ `<div class="ph"><div class="tabs" role="tablist"><button class="${ui.att==='qr'?'on':''}" data-tab="qr">${''}QR স্ক্যান</button><button class="${ui.att==='roll'?'on':''}" data-tab="roll">রোল কল</button></div>
+ <div class="acts"><label style="min-width:170px">তারিখ<input type="date" id="attDate" value="${ui.attDate}"></label><label style="min-width:150px">শ্রেণি<select id="attCls">${clsOpts(ui.attCls,1)}</select></label></div></div>
+ <div id="attSum" style="margin-bottom:18px"></div>
+ ${ui.att==='qr'?`<div class="cols eq"><section class="panel"><h3>QR স্ক্যানার</h3><div id="qr-reader"><span class="mut" style="padding:20px;text-align:center">${ic('cam')}<br>ক্যামেরা চালু করলে এখানে দেখা যাবে</span></div><p class="stat" id="scanStat" role="status" aria-live="polite">ক্যামেরা চালু করে আইডি কার্ডের QR কোড সামনে ধরুন।</p>
+ <div class="acts"><button class="btn" data-act="scanOn">${ic('cam')}ক্যামেরা চালু করুন</button><button class="btn gh" data-act="scanOff">বন্ধ করুন</button></div>
+ <form id="manForm" style="margin-top:16px;display:flex;gap:8px;align-items:flex-end"><label style="flex:1">QR না থাকলে আইডি লিখুন<input id="manId" placeholder="যেমন RM-2026-001" list="idlist"></label><button class="btn gh">হাজিরা দিন</button></form><datalist id="idlist">${S.students.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</datalist></section>
+ <section class="panel"><h3>আজকের স্ক্যান</h3><div id="attLog" class="list"></div></section></div>`:
+ `<section class="panel"><div class="ph"><h3>${ui.attCls?esc(ui.attCls)+' শ্রেণি':'সব শ্রেণি'} (${bn(st.length)} জন)</h3><button class="btn gd sm" data-act="allPresent">সবাইকে উপস্থিত দিন</button></div><div id="attRoll"></div></section>`}
+ <section class="panel" style="margin-top:18px"><div class="ph"><h3>অনুপস্থিত শিক্ষার্থী</h3><span class="sm mut">অভিভাবককে ফোন করতে নম্বরে চাপুন</span></div><div id="attAbs"></div></section>`}
+function attParts(){const d=ui.attDate,r=S.att[d]||{},st=S.students.filter(s=>!ui.attCls||s.cls===ui.attCls),p=st.filter(s=>r[s.id]),pct=st.length?Math.round(p.length*100/st.length):0;
+ const sum=$('#attSum');if(sum)sum.innerHTML=`<div class="kpis"><div class="kpi"><span>উপস্থিত</span><b style="color:var(--g2)">${bn(p.length)} জন</b></div><div class="kpi"><span>অনুপস্থিত</span><b style="color:var(--red)">${bn(st.length-p.length)} জন</b></div><div class="kpi"><span>উপস্থিতির হার</span><b>${bn(pct)}%</b><div class="meter" style="margin-top:6px"><i style="width:${pct}%"></i></div></div></div>`;
+ const log=$('#attLog');if(log){const l=p.slice().sort((a,b)=>String(r[b.id]).localeCompare(String(r[a.id])));log.innerHTML=l.length?l.map(s=>`<div><span class="who">${avatar(s)}<span>${esc(s.name)}<small>${esc(s.cls)}, রোল ${bn(s.roll)}</small></span></span><span class="badge b-ok">${esc(r[s.id])}</span></div>`).join(''):'<div class="empty"><b>এখনো কেউ স্ক্যান করেনি</b>প্রথম কার্ডটি স্ক্যান করলেই এখানে নাম দেখাবে।</div>'}
+ const roll=$('#attRoll');if(roll)roll.innerHTML=st.map(s=>`<div class="rc-row"><span class="who">${avatar(s)}<span><b>${esc(s.name)}</b><small>${esc(s.cls)}, রোল ${bn(s.roll)}</small></span></span><span class="tog"><button class="p ${r[s.id]?'on':''}" data-mark="${s.id}" data-v="1" aria-pressed="${!!r[s.id]}">উপস্থিত</button><button class="a ${r[s.id]?'':'on'}" data-mark="${s.id}" data-v="0">অনুপস্থিত</button></span></div>`).join('')||'<div class="empty"><b>এই শ্রেণিতে কোনো শিক্ষার্থী নেই</b></div>';
+ const ab=$('#attAbs'),al=st.filter(s=>!r[s.id]);if(ab)ab.innerHTML=al.length?`<div class="scroll"><table class="stack"><thead><tr><th>নাম</th><th>শ্রেণি</th><th class="num">রোল</th><th>অভিভাবক</th></tr></thead><tbody>${al.map(s=>`<tr><td data-l="নাম">${esc(s.name)}</td><td data-l="শ্রেণি">${esc(s.cls)}</td><td data-l="রোল" class="num">${bn(s.roll)}</td><td data-l="অভিভাবক"><a href="tel:${esc(en(s.phone))}">${esc(bn(s.phone))}</a></td></tr>`).join('')}</tbody></table></div>`:'<p class="mut" style="margin:0">আলহামদুলিল্লাহ, আজ সবাই উপস্থিত।</p>'}
+AFTER.attendance=()=>{attParts();$('#attDate').onchange=e=>{ui.attDate=e.target.value||ymd();attParts()};$('#attCls').onchange=e=>{ui.attCls=e.target.value;go()};
+ const mf=$('#manForm');if(mf)mf.onsubmit=e=>{e.preventDefault();markScan($('#manId').value,true);$('#manId').value=''}};
+function nowTime(){return new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'})}
+function setStat(t,k){const e=$('#scanStat');if(e){e.textContent=t;e.className='stat '+(k||'')}}
+function beep(ok){try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=ok?880:220;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.15)}catch(e){}try{navigator.vibrate&&navigator.vibrate(ok?60:[40,40,40])}catch(e){}}
+let lastScan={};
+function markScan(raw,manual){let id=String(raw||'').trim();try{const o=JSON.parse(id);if(o&&o.type==='RMTC_STUDENT')id=o.id}catch(e){}
+ if(!id)return;if(!manual&&lastScan[id]&&Date.now()-lastScan[id]<3000)return;lastScan[id]=Date.now();
+ const s=stu(id);if(!s){setStat('এই আইডি ('+id+') শিক্ষার্থী তালিকায় নেই। আগে শিক্ষার্থী যোগ করুন।','err');beep(0);return}
+ const r=S.att[ui.attDate]??={};if(r[id]){setStat(s.name+' এর হাজিরা আগেই নেওয়া হয়েছে ('+r[id]+')।','warn');beep(0);return}
+ r[id]=nowTime();save();setStat('হাজিরা সফল: '+s.name+', '+s.cls+' শ্রেণি','ok');beep(1);attParts()}
+let scanner=null;
+async function startScan(){if(!window.Html5Qrcode){setStat('স্ক্যানার লোড হয়নি। ইন্টারনেট সংযোগ দেখুন।','err');return}
+ try{if(!scanner)scanner=new Html5Qrcode('qr-reader');await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},markScan,()=>{});setStat('ক্যামেরা চালু আছে। QR কোড ফ্রেমের মধ্যে ধরুন।','ok')}
+ catch(e){scanner=null;setStat('ক্যামেরা চালু করা যায়নি। ওয়েবসাইটটি HTTPS-এ খুলুন এবং ক্যামেরার অনুমতি দিন।','err')}}
+function stopScan(){if(scanner){const s=scanner;scanner=null;try{if(s.isScanning)s.stop().then(()=>s.clear()).catch(()=>{})}catch(e){}}}
+
+/* ---------- id cards ---------- */
+function vId(){const l=S.students.filter(s=>!ui.idcls||s.cls===ui.idcls);if(!ui.idsel.size&&S.students[0])ui.idsel.add(S.students[0].id);
+ const first=stu([...ui.idsel][0]);
+ return head('আইডি কার্ড','কার্ডের QR কোড দিয়েই হাজিরা নেওয়া হয়। এক পাতায় ৪ জনের কার্ড (সামনে ও পেছনে) প্রিন্ট হয়।',`<button class="btn" data-act="printIds">${ic('print')}নির্বাচিত ${bn(ui.idsel.size)}টি কার্ড প্রিন্ট</button>`)+
+ `<div class="cols l"><section class="panel"><div class="ph"><label style="flex:1">শ্রেণি<select id="idCls">${clsOpts(ui.idcls,1)}</select></label></div>
+ <div class="acts" style="margin-bottom:10px"><button class="btn gh sm" data-act="idAll">সবাই নির্বাচন</button><button class="btn gh sm" data-act="idNone">বাদ দিন</button></div>
+ <div class="pick">${l.map(s=>`<label><input type="checkbox" data-idp="${s.id}" ${ui.idsel.has(s.id)?'checked':''}>${avatar(s)}<span>${esc(s.name)}<small class="mut" style="display:block;font-size:13px">${esc(s.id)}, ${esc(s.cls)}</small></span></label>`).join('')||'<div class="empty">কোনো শিক্ষার্থী নেই</div>'}</div></section>
+ <section class="panel"><h3>প্রিভিউ${first?': '+esc(first.name):''}</h3>${first?`<div class="cardpair">${idFront(first)}${idBack(first)}</div><p class="sm mut" style="margin-top:14px">ছবি যোগ করতে শিক্ষার্থীর তথ্য সম্পাদনা করুন। কার্ডের মাপ ৮৫.৬ × ৫৪ মিমি (সাধারণ PVC কার্ডের মাপ)।</p>`:'<div class="empty"><b>কোনো শিক্ষার্থী নির্বাচন করা হয়নি</b></div>'}</section></div>`}
+AFTER.idcards=()=>{$('#idCls').onchange=e=>{ui.idcls=e.target.value;go()}};
+function printIds(ids){const l=ids.map(stu).filter(Boolean);if(!l.length){toast('অন্তত একজন শিক্ষার্থী নির্বাচন করুন','err');return}
+ const pages=[];for(let i=0;i<l.length;i+=4)pages.push(l.slice(i,i+4));printNow(pages.map(p=>`<div class="doc"><div class="sheet">${p.map(s=>idFront(s)+idBack(s)).join('')}</div></div>`).join(''))}
+
+/* ---------- fees ---------- */
+function monthsList(){const a=[];const t=new Date();for(let k=-6;k<=2;k++)a.push(ym(new Date(t.getFullYear(),t.getMonth()+k,1)));return a}
+function vFee(){const m=ui.fm,paid=new Set(S.pays.filter(p=>p.month===m).map(p=>p.id)),dues=S.students.filter(s=>!paid.has(s.id)),coll=S.pays.filter(p=>p.month===m).reduce((x,p)=>x+Number(p.paid),0),exp=S.students.length*S.settings.fee;
+ const pre=ui.payFor||'';
+ return head('বেতন ও হিসাব','বেতন আদায় করুন, রসিদ প্রিন্ট করুন, বকেয়া দেখুন।',`<label style="min-width:190px">মাস<select id="fm">${monthsList().map(k=>`<option value="${k}" ${k===m?'selected':''}>${mname(k)}</option>`).join('')}</select></label>`)+
+ `<div class="kpis" style="margin-bottom:18px"><div class="kpi"><span>${mname(m)} আদায়</span><b style="color:var(--g2)">${taka(coll)}</b></div><div class="kpi"><span>প্রত্যাশিত</span><b>${taka(exp)}</b></div><div class="kpi"><span>বকেয়া শিক্ষার্থী</span><b style="color:var(--red)">${bn(dues.length)} জন</b></div><div class="kpi"><span>আদায়ের হার</span><b>${bn(exp?Math.round(coll*100/exp):0)}%</b><div class="meter" style="margin-top:6px"><i style="width:${exp?Math.min(100,coll*100/exp):0}%"></i></div></div></div>
+ <div class="cols"><form class="panel" id="payForm"><h3>বেতন আদায়</h3><div class="grid">
+ <label>শিক্ষার্থী <span class="req">*</span><select id="p_stu"><option value="">নির্বাচন করুন</option>${S.settings.classes.map(c=>`<optgroup label="${esc(c)}">${S.students.filter(s=>s.cls===c).map(s=>`<option value="${s.id}" ${s.id===pre?'selected':''}>${esc(s.name)} (রোল ${bn(s.roll)})${paid.has(s.id)?' ✓':''}</option>`).join('')}</optgroup>`).join('')}</select></label>
+ <label>মাস<select id="p_month">${monthsList().map(k=>`<option value="${k}" ${k===m?'selected':''}>${mname(k)}</option>`).join('')}</select></label></div>
+ <div class="grid" style="margin-top:14px"><label>মাসিক বেতন<input id="p_fee" type="number" min="0" value="${S.settings.fee}"></label><label>ভর্তি/সেশন ফি<input id="p_adm" type="number" min="0" value="0"></label><label>পরীক্ষার ফি<input id="p_exam" type="number" min="0" value="0"></label><label>অন্যান্য<input id="p_oth" type="number" min="0" value="0"></label><label>ছাড় (যদি থাকে)<input id="p_disc" type="number" min="0" value="0"></label><label>জমা দিচ্ছেন<input id="p_paid" type="number" min="0" value="${S.settings.fee}"></label></div>
+ <div class="ph" style="margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)"><span>মোট <b id="p_tot" style="font-size:22px;margin-left:6px">${taka(S.settings.fee)}</b> <span class="sm mut" id="p_due"></span></span><button class="btn">${ic('wallet')}আদায় করুন ও রসিদ</button></div><p class="stat err" id="payErr" hidden></p></form>
+ <section class="panel"><div class="ph"><h3>${mname(m)} বকেয়া</h3><span class="badge b-no">${bn(dues.length)} জন</span></div><div class="list" style="max-height:420px;overflow-y:auto">${dues.map(s=>`<div><span class="who">${avatar(s)}<span>${esc(s.name)}<small>${esc(s.cls)}, ${esc(bn(s.phone))}</small></span></span><button class="btn gh sm" data-pay="${s.id}">আদায়</button></div>`).join('')||'<p class="mut">এ মাসে কোনো বকেয়া নেই।</p>'}</div></section></div>
+ <section class="panel" style="margin-top:18px"><h3>আদায়ের তালিকা (${mname(m)})</h3>${S.pays.filter(p=>p.month===m).length?`<div class="scroll"><table class="stack"><thead><tr><th>রসিদ</th><th>তারিখ</th><th>শিক্ষার্থী</th><th>শ্রেণি</th><th class="num">টাকা</th><th></th></tr></thead><tbody>${S.pays.filter(p=>p.month===m).reverse().map(p=>{const s=stu(p.id)||{};return `<tr><td data-l="রসিদ">${bn(String(p.no).padStart(4,'0'))}</td><td data-l="তারিখ">${fdate(p.date)}</td><td data-l="শিক্ষার্থী">${esc(s.name||p.id)}</td><td data-l="শ্রেণি">${esc(s.cls||'')}</td><td data-l="টাকা" class="num">${taka(p.paid)}</td><td><span class="acts"><button class="btn gh sm" data-rcpt="${p.no}" data-mode="pos">POS</button><button class="btn gh sm" data-rcpt="${p.no}" data-mode="a4">A4</button></span></td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty"><b>এ মাসে এখনো কোনো আদায় হয়নি</b>বাঁ দিকের ফর্ম থেকে প্রথম বেতন আদায় করুন।</div>'}</section>`}
+AFTER.fees=()=>{ui.payFor='';$('#fm').onchange=e=>{ui.fm=e.target.value;go()};const ids=['p_fee','p_adm','p_exam','p_oth','p_disc'];
+ const tot=()=>ids.slice(0,4).reduce((a,i)=>a+Number($('#'+i).value||0),0)-Number($('#p_disc').value||0);
+ const upd=e=>{const t=tot();if(e&&e.target.id!=='p_paid')$('#p_paid').value=t;$('#p_tot').textContent=taka(t);const d=t-Number($('#p_paid').value||0);$('#p_due').textContent=d>0?'(বকেয়া থাকবে '+taka(d)+')':''};
+ [...ids,'p_paid'].forEach(i=>$('#'+i).oninput=upd);
+ $('#payForm').onsubmit=e=>{e.preventDefault();const id=$('#p_stu').value,er=$('#payErr');if(!id){er.hidden=false;er.textContent='শিক্ষার্থী নির্বাচন করুন।';return}
+  const mo=$('#p_month').value;if(S.pays.some(p=>p.id===id&&p.month===mo)&&!e.submitter?.dataset.force){er.hidden=false;er.innerHTML='এই শিক্ষার্থীর '+mname(mo)+' মাসের বেতন আগেই জমা হয়েছে। আবার নিতে চাইলে <button class="btn gh sm" data-force="1">তবুও আদায় করুন</button>';return}
+  const items=[['মাসিক বেতন',$('#p_fee').value],['ভর্তি/সেশন ফি',$('#p_adm').value],['পরীক্ষার ফি',$('#p_exam').value],['অন্যান্য',$('#p_oth').value]].filter(x=>Number(x[1])>0).map(x=>[x[0],Number(x[1])]);
+  const disc=Number($('#p_disc').value||0);if(disc)items.push(['ছাড়',-disc]);
+  const p={no:(S.pays.reduce((a,b)=>Math.max(a,b.no),0)+1),id,month:mo,items,paid:Number($('#p_paid').value||0),date:ymd()};S.pays.push(p);save();toast('আদায় সম্পন্ন, রসিদ নং '+bn(p.no));
+  dialog('রসিদ তৈরি হয়েছে',`<div style="border:1px dashed var(--line);border-radius:12px;padding:14px" class="sm">${receiptHtml(p).replace(/<div class="dhd">[\s\S]*?<\/div><\/div>/,'')}</div>`,`<button class="btn gh" data-close>বন্ধ করুন</button><button class="btn gh" data-rcpt="${p.no}" data-mode="a4">A4 প্রিন্ট</button><button class="btn" data-rcpt="${p.no}" data-mode="pos">${ic('print')}POS রসিদ প্রিন্ট</button>`);go()};
+upd()};
+
+/* ---------- exams ---------- */
+const grade=p=>p>=80?['মুমতায','b-ok']:p>=65?['জায়্যিদ জিদ্দান','b-ok']:p>=50?['জায়্যিদ','b-gd']:p>=33?['মাকবুল','b-gd']:['রাসিব','b-no'];
+function examRows(){const k=ui.exam+'|'+ui.examCls,mk=S.marks[k]||{},subs=S.settings.subjects;
+ return S.students.filter(s=>s.cls===ui.examCls).map(s=>{const m=mk[s.id]||{},vals=subs.map(x=>m[x]),f=vals.filter(v=>v!==undefined&&v!=='');const tot=f.reduce((a,b)=>a+Number(b),0);const fail=f.some(v=>Number(v)<33);return{s,m,tot,avg:subs.length?tot/subs.length:0,done:f.length===subs.length,fail}}).map((r,i,a)=>r)}
+function vExam(){ui.exam=ui.exam||S.settings.exams[0];ui.examCls=ui.examCls||(S.marks['প্রথম সাময়িক|প্রথম']?'প্রথম':S.settings.classes[0]);
+ const rows=examRows(),subs=S.settings.subjects,rank=rows.filter(r=>r.done&&!r.fail).sort((a,b)=>b.tot-a.tot).map(r=>r.s.id);
+ return head('পরীক্ষা ও ফলাফল','নম্বর লিখলেই মোট, গড়, বিভাগ ও মেধাক্রম নিজে থেকে হিসাব হয়। কোনো বিষয়ে ৩৩-এর কম হলে রাসিব।',`<button class="btn gh" data-act="printTab">${ic('print')}টেবুলেশন শিট</button>`)+
+ `<section class="panel"><div class="ph"><div class="acts"><label>পরীক্ষা<select id="exN">${S.settings.exams.map(x=>`<option ${x===ui.exam?'selected':''}>${esc(x)}</option>`).join('')}</select></label><label>শ্রেণি<select id="exC">${clsOpts(ui.examCls)}</select></label></div><span class="sm mut">প্রতিটি বিষয় ১০০ নম্বরের। নম্বর লিখলেই সংরক্ষণ হয়।</span></div>
+ ${rows.length?`<div class="scroll"><table><thead><tr><th>শিক্ষার্থী</th>${subs.map(x=>`<th style="text-align:center">${esc(x)}</th>`).join('')}<th class="num">মোট</th><th class="num">গড়</th><th>বিভাগ</th><th class="num">মেধা</th><th></th></tr></thead><tbody>${rows.map(r=>{const g=r.done?(r.fail?['রাসিব','b-no']:grade(r.avg)):null,pos=rank.indexOf(r.s.id);return `<tr><td><span class="who">${avatar(r.s)}<span>${esc(r.s.name)}<small>রোল ${bn(r.s.roll)}</small></span></span></td>${subs.map(x=>`<td style="text-align:center"><input class="mk ${r.m[x]!==undefined&&r.m[x]!==''&&Number(r.m[x])<33?'bad':''}" inputmode="numeric" data-mk="${r.s.id}" data-sub="${esc(x)}" value="${r.m[x]!==undefined?bn(r.m[x]):''}" aria-label="${esc(r.s.name)}, ${esc(x)}"></td>`).join('')}<td class="num"><b>${bn(r.tot)}</b></td><td class="num">${bn(r.avg.toFixed(1))}</td><td>${g?`<span class="badge ${g[1]}">${g[0]}</span>`:'<span class="sm mut">অসম্পূর্ণ</span>'}</td><td class="num">${pos>=0?bn(pos+1):'—'}</td><td><button class="btn gh sm" data-ms="${r.s.id}">মার্কশিট</button></td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty"><b>এই শ্রেণিতে কোনো শিক্ষার্থী নেই</b></div>'}</section>`}
+AFTER.exams=()=>{$('#exN').onchange=e=>{ui.exam=e.target.value;go()};$('#exC').onchange=e=>{ui.examCls=e.target.value;go()};
+ $$('[data-mk]').forEach(i=>{i.onchange=()=>{let v=en(i.value).replace(/[^\d.]/g,'');if(v!==''&&Number(v)>100)v='100';const k=ui.exam+'|'+ui.examCls;((S.marks[k]??={})[i.dataset.mk]??={})[i.dataset.sub]=v;save();
+  setTimeout(()=>{const a=document.activeElement,key=a&&a.dataset&&a.dataset.mk?[a.dataset.mk,a.dataset.sub]:null,y=scrollY;go();scrollTo(0,y);if(key){const n=$$('[data-mk]').find(x=>x.dataset.mk===key[0]&&x.dataset.sub===key[1]);n&&n.focus()}},0)};
+ i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const all=$$('[data-mk]'),n=all[all.indexOf(i)+1];if(n)n.focus();else i.blur()}}})};
+function marksheet(id){const r=examRows().find(x=>x.s.id===id);if(!r)return;const subs=S.settings.subjects,g=r.fail?['রাসিব']:grade(r.avg);
+ return `<div class="doc">${docHead()}<h2>${esc(ui.exam)}: মার্কশিট</h2><table><tr><th>নাম</th><td>${esc(r.s.name)}</td><th>আইডি</th><td>${esc(r.s.id)}</td></tr><tr><th>শ্রেণি</th><td>${esc(r.s.cls)}</td><th>রোল</th><td>${bn(r.s.roll)}</td></tr></table><table><tr><th>বিষয়</th><th>পূর্ণমান</th><th>প্রাপ্ত নম্বর</th></tr>${subs.map(x=>`<tr><td>${esc(x)}</td><td>১০০</td><td>${bn(r.m[x]??'')}</td></tr>`).join('')}<tr><th>মোট</th><th>${bn(subs.length*100)}</th><th>${bn(r.tot)}</th></tr><tr><th>গড়</th><td colspan="2">${bn(r.avg.toFixed(2))}</td></tr><tr><th>বিভাগ</th><td colspan="2"><b>${g[0]}</b></td></tr></table><div class="signs"><span>শ্রেণি শিক্ষক</span><span>পরীক্ষা নিয়ন্ত্রক</span><span>মুহতামিম</span></div></div>`}
+
+/* ---------- hifz ---------- */
+function vHifz(){const l=S.students.filter(s=>s.cls==='হিফজ').length?S.students.filter(s=>s.cls==='হিফজ'):S.students;if(!ui.hz||!stu(ui.hz))ui.hz=l[0]&&l[0].id;const s=stu(ui.hz),h=s?(S.hifz[s.id]??={done:[],log:[]}):null;
+ return head('হিফজ অগ্রগতি','প্রতিদিনের সবক, সাবকি ও মানজিল লিখে রাখুন। পারা সম্পন্ন হলে নিচের ঘরে চাপ দিন।')+
+ (s?`<div class="cols r"><section class="panel"><h3>শিক্ষার্থী</h3><div class="list">${l.map(x=>{const n=((S.hifz[x.id]||{}).done||[]).length;return `<div class="sel ${x.id===ui.hz?'on':''}" data-hz="${x.id}" tabindex="0" style="padding:10px;border-radius:10px"><span class="who" style="flex:1">${avatar(x)}<span style="flex:1">${esc(x.name)}<div class="meter" style="margin-top:6px"><i style="width:${n/30*100}%"></i></div></span></span><span class="num sm">${bn(n)}/৩০</span></div>`}).join('')}</div></section>
+ <div class="stack18"><section class="panel"><div class="ph"><span class="who">${avatar(s,'av" style="width:56px;height:56px')}<span><h2>${esc(s.name)}</h2><small>${esc(s.id)}</small></span></span><div class="ring" style="--p:${h.done.length/30*100}"><div><span><b>${bn(h.done.length)}</b><br><span class="sm mut">পারা সম্পন্ন</span></span></div></div></div>
+ <div class="juz">${Array.from({length:30},(_,i)=>i+1).map(n=>`<button class="${h.done.includes(n)?'on':''} ${!h.done.includes(n)&&n===Math.max(0,...h.done)+1?'cur':''}" data-juz="${n}" aria-pressed="${h.done.includes(n)}" title="পারা ${bn(n)}">${bn(n)}</button>`).join('')}</div><p class="sm mut" style="margin:10px 0 0">সবুজ: মুখস্থ সম্পন্ন। সোনালি দাগ: এখন যে পারা চলছে।</p></section>
+ <form class="panel" id="hzForm"><h3>আজকের পড়া</h3><div class="grid"><label>তারিখ<input type="date" id="hz_d" value="${ymd()}"></label><label>সবক (নতুন পড়া)<input id="hz_s" placeholder="যেমন পারা ১৩, পৃষ্ঠা ২"></label><label>সাবকি<input id="hz_q" placeholder="গত কয়েক দিনের পড়া"></label><label>মানজিল<input id="hz_m" placeholder="পুরনো পারা"></label><label>ভুলের সংখ্যা<input id="hz_e" inputmode="numeric"></label><label>মন্তব্য<input id="hz_n"></label></div><button class="btn" style="margin-top:14px">সংরক্ষণ করুন</button></form>
+ <section class="panel"><h3>পড়ার খাতা</h3>${h.log.length?`<div class="scroll"><table class="stack"><thead><tr><th>তারিখ</th><th>সবক</th><th>সাবকি</th><th>মানজিল</th><th class="num">ভুল</th><th>মন্তব্য</th></tr></thead><tbody>${h.log.slice(0,15).map(r=>`<tr><td data-l="তারিখ">${fdate(r.d)}</td><td data-l="সবক">${esc(r.sabak)}</td><td data-l="সাবকি">${esc(r.sabqi)}</td><td data-l="মানজিল">${esc(r.manzil)}</td><td data-l="ভুল" class="num">${bn(r.err)}</td><td data-l="মন্তব্য">${esc(r.note)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><b>এখনো কোনো পড়া লেখা হয়নি</b>উপরের ফর্মে আজকের সবক লিখুন।</div>'}</section></div></div>`:'<div class="panel empty"><b>কোনো শিক্ষার্থী নেই</b></div>')}
+AFTER.hifz=()=>{const f=$('#hzForm');if(f)f.onsubmit=e=>{e.preventDefault();const h=S.hifz[ui.hz];h.log.unshift({d:$('#hz_d').value||ymd(),sabak:$('#hz_s').value,sabqi:$('#hz_q').value,manzil:$('#hz_m').value,err:en($('#hz_e').value),note:$('#hz_n').value});h.log.sort((a,b)=>b.d.localeCompare(a.d));save();toast('আজকের পড়া সংরক্ষণ হয়েছে');go()}};
+
+/* ---------- notices ---------- */
+function vNot(){return head('নোটিশ','নোটিশ লিখুন, প্রিন্ট করুন বা WhatsApp-এ অভিভাবকদের পাঠান।')+
+ `<div class="cols eq"><form class="panel" id="nForm"><h3>নতুন নোটিশ</h3><label>বিষয় <span class="req">*</span><input id="n_t" required></label><label style="margin-top:14px">তারিখ<input id="n_d" type="date" value="${ymd()}"></label><label style="margin-top:14px">বিস্তারিত <span class="req">*</span><textarea id="n_b" style="min-height:160px">সকল শিক্ষার্থী ও অভিভাবকদের অবগতির জন্য জানানো যাচ্ছে যে, </textarea></label><button class="btn" style="margin-top:14px">নোটিশ প্রকাশ করুন</button></form>
+ <section class="panel"><h3>নোটিশ বোর্ড</h3><div class="list">${S.notices.map(n=>`<div style="display:block"><div class="ph" style="margin:0 0 4px"><b>${esc(n.title)}</b><span class="badge b-gd">${fdate(n.date)}</span></div><p style="margin:0 0 10px;white-space:pre-wrap" class="sm">${esc(n.body)}</p><div class="acts"><button class="btn gh sm" data-np="${n.id}">${ic('print')}প্রিন্ট</button><a class="btn gh sm" href="https://wa.me/?text=${encodeURIComponent(S.settings.name+'\n\n'+n.title+'\n'+n.body)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn gh sm" data-ncopy="${n.id}">কপি</button><button class="btn dg sm" data-ndel="${n.id}">মুছুন</button></div></div>`).join('')||'<div class="empty"><b>বোর্ডে কোনো নোটিশ নেই</b>বাঁ দিকে প্রথম নোটিশটি লিখুন।</div>'}</div></section></div>`}
+AFTER.notices=()=>{$('#nForm').onsubmit=e=>{e.preventDefault();const t=$('#n_t').value.trim(),b=$('#n_b').value.trim();if(!t||!b){toast('বিষয় ও বিস্তারিত লিখুন','err');return}S.notices.unshift({id:Date.now(),title:t,date:$('#n_d').value||ymd(),body:b});save();toast('নোটিশ প্রকাশ হয়েছে');go()}};
+
+/* ---------- reports ---------- */
+function repData(m){const days=workDays(m),st=S.students;
+ const cls=S.settings.classes.map(c=>{const l=st.filter(s=>s.cls===c),tot=l.length*days.length,p=days.reduce((a,d)=>a+l.filter(s=>S.att[d][s.id]).length,0);return{c,n:l.length,pct:tot?p*100/tot:0}}).filter(x=>x.n);
+ const abs=st.map(s=>({s,a:days.filter(d=>!S.att[d][s.id]).length})).sort((a,b)=>b.a-a.a).slice(0,5);
+ const coll=S.pays.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.paid),0),exp=st.length*S.settings.fee;return{days,cls,abs,coll,exp}}
+function vRep(){const m=ui.rm,d=repData(m);
+ return head('মাসিক রিপোর্ট',`${mname(m)}: ${bn(d.days.length)} কর্মদিবসের হিসাব`,`<label style="min-width:190px">মাস<select id="rm">${monthsList().map(k=>`<option value="${k}" ${k===m?'selected':''}>${mname(k)}</option>`).join('')}</select></label><button class="btn" data-act="printRep">${ic('print')}রিপোর্ট প্রিন্ট</button>`)+
+ `<div class="cols eq"><section class="panel"><h3>শ্রেণিভিত্তিক উপস্থিতি</h3>${d.cls.map(x=>`<div style="display:grid;grid-template-columns:90px minmax(0,1fr) 52px;gap:10px;align-items:center;padding:8px 0"><span>${esc(x.c)}</span><div class="meter" style="height:14px"><i style="width:${x.pct}%;${x.pct<75?'background:var(--gold)':''}"></i></div><b class="num">${bn(Math.round(x.pct))}%</b></div>`).join('')||'<p class="mut">এই মাসে কোনো হাজিরা নেই।</p>'}<p class="sm mut">সোনালি বার: উপস্থিতি ৭৫%-এর নিচে।</p></section>
+ <section class="panel"><h3>বেতন আদায়</h3><div class="big" style="color:var(--g2);font-size:44px">${taka(d.coll)}</div><p class="mut" style="margin:6px 0 12px">প্রত্যাশিত ${taka(d.exp)} এর মধ্যে, বাকি ${taka(Math.max(0,d.exp-d.coll))}</p><div class="meter" style="height:16px"><i style="width:${d.exp?Math.min(100,d.coll*100/d.exp):0}%"></i></div>
+ <h3 style="margin:22px 0 8px">সবচেয়ে বেশি অনুপস্থিত</h3><div class="list">${d.abs.filter(x=>x.a).map(x=>`<div><span class="who">${avatar(x.s)}<span>${esc(x.s.name)}<small>${esc(x.s.cls)}, ${esc(bn(x.s.phone))}</small></span></span><span class="badge b-no">${bn(x.a)} দিন</span></div>`).join('')||'<p class="mut">কেউ অনুপস্থিত ছিল না।</p>'}</div></section></div>`}
+AFTER.reports=()=>{$('#rm').onchange=e=>{ui.rm=e.target.value;go()}};
+
+/* ---------- settings ---------- */
+function vSet(){const s=S.settings;return head('সেটিংস','মাদরাসার তথ্য, শ্রেণি, বিষয় ও বেতন ঠিক করুন। তথ্যের ব্যাকআপ রাখুন।')+
+ `<div class="cols"><form class="panel" id="setForm"><fieldset><legend>মাদরাসার তথ্য</legend><div class="grid"><label style="grid-column:1/-1">নাম<input id="s_name" value="${esc(s.name)}"></label><label style="grid-column:1/-1">ঠিকানা<input id="s_addr" value="${esc(s.address)}"></label><label>মোবাইল<input id="s_phone" value="${esc(s.phone)}"></label><label>স্থাপিত<input id="s_est" value="${esc(s.est)}"></label><label>শিক্ষাবর্ষ<input id="s_ses" value="${esc(s.session)}"></label><label>মাসিক বেতন (টাকা)<input id="s_fee" type="number" value="${s.fee}"></label></div>
+ <div class="photo-in" style="margin-top:14px"><img src="${s.logo||LOGO}" alt="লোগো" style="width:64px;height:72px;object-fit:contain;border:1px solid var(--line);border-radius:12px;background:#fff;padding:4px"><label style="flex:1">লোগো পরিবর্তন<input type="file" id="s_logo" accept="image/*"></label></div></fieldset>
+ <fieldset><legend>শ্রেণি, বিষয় ও পরীক্ষা</legend><label>শ্রেণিগুলো (কমা দিয়ে আলাদা করুন)<input id="s_cls" value="${esc(s.classes.join(', '))}"></label><label style="margin-top:14px">বিষয়সমূহ<input id="s_sub" value="${esc(s.subjects.join(', '))}"></label><label style="margin-top:14px">পরীক্ষার নাম<input id="s_ex" value="${esc(s.exams.join(', '))}"></label></fieldset>
+ <button class="btn">সেটিংস সংরক্ষণ</button></form>
+ <div class="stack18"><section class="panel"><h3>ব্যাকআপ</h3><p class="sm mut" style="margin-top:0">সব তথ্য এখন শুধু এই ব্রাউজারে আছে। নিয়মিত ব্যাকআপ ফাইল নামিয়ে রাখুন, ফোন বা কম্পিউটার বদলালে সেটি দিয়ে ফেরত আনতে পারবেন।</p><div class="acts"><button class="btn" data-act="backup">${ic('dl')}ব্যাকআপ নামান</button><label class="btn gh" style="color:var(--ink)">ব্যাকআপ থেকে ফেরত<input type="file" id="restore" accept=".json" hidden></label></div></section>
+ <section class="panel"><h3>তথ্য মুছুন</h3><p class="sm mut" style="margin-top:0">নমুনা বা পুরো তথ্য মুছে নতুন করে শুরু করতে পারেন। মোছার আগে ব্যাকআপ নিন।</p><div class="acts">${S.sample?'<button class="btn gh" data-act="clearSample">নমুনা তথ্য মুছুন</button>':''}<button class="btn dg" data-act="wipe">সব তথ্য মুছুন</button></div></section></div></div>`}
+AFTER.setup=()=>{let logo=S.settings.logo;$('#s_logo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),k=Math.min(1,200/Math.max(im.width,im.height));c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);logo=c.toDataURL('image/png');$('#setForm img').src=logo};im.src=r.result};r.readAsDataURL(f)};
+ const sp=v=>v.split(/[,،]/).map(x=>x.trim()).filter(Boolean);
+ $('#setForm').onsubmit=e=>{e.preventDefault();Object.assign(S.settings,{name:$('#s_name').value.trim()||S.settings.name,address:$('#s_addr').value.trim(),phone:$('#s_phone').value.trim(),est:$('#s_est').value.trim(),session:en($('#s_ses').value.trim()),fee:Number($('#s_fee').value||0),classes:sp($('#s_cls').value),subjects:sp($('#s_sub').value),exams:sp($('#s_ex').value),logo});save();toast('সেটিংস সংরক্ষণ হয়েছে');go()};
+ $('#restore').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.settings||!Array.isArray(d.students))throw 0;confirmBox('ব্যাকআপের '+bn(d.students.length)+' জন শিক্ষার্থীর তথ্য দিয়ে বর্তমান সব তথ্য বদলে যাবে।',()=>{S=d;save();toast('ব্যাকআপ থেকে তথ্য ফেরত আনা হয়েছে');go()},'ফেরত আনুন')}catch(x){toast('এটি সঠিক ব্যাকআপ ফাইল নয়','err')}})}};
+
+/* ---------- actions ---------- */
+const ACT={
+clearSample:()=>confirmBox('নমুনা শিক্ষার্থী, হাজিরা, বেতন ও নোটিশ মুছে যাবে। মাদরাসার তথ্য ও সেটিংস থাকবে।',()=>{const s=S.settings;S=fresh();S.settings=s;save();toast('নমুনা তথ্য মুছে ফেলা হয়েছে');location.hash='admission';go()}),
+wipe:()=>confirmBox('সব শিক্ষার্থী, হাজিরা, বেতন, ফলাফল ও সেটিংস স্থায়ীভাবে মুছে যাবে।',()=>{S=fresh();save();toast('সব তথ্য মুছে ফেলা হয়েছে');go()}),
+backup:()=>download('madrasa-backup-'+ymd()+'.json',JSON.stringify(S),'application/json'),
+newAdm:()=>{ui.edit=null},cancelEdit:()=>{ui.edit=null;location.hash='students'},admPrint:()=>saveAdm(true),
+scanOn:startScan,scanOff:()=>{stopScan();setStat('স্ক্যান বন্ধ আছে।')},
+allPresent:()=>{const r=S.att[ui.attDate]??={};S.students.filter(s=>!ui.attCls||s.cls===ui.attCls).forEach(s=>{if(!r[s.id])r[s.id]=nowTime()});save();attParts();toast('সবাইকে উপস্থিত দেওয়া হয়েছে')},
+csvAtt:()=>{const r=S.att[ui.attDate]||{};download('attendance-'+ui.attDate+'.csv','﻿'+['তারিখ,আইডি,নাম,শ্রেণি,রোল,অবস্থা,সময়',...S.students.filter(s=>!ui.attCls||s.cls===ui.attCls).map(s=>[ui.attDate,s.id,s.name,s.cls,s.roll,r[s.id]?'উপস্থিত':'অনুপস্থিত',r[s.id]||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))].join('\n'),'text/csv')},
+csvStu:()=>download('students.csv','﻿'+['আইডি,নাম,শ্রেণি,রোল,পিতা,মাতা,মোবাইল,ঠিকানা',...S.students.map(s=>[s.id,s.name,s.cls,s.roll,s.father,s.mother,s.phone,s.address].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(','))].join('\n'),'text/csv'),
+printAtt:()=>{const r=S.att[ui.attDate]||{},l=S.students.filter(s=>!ui.attCls||s.cls===ui.attCls);printNow(`<div class="doc">${docHead()}<h2>হাজিরা প্রতিবেদন: ${fdate(ui.attDate)}${ui.attCls?', '+esc(ui.attCls)+' শ্রেণি':''}</h2><p>উপস্থিত ${bn(l.filter(s=>r[s.id]).length)} জন, অনুপস্থিত ${bn(l.filter(s=>!r[s.id]).length)} জন</p><table><tr><th>রোল</th><th>নাম</th><th>শ্রেণি</th><th>অবস্থা</th><th>সময়</th></tr>${l.map(s=>`<tr><td>${bn(s.roll)}</td><td>${esc(s.name)}</td><td>${esc(s.cls)}</td><td>${r[s.id]?'উপস্থিত':'অনুপস্থিত'}</td><td>${esc(r[s.id]||'')}</td></tr>`).join('')}</table><div class="signs"><span>শ্রেণি শিক্ষক</span><span>মুহতামিম</span></div></div>`)},
+printIds:()=>printIds([...ui.idsel]),idAll:()=>{S.students.filter(s=>!ui.idcls||s.cls===ui.idcls).forEach(s=>ui.idsel.add(s.id));go()},idNone:()=>{ui.idsel.clear();go()},
+printTab:()=>{const rows=examRows(),subs=S.settings.subjects;printNow(`<div class="doc">${docHead()}<h2>${esc(ui.exam)}: টেবুলেশন শিট, ${esc(ui.examCls)} শ্রেণি</h2><table><tr><th>রোল</th><th>নাম</th>${subs.map(x=>`<th>${esc(x)}</th>`).join('')}<th>মোট</th><th>বিভাগ</th></tr>${rows.map(r=>`<tr><td>${bn(r.s.roll)}</td><td>${esc(r.s.name)}</td>${subs.map(x=>`<td>${bn(r.m[x]??'')}</td>`).join('')}<td>${bn(r.tot)}</td><td>${r.done?(r.fail?'রাসিব':grade(r.avg)[0]):''}</td></tr>`).join('')}</table><div class="signs"><span>পরীক্ষা নিয়ন্ত্রক</span><span>মুহতামিম</span></div></div>`)},
+printRep:()=>{const d=repData(ui.rm);printNow(`<div class="doc">${docHead()}<h2>মাসিক রিপোর্ট: ${mname(ui.rm)}</h2><table><tr><th>মোট শিক্ষার্থী</th><td>${bn(S.students.length)} জন</td><th>কর্মদিবস</th><td>${bn(d.days.length)} দিন</td></tr><tr><th>বেতন আদায়</th><td>${taka(d.coll)}</td><th>বাকি</th><td>${taka(Math.max(0,d.exp-d.coll))}</td></tr></table><h3>শ্রেণিভিত্তিক উপস্থিতি</h3><table><tr><th>শ্রেণি</th><th>শিক্ষার্থী</th><th>উপস্থিতির হার</th></tr>${d.cls.map(x=>`<tr><td>${esc(x.c)}</td><td>${bn(x.n)}</td><td>${bn(Math.round(x.pct))}%</td></tr>`).join('')}</table><div class="signs"><span>প্রস্তুতকারী</span><span>মুহতামিম</span></div></div>`)}};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act],[data-close],[data-prof],[data-edit],[data-del],[data-pay],[data-idone],[data-cls],[data-tab],[data-mark],[data-juz],[data-hz],[data-rcpt],[data-ms],[data-np],[data-ndel],[data-ncopy],[data-idp]');if(!t)return;const d=t.dataset;
+ if(d.act&&ACT[d.act]){ACT[d.act]();return}
+ if('close' in d){closeDlg();return}
+ if(d.prof){profile(d.prof);return}
+ if(d.edit){closeDlg();ui.edit=d.edit;location.hash='admission';go();return}
+ if(d.del){const s=stu(d.del);confirmBox(esc(s.name)+' এর সব তথ্য (হাজিরা ও বেতনের ইতিহাসসহ) মুছে যাবে।',()=>{S.students=S.students.filter(x=>x.id!==d.del);S.pays=S.pays.filter(p=>p.id!==d.del);delete S.hifz[d.del];save();toast('শিক্ষার্থী মুছে ফেলা হয়েছে');go()});return}
+ if(d.pay){closeDlg();ui.payFor=d.pay;if(location.hash==='#fees'){const sel=$('#p_stu');sel.value=d.pay;sel.scrollIntoView({behavior:'smooth',block:'center'});sel.focus()}else{location.hash='fees'}return}
+ if(d.idone){closeDlg();ui.idsel=new Set([d.idone]);location.hash='idcards';go();return}
+ if('cls' in d&&t.classList.contains('chip')){ui.cls=d.cls;go();return}
+ if(d.tab){stopScan();ui.att=d.tab;go();return}
+ if(d.mark){const r=S.att[ui.attDate]??={};if(d.v==='1'){if(!r[d.mark])r[d.mark]=nowTime()}else delete r[d.mark];save();attParts();return}
+ if(d.juz){const h=S.hifz[ui.hz],n=+d.juz;h.done=h.done.includes(n)?h.done.filter(x=>x!==n):[...h.done,n].sort((a,b)=>a-b);save();go();return}
+ if(d.hz){ui.hz=d.hz;go();return}
+ if(d.rcpt){const p=S.pays.find(x=>x.no==d.rcpt);if(p)printNow(receiptHtml(p),d.mode);return}
+ if(d.ms){printNow(marksheet(d.ms));return}
+ if(d.np){const n=S.notices.find(x=>x.id==d.np);printNow(`<div class="doc">${docHead()}<h2>নোটিশ</h2><p style="text-align:right">তারিখ: ${fdate(n.date)}</p><h3>বিষয়: ${esc(n.title)}</h3><p style="white-space:pre-wrap;line-height:2">${esc(n.body)}</p><div class="signs"><span></span><span>মুহতামিম</span></div></div>`);return}
+ if(d.ncopy){const n=S.notices.find(x=>x.id==d.ncopy);navigator.clipboard.writeText(S.settings.name+'\n\n'+n.title+'\n'+n.body).then(()=>toast('নোটিশ কপি হয়েছে'),()=>toast('কপি করা যায়নি','err'));return}
+ if(d.ndel){confirmBox('এই নোটিশটি মুছে যাবে।',()=>{S.notices=S.notices.filter(x=>x.id!=d.ndel);save();go()});return}
+ if(d.idp){t.checked?ui.idsel.add(d.idp):ui.idsel.delete(d.idp);go();return}
+});
+document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-hz]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click()}});
+/* global search */
+const q=$('#q'),res=$('#res');
+q.oninput=()=>{const v=en(q.value.trim().toLowerCase());if(!v){res.classList.remove('on');return}const l=S.students.filter(s=>[s.name,s.id,en(s.phone),s.father].join(' ').toLowerCase().includes(v)).slice(0,6);
+ res.innerHTML=l.map(s=>`<button data-prof="${s.id}">${avatar(s)}<span>${esc(s.name)}<small class="mut" style="display:block;font-size:13px">${esc(s.id)}, ${esc(s.cls)} শ্রেণি</small></span></button>`).join('')||'<p class="mut" style="padding:12px;margin:0">কাউকে পাওয়া যায়নি</p>';res.classList.add('on')};
+document.addEventListener('click',e=>{if(!e.target.closest('.srch'))res.classList.remove('on');else if(e.target.closest('[data-prof]')){res.classList.remove('on');q.value=''}});
+$('#menuBtn').onclick=openSide;$('#scrim').onclick=closeSide;
+$('#dlg').addEventListener('click',e=>{if(e.target.id==='dlg')closeDlg()});
+window.addEventListener('hashchange',go);
+load();
+const dt=new Date();let hj='';try{hj=new Intl.DateTimeFormat('bn-BD-u-ca-islamic-umalqura',{day:'numeric',month:'long'}).format(dt)}catch(e){}
+$('#today').innerHTML=`<b>${DAYS[dt.getDay()]}বার, ${fdate(ymd(dt))}</b>${hj}`;
+go();
+}
+</script>
+</body>
+</html>

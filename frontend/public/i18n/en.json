@@ -1,0 +1,18 @@
+{
+  "app": { "name": "Madrasa Management", "session": "Session" },
+  "common": {
+    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit", "add": "Add",
+    "search": "Search", "print": "Print", "download": "Download", "retry": "Try again", "loading": "Loading…",
+    "required": "This field is required", "invalidPhone": "Enter a valid 11-digit mobile number"
+  },
+  "nav": {
+    "dashboard": "Dashboard", "students": "Students", "admission": "Admission", "attendance": "Attendance", "idcards": "ID cards",
+    "fees": "Fees & accounts", "exams": "Exams & results", "hifz": "Hifz progress", "notices": "Notices", "reports": "Reports", "settings": "Settings"
+  },
+  "status": { "present": "Present", "absent": "Absent", "late": "Late", "leave": "Leave", "paid": "Paid", "due": "Due" },
+  "prefs": { "theme": "Theme", "system": "System", "light": "Light", "dark": "Dark", "language": "Language", "digits": "Digits" },
+  "ds": {
+    "title": "Design system",
+    "desc": "Every page uses the same colours, type, buttons, forms and tables. They are all shown together here."
+  }
+}

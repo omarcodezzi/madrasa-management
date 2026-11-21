@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A97DB4E0-0924-42D0-A030-A245D81F97A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Madrasa.Api", "src\Madrasa.Api\Madrasa.Api.csproj", "{C3018AE3-CD39-49ED-AED1-865F465DD4CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Madrasa.Application", "src\Madrasa.Application\Madrasa.Application.csproj", "{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Madrasa.Domain", "src\Madrasa.Domain\Madrasa.Domain.csproj", "{C747801A-791F-49EB-83F1-84B1002C29E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Madrasa.Infrastructure", "src\Madrasa.Infrastructure\Madrasa.Infrastructure.csproj", "{208FD14D-7638-4EB7-AF0F-D14547833644}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7522FDE7-432D-4E6B-BB94-D1454FB8217F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Madrasa.Tests", "tests\Madrasa.Tests\Madrasa.Tests.csproj", "{FC3BC688-36C2-4F3E-A54F-3A9202628136}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C3018AE3-CD39-49ED-AED1-865F465DD4CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3018AE3-CD39-49ED-AED1-865F465DD4CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3018AE3-CD39-49ED-AED1-865F465DD4CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3018AE3-CD39-49ED-AED1-865F465DD4CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C747801A-791F-49EB-83F1-84B1002C29E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C747801A-791F-49EB-83F1-84B1002C29E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C747801A-791F-49EB-83F1-84B1002C29E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C747801A-791F-49EB-83F1-84B1002C29E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{208FD14D-7638-4EB7-AF0F-D14547833644}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{208FD14D-7638-4EB7-AF0F-D14547833644}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{208FD14D-7638-4EB7-AF0F-D14547833644}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208FD14D-7638-4EB7-AF0F-D14547833644}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC3BC688-36C2-4F3E-A54F-3A9202628136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC3BC688-36C2-4F3E-A54F-3A9202628136}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC3BC688-36C2-4F3E-A54F-3A9202628136}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC3BC688-36C2-4F3E-A54F-3A9202628136}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C3018AE3-CD39-49ED-AED1-865F465DD4CA} = {A97DB4E0-0924-42D0-A030-A245D81F97A6}
+		{1BE2AF99-076B-4F15-B7D5-43EF706BFFA6} = {A97DB4E0-0924-42D0-A030-A245D81F97A6}
+		{C747801A-791F-49EB-83F1-84B1002C29E5} = {A97DB4E0-0924-42D0-A030-A245D81F97A6}
+		{208FD14D-7638-4EB7-AF0F-D14547833644} = {A97DB4E0-0924-42D0-A030-A245D81F97A6}
+		{FC3BC688-36C2-4F3E-A54F-3A9202628136} = {7522FDE7-432D-4E6B-BB94-D1454FB8217F}
+	EndGlobalSection
+EndGlobal

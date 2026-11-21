@@ -1,0 +1,219 @@
+<div class="min-h-full">
+  <!-- Sidebar-style brand strip shows the pattern + palette in context -->
+  <header class="bg-side text-[#e9f3ec] pattern">
+    <div class="max-w-[1280px] mx-auto px-[clamp(16px,3vw,32px)] py-5 flex flex-wrap items-center gap-4">
+      <div class="size-12 rounded-xl bg-white border-2 border-gold grid place-items-center text-g font-serif font-extrabold text-xl">م</div>
+      <div class="flex-1">
+        <b class="block font-serif text-[16px]">{{ 'app.name' | transloco }}</b>
+        <span class="ar block text-[#f3cf6b] font-bold text-sm text-left">رماربغ تعمير القرآن مدرسة</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 text-ink">
+        <m-segmented [options]="themeOpts" [value]="prefs.theme()" (valueChange)="prefs.theme.set($event)" aria-label="থিম" />
+        <m-segmented [options]="langOpts" [value]="prefs.lang()" (valueChange)="prefs.lang.set($event)" aria-label="ভাষা" />
+        <m-segmented [options]="digitOpts" [value]="prefs.digits()" (valueChange)="prefs.digits.set($event)" aria-label="সংখ্যা" />
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1280px] mx-auto px-[clamp(16px,3vw,32px)] pt-6 pb-16 grid gap-6">
+    <m-page-header [title]="'ds.title' | transloco" [description]="'ds.desc' | transloco">
+      <button mButton variant="outline" (click)="toast.show('প্রিন্ট টেমপ্লেট Phase 7-এ আসবে', 'info')"><m-icon name="print" /> {{ 'common.print' | transloco }}</button>
+      <button mButton (click)="modalOpen.set(true)"><m-icon name="plus" /> {{ 'common.add' | transloco }}</button>
+    </m-page-header>
+
+    <!-- Colours -->
+    <m-card title="রং" subtitle="প্রোটোটাইপের সবুজ ও সোনালি। ডার্ক মোডে রংগুলো নিজে থেকে বদলায়।">
+      <div class="grid gap-3 grid-cols-[repeat(auto-fill,minmax(150px,1fr))]">
+        @for (c of colors; track c.v) {
+          <div class="rounded-xl border border-line overflow-hidden">
+            <div class="h-14" [style.background]="'var(' + c.v + ')'"></div>
+            <div class="px-3 py-2 text-sm"><b class="block">{{ c.name }}</b><code class="text-mut text-xs">{{ c.v }} · {{ c.hex }}</code></div>
+          </div>
+        }
+      </div>
+    </m-card>
+
+    <!-- Typography -->
+    <m-card title="অক্ষর" subtitle="শিরোনাম: Noto Serif Bengali · লেখা: Hind Siliguri · সংখ্যা: Inter · আরবি: Amiri">
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-2">
+          <h1>শিরোনাম ১ — হিফজ বিভাগ</h1>
+          <h2>শিরোনাম ২ — আজকের হাজিরা</h2>
+          <h3>শিরোনাম ৩ — মাসিক বেতন</h3>
+          <p class="m-0">সাধারণ লেখা: সকল শিক্ষার্থী ও অভিভাবকদের অবগতির জন্য জানানো যাচ্ছে যে, আগামী ১৫ ডিসেম্বর থেকে বার্ষিক পরীক্ষা শুরু হবে।</p>
+          <p class="m-0 text-sm text-mut">সহায়ক লেখা (১৪px, হালকা রং)</p>
+        </div>
+        <div class="grid gap-3 content-start">
+          <p class="ar m-0 text-[28px] leading-[1.8]">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+          <p class="ar m-0 text-lg">مشكاة المصابيح · صحيح البخاري</p>
+          <div class="flex flex-wrap gap-6">
+            <div><span class="text-sm text-mut block">টাকা</span><b class="font-serif text-2xl tabular">{{ 1250000 | money }}</b></div>
+            <div><span class="text-sm text-mut block">সংখ্যা</span><b class="font-serif text-2xl tabular">{{ 98765 | num }}</b></div>
+            <div><span class="text-sm text-mut block">আইডি</span><b class="font-serif text-2xl">{{ 'RM-2026-007' | digits }}</b></div>
+          </div>
+        </div>
+      </div>
+    </m-card>
+
+    <!-- Buttons -->
+    <m-card title="বাটন" subtitle="primary · secondary · outline · ghost · gold · destructive — ছোট / মাঝারি / বড় — লোডিং">
+      <div class="grid gap-4">
+        <div class="flex flex-wrap gap-2">
+          <button mButton>সংরক্ষণ করুন</button>
+          <button mButton variant="secondary">খসড়া রাখুন</button>
+          <button mButton variant="outline"><m-icon name="dl" /> ডাউনলোড</button>
+          <button mButton variant="ghost">বাতিল</button>
+          <button mButton variant="gold"><m-icon name="wallet" /> বেতন আদায়</button>
+          <button mButton variant="destructive"><m-icon name="trash" /> মুছে ফেলুন</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button mButton size="sm">ছোট</button>
+          <button mButton size="md">মাঝারি</button>
+          <button mButton size="lg">বড়</button>
+          <button mButton [loading]="true">সংরক্ষণ হচ্ছে</button>
+          <button mButton [disabled]="true">বন্ধ</button>
+          <button mIconButton aria-label="সম্পাদনা"><m-icon name="edit" /></button>
+          <button mIconButton aria-label="আরও"><m-icon name="more" /></button>
+        </div>
+      </div>
+    </m-card>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+      <!-- Form -->
+      <m-card title="ফর্ম" subtitle="লেবেল উপরে, ভুল হলে বাংলায় বার্তা, আবশ্যক ঘরে লাল তারা">
+        <form class="grid gap-4 sm:grid-cols-2" (ngSubmit)="save()" novalidate>
+          <m-field label="শিক্ষার্থীর নাম" for="f-name" [required]="true" [error]="nameError()">
+            <input id="f-name" class="ctl" [ngModel]="form().name" (ngModelChange)="patch('name', $event)" name="name" [attr.aria-invalid]="!!nameError()" placeholder="যেমন: আব্দুল্লাহ">
+          </m-field>
+          <m-field label="অভিভাবকের মোবাইল" for="f-phone" [required]="true" [error]="phoneError()" hint="এই নম্বরে SMS যাবে">
+            <input id="f-phone" class="ctl tabular" inputmode="tel" [ngModel]="form().phone" (ngModelChange)="patch('phone', $event)" name="phone" [attr.aria-invalid]="!!phoneError()" placeholder="০১৭XXXXXXXX">
+          </m-field>
+          <m-field label="শ্রেণি" for="f-cls">
+            <select id="f-cls" class="ctl" [ngModel]="form().cls" (ngModelChange)="patch('cls', $event)" name="cls">
+              <option value="">বাছাই করুন</option>
+              @for (c of classChips.slice(1); track c.value) { <option [value]="c.value">{{ c.label }}</option> }
+            </select>
+          </m-field>
+          <m-field label="জন্ম তারিখ" for="f-dob" hint="হিজরি তারিখ দেখানো Phase 4-এ যুক্ত হবে">
+            <input id="f-dob" type="date" class="ctl" [ngModel]="form().dob" (ngModelChange)="patch('dob', $event)" name="dob">
+          </m-field>
+          <m-field label="মন্তব্য" for="f-note" class="sm:col-span-2">
+            <textarea id="f-note" class="ctl" [ngModel]="form().note" (ngModelChange)="patch('note', $event)" name="note"></textarea>
+          </m-field>
+          <div class="sm:col-span-2 flex justify-end gap-2 pt-1">
+            <button mButton variant="ghost" type="button" (click)="submitted.set(false)">বাতিল</button>
+            <button mButton type="submit" [loading]="saving()">সংরক্ষণ করুন</button>
+          </div>
+        </form>
+      </m-card>
+
+      <div class="grid gap-6 content-start">
+        <!-- Badges / avatars -->
+        <m-card title="ব্যাজ ও ছবি">
+          <div class="flex flex-wrap gap-2 mb-4">
+            @for (b of badges; track b.label) { <m-badge [tone]="b.tone" [dot]="true">{{ b.label }}</m-badge> }
+          </div>
+          <div class="flex items-center gap-3">
+            <m-avatar name="আব্দুল্লাহ আল মামুন" />
+            <m-avatar name="মোঃ রফিকুল ইসলাম" />
+            <m-avatar name="ফাতিমা আক্তার" [size]="48" />
+            <div class="leading-tight"><b>উমর ফারুক</b><small class="block text-mut text-[13px]">হিফজ · রোল {{ 3 | num }}</small></div>
+          </div>
+        </m-card>
+
+        <!-- Tabs & chips -->
+        <m-card title="ট্যাব ও ফিল্টার">
+          <m-segmented [options]="[{ value: 'qr', label: 'QR স্ক্যান' }, { value: 'manual', label: 'হাতে হাজিরা' }]" [(value)]="attTab" />
+          <div class="mt-4"><m-chips [options]="classChips" [(value)]="classFilter" /></div>
+        </m-card>
+      </div>
+    </div>
+
+    <!-- KPI row -->
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(min(170px,100%),1fr))] bg-card border border-line rounded-[var(--radius-card)]">
+      @for (k of [
+        { label: 'মোট শিক্ষার্থী', v: 248, sub: '+১২ এই মাসে', tone: 'text-g2' },
+        { label: 'আজ উপস্থিত', v: 212, sub: '৮৫%', tone: 'text-g2' },
+        { label: 'এই মাসে আদায়', v: 86500, money: true, sub: 'লক্ষ্য ৳ ১,২৪,০০০', tone: 'text-goldink' },
+        { label: 'মোট বকেয়া', v: 37500, money: true, sub: '৪২ জন', tone: 'text-red' }
+      ]; track k.label; let first = $first) {
+        <div class="px-5 py-4" [class.border-l]="!first" [class.border-line]="!first">
+          <span class="text-sm text-mut">{{ k.label }}</span>
+          <b class="block font-serif font-extrabold text-[26px] leading-tight whitespace-nowrap">{{ k.money ? (k.v | money) : (k.v | num) }}</b>
+          <em class="not-italic text-[13px]" [class]="k.tone">{{ k.sub }}</em>
+        </div>
+      }
+    </div>
+
+    <!-- Table -->
+    <m-card title="ডেটা টেবিল" subtitle="খোঁজা, সাজানো, কলাম লুকানো, নির্বাচন, পাতা, CSV, মোবাইলে কার্ড আকারে">
+      <m-data-table [rows]="filteredStudents()" [columns]="columns" [selectable]="true" exportName="students"
+        searchPlaceholder="নাম, আইডি বা মোবাইল দিয়ে খুঁজুন" emptyTitle="এখনো কোনো শিক্ষার্থী নেই" emptyText="প্রথম শিক্ষার্থী যোগ করুন">
+        <m-chips tableFilters [options]="classChips.slice(0, 4)" [(value)]="classFilter" />
+        <ng-template mCell="name" let-r>
+          <div class="flex items-center gap-2.5"><m-avatar [name]="r.name" [size]="34" /><span class="font-semibold">{{ r.name }}</span></div>
+        </ng-template>
+        <ng-template mCell="roll" let-r>{{ r.roll | num }}</ng-template>
+        <ng-template mCell="status" let-r><m-badge [tone]="statusTone[r.status]">{{ ('status.' + r.status) | transloco }}</m-badge></ng-template>
+        <ng-template mCell="due" let-r>
+          @if (r.due) { <span class="text-red font-semibold">{{ r.due | money }}</span> } @else { <m-badge tone="success">পরিশোধিত</m-badge> }
+        </ng-template>
+        <ng-template mRowActions let-r>
+          <button mIconButton (click)="remove(r)" [attr.aria-label]="r.name + ' মুছুন'"><m-icon name="trash" [size]="18" /></button>
+        </ng-template>
+        <ng-template mBulkActions let-rows>
+          <button mButton size="sm" variant="outline" (click)="bulkSms(rows)"><m-icon name="phone" [size]="16" /> SMS পাঠান</button>
+          <button mButton size="sm" variant="outline"><m-icon name="card" [size]="16" /> আইডি কার্ড</button>
+        </ng-template>
+      </m-data-table>
+    </m-card>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      <m-card title="লোডিং (স্কেলেটন)">
+        <div class="flex items-center gap-3 mb-3"><m-skeleton width="44px" height="44px" class="!rounded-full" /><div class="flex-1 grid gap-2"><m-skeleton width="60%" /><m-skeleton width="35%" height="12px" /></div></div>
+        <m-skeleton height="120px" />
+      </m-card>
+      <m-card title="খালি অবস্থা">
+        <m-empty-state title="এখনো কোনো নোটিশ নেই" description="প্রথম নোটিশটি লিখুন, অভিভাবকরা দেখতে পাবেন।" icon="mega">
+          <button mButton size="sm"><m-icon name="plus" [size]="16" /> নোটিশ লিখুন</button>
+        </m-empty-state>
+      </m-card>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      <m-card title="বার্তা ও ডায়ালগ">
+        <div class="flex flex-wrap gap-2">
+          <button mButton variant="outline" (click)="toast.success('আদায় সম্পন্ন, রসিদ নং ১২৩')">সফল বার্তা</button>
+          <button mButton variant="outline" (click)="toast.error('সংযোগ পাওয়া যায়নি। আবার চেষ্টা করুন।')">ত্রুটি বার্তা</button>
+          <button mButton variant="outline" (click)="modalOpen.set(true)">মডাল খুলুন</button>
+          <button mButton variant="destructive" (click)="remove(students[0])">মুছে ফেলার নিশ্চয়তা</button>
+        </div>
+        <div class="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
+          <m-icon name="alert" /><span class="flex-1">তথ্য লোড করা যায়নি।</span>
+          <button mButton size="sm" variant="outline">{{ 'common.retry' | transloco }}</button>
+        </div>
+        <div class="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl bg-goldbg text-goldink">
+          <m-icon name="info" /><span>নমুনা তথ্য দেখানো হচ্ছে। আসল তথ্য যোগ করলে এগুলো মুছে যাবে।</span>
+        </div>
+      </m-card>
+      <m-card title="আইকন" subtitle="২৪px গ্রিড, ১.৭ স্ট্রোক">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-2">
+          @for (n of icons; track n) {
+            <div class="grid justify-items-center gap-1 p-2 rounded-lg hover:bg-soft text-g2" [title]="n"><m-icon [name]="n" /><code class="text-[11px] text-mut">{{ n }}</code></div>
+          }
+        </div>
+      </m-card>
+    </div>
+  </main>
+</div>
+
+<m-modal [(open)]="modalOpen" title="নতুন নোটিশ">
+  <div class="grid gap-4">
+    <m-field label="শিরোনাম" for="n-title" [required]="true"><input id="n-title" class="ctl" placeholder="যেমন: অভিভাবক সমাবেশ"></m-field>
+    <m-field label="বিস্তারিত" for="n-body"><textarea id="n-body" class="ctl"></textarea></m-field>
+  </div>
+  <div modalFooter class="contents">
+    <button mButton variant="ghost" (click)="modalOpen.set(false)">বাতিল</button>
+    <button mButton (click)="modalOpen.set(false); toast.success('নোটিশ প্রকাশিত হয়েছে')">প্রকাশ করুন</button>
+  </div>
+</m-modal>
