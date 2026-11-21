@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Madrasa.Api.Infrastructure;
+using Madrasa.Application;
 using Madrasa.Application.Auth;
 using Madrasa.Application.Common;
 using Madrasa.Infrastructure;
@@ -12,7 +13,9 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
 
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(cfg);
+builder.Services.AddExceptionHandler<AppExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
@@ -36,6 +39,8 @@ builder.Services.AddAuthorization(o =>
 });
 
 builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+// Photos arrive as data URLs
+builder.WebHost.ConfigureKestrel(k => k.Limits.MaxRequestBodySize = 5 * 1024 * 1024);
 builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -60,6 +65,10 @@ if (app.Environment.IsDevelopment())
 }
 app.UseExceptionHandler();
 app.UseCors();
+// Student photos and other uploads
+var uploads = cfg["Uploads:Root"] ?? Path.Combine(AppContext.BaseDirectory, "wwwroot", "uploads");
+Directory.CreateDirectory(uploads);
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploads), RequestPath = "/uploads" });
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

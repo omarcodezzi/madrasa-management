@@ -1,45 +1,47 @@
+using Madrasa.Application.Attendance;
 using Madrasa.Application.Auth;
 using Madrasa.Application.Common;
+using Madrasa.Application.Fees;
+using Madrasa.Application.Students;
+using Madrasa.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Madrasa.Api.Controllers;
 
-/// <summary>Read endpoints used by global search and the design-system demo. Full CRUD comes in Phase 4.</summary>
 [ApiController]
 [Route("api/students")]
 [Authorize(Policy = Permissions.StudentsView)]
-public class StudentsController(IAppDbContext db) : ControllerBase
+public class StudentsController(StudentService students, AttendanceService attendance, FeeService fees) : ControllerBase
 {
-    public record StudentRow(int Id, string StudentCode, string Name, string Gender, string? ClassName, int? Roll, string? Phone, string Status);
-    public record PagedResult<T>(IReadOnlyList<T> Items, int Total, int Page, int PageSize);
-
-    /// <summary>Search by name, ID, roll, phone or guardian phone (UX rule 8.2).</summary>
+    /// <summary>Search by name, ID, roll, phone or guardian phone (UX rule 8.2). sort: name | -name | admitted | -admitted | code (default class+roll)</summary>
     [HttpGet]
-    public async Task<ActionResult<PagedResult<StudentRow>>> List([FromQuery] string? q, [FromQuery] int? classId,
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 25, CancellationToken ct = default)
+    public Task<PagedResult<StudentRow>> List([FromQuery] string? q, [FromQuery] int? classId, [FromQuery] Gender? gender, [FromQuery] StudentStatus? status,
+        [FromQuery] string? sort, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, CancellationToken ct = default) =>
+        students.ListAsync(new StudentListQuery(q, classId, gender, status, sort, page, pageSize), ct);
+
+    [HttpGet("{id:int}")]
+    public Task<StudentDetail> Get(int id, CancellationToken ct) => students.GetAsync(id, ct);
+
+    [HttpGet("next-codes")]
+    public Task<NextCodes> NextCodes([FromQuery] int? classId, CancellationToken ct) => students.NextCodesAsync(classId, ct);
+
+    [HttpPost, Authorize(Policy = Permissions.StudentsEdit)]
+    public async Task<ActionResult<StudentDetail>> Create(StudentInput input, CancellationToken ct)
     {
-        pageSize = Math.Clamp(pageSize, 1, 200);
-        var sessionId = await db.AcademicSessions.Where(s => s.IsCurrent).Select(s => s.Id).FirstOrDefaultAsync(ct);
-        var query = db.Students.AsNoTracking();
-        if (classId is not null) query = query.Where(s => s.Enrollments.Any(e => e.SessionId == sessionId && e.ClassId == classId));
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            q = q.Trim();
-            int.TryParse(q, out var roll);
-            query = query.Where(s => s.Name.Contains(q) || s.StudentCode.Contains(q) || (s.Phone != null && s.Phone.Contains(q))
-                || s.Guardians.Any(g => g.Guardian!.Phone.Contains(q))
-                || (roll > 0 && s.Enrollments.Any(e => e.SessionId == sessionId && e.Roll == roll)));
-        }
-        var total = await query.CountAsync(ct);
-        var items = await query.OrderBy(s => s.StudentCode).Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(s => new
-            {
-                s.Id, s.StudentCode, s.Name, s.Gender, s.Phone, s.Status,
-                E = s.Enrollments.Where(e => e.SessionId == sessionId).Select(e => new { e.Class!.NameBn, e.Roll }).FirstOrDefault()
-            }).ToListAsync(ct);
-        return new PagedResult<StudentRow>(items.Select(s => new StudentRow(s.Id, s.StudentCode, s.Name, s.Gender.ToString(),
-            s.E?.NameBn, s.E?.Roll, s.Phone, s.Status.ToString())).ToList(), total, page, pageSize);
+        var s = await students.CreateAsync(input, ct);
+        return CreatedAtAction(nameof(Get), new { id = s.Id }, s);
     }
+
+    [HttpPut("{id:int}"), Authorize(Policy = Permissions.StudentsEdit)]
+    public Task<StudentDetail> Update(int id, StudentInput input, CancellationToken ct) => students.UpdateAsync(id, input, ct);
+
+    [HttpDelete("{id:int}"), Authorize(Policy = Permissions.StudentsEdit)]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct) { await students.DeleteAsync(id, ct); return NoContent(); }
+
+    [HttpGet("{id:int}/attendance")]
+    public Task<StudentMonth> Attendance(int id, [FromQuery] string? month, CancellationToken ct) => attendance.StudentMonthAsync(id, month, ct);
+
+    [HttpGet("{id:int}/dues")]
+    public Task<StudentDues> Dues(int id, CancellationToken ct) => fees.StudentDuesAsync(id, ct);
 }

@@ -45,10 +45,10 @@ public static class DbInitializer
             await users.AddToRoleAsync(admin, Roles.SuperAdmin);
         }
 
-        if (env.IsDevelopment() && !await db.Students.AnyAsync()) await SeedSampleAsync(db);
+        if (env.IsDevelopment() && !await db.Students.AnyAsync()) await SeedSampleAsync(db, s);
     }
 
-    private static async Task SeedSampleAsync(AppDbContext db)
+    private static async Task SeedSampleAsync(AppDbContext db, IServiceProvider sp)
     {
         var classes = new[]
         {
@@ -79,6 +79,66 @@ public static class DbInitializer
         }
         db.Notices.Add(new Notice { Title = "বার্ষিক পরীক্ষার সময়সূচি", Date = DateOnly.FromDateTime(DateTime.Today),
             Body = "আগামী ১৫ ডিসেম্বর থেকে বার্ষিক পরীক্ষা শুরু হবে। পরীক্ষার আগে সকল বকেয়া বেতন পরিশোধ করতে অনুরোধ করা হলো।" });
+        db.Notices.Add(new Notice { Title = "অভিভাবক সমাবেশ", Date = DateOnly.FromDateTime(DateTime.Today.AddDays(-12)),
+            Body = "আগামী শুক্রবার বাদ জুমা মাদরাসা প্রাঙ্গণে অভিভাবক সমাবেশ অনুষ্ঠিত হবে।" });
+        await db.SaveChangesAsync();
+
+        // Guardians: the father, with the student's phone
+        foreach (var st in await db.Students.ToListAsync())
+            db.StudentGuardians.Add(new StudentGuardian { StudentId = st.Id, IsPrimary = true,
+                Guardian = new Guardian { Name = st.FatherName ?? "অভিভাবক", Relation = "পিতা", Phone = st.Phone ?? "01711000000" } });
+        await db.SaveChangesAsync();
+
+        // Attendance for the last 20 school days (deterministic, about 88% present)
+        var clock = sp.GetRequiredService<Madrasa.Application.Common.IClock>();
+        var ids = await db.Students.Select(x => x.Id).ToListAsync();
+        var rnd = new Random(11);
+        var today = clock.Today;
+        for (int k = 0; k <= 26; k++)
+        {
+            var d = today.AddDays(-k);
+            if (d.DayOfWeek == DayOfWeek.Friday) continue;
+            foreach (var id in ids)
+            {
+                var r = rnd.NextDouble();
+                if (k == 0 && r > 0.72) continue;   // today's roll call is still in progress
+                var status = r < 0.82 ? AttendanceStatus.Present : r < 0.88 ? AttendanceStatus.Late : r < 0.95 ? AttendanceStatus.Absent : AttendanceStatus.Leave;
+                db.StudentAttendance.Add(new StudentAttendance { StudentId = id, Date = d, Status = status,
+                    CheckIn = status is AttendanceStatus.Present or AttendanceStatus.Late ? new TimeOnly(7, 15 + rnd.Next(40)) : null });
+            }
+        }
+        await db.SaveChangesAsync();
+
+        // Fees: most students paid last month, about two thirds paid this month
+        var fees = sp.GetRequiredService<Madrasa.Application.Fees.FeeService>();
+        await fees.EnsureMonthlyInvoicesAsync(Madrasa.Application.Common.Months.Of(today), default);
+        int n = 0;
+        foreach (var id in ids)
+        {
+            var dues = await fees.StudentDuesAsync(id, default);
+            var thisMonth = Madrasa.Application.Common.Months.Of(today);
+            var pay = dues.Items.Where(x => (n % 9 != 4 && string.Compare(x.Month, thisMonth) < 0) || (x.Month == thisMonth && n % 3 != 1)).ToList();
+            // One receipt per month, dated inside that month, like a real counter
+            foreach (var g in pay.GroupBy(x => x.Month))
+            {
+                var first = Madrasa.Application.Common.Months.First(g.Key!);
+                var date = first.AddDays(4 + n % 10);
+                if (date > today) date = today;
+                await fees.CollectAsync(new Madrasa.Application.Fees.CollectRequest(id, g.Select(x => new Madrasa.Application.Fees.CollectLine(x.InvoiceId, null, null, x.Due)).ToList(),
+                    n % 4 == 0 ? PaymentMethod.BKash : PaymentMethod.Cash, n % 4 == 0 ? $"TRX{n:000}{first.Month:00}" : null, date), default);
+            }
+            n++;
+        }
+        // A few expenses so the income/expense chart has both sides
+        var general = await db.Funds.Where(f => f.Code == "GENERAL").Select(f => f.Id).FirstAsync();
+        for (int m = 0; m < 6; m++)
+        {
+            var d = new DateOnly(today.Year, today.Month, 1).AddMonths(-m).AddDays(4);
+            if (d > today) continue;
+            db.LedgerEntries.Add(new LedgerEntry { Date = d, FundId = general, CategoryId = 3, Direction = Direction.Out, Amount = 42000 + m * 500, Description = "শিক্ষক-কর্মচারী বেতন", CreatedAt = DateTime.UtcNow });
+            db.LedgerEntries.Add(new LedgerEntry { Date = d.AddDays(6), FundId = general, CategoryId = 5, Direction = Direction.Out, Amount = 3500 + m * 120, Description = "বিদ্যুৎ বিল", CreatedAt = DateTime.UtcNow });
+            db.LedgerEntries.Add(new LedgerEntry { Date = d.AddDays(2), FundId = general, CategoryId = 2, Direction = Direction.In, Amount = 25000 + m * 3000, Description = "সাধারণ দান", CreatedAt = DateTime.UtcNow });
+        }
         await db.SaveChangesAsync();
     }
 }
