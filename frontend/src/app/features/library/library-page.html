@@ -1,0 +1,105 @@
+<m-page-header title="লাইব্রেরি" description="বই, ইস্যু ও ফেরত">
+  <button mButton (click)="newBook()"><m-icon name="plus" [size]="18" /> নতুন বই</button>
+</m-page-header>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
+  @if (summary(); as s) {
+    <div class="px-5 py-4"><span class="text-sm text-mut">বইয়ের নাম</span><b class="block font-serif font-extrabold text-[26px]">{{ s.titles | num }}টি</b><em class="not-italic text-[13px] text-mut">মোট কপি {{ s.copies | num }}</em></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">তাকে আছে</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ (s.copies - s.out) | num }} কপি</b></div>
+    <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">ইস্যু করা</span><b class="block font-serif font-extrabold text-[26px]">{{ s.out | num }} কপি</b></div>
+    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">মেয়াদ পেরিয়েছে</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="s.overdue">{{ s.overdue | num }} কপি</b><em class="not-italic text-[13px] text-mut">জরিমানা দিনে {{ s.finePerDay | money }}</em></div>
+  } @else { @for (i of [1,2,3,4]; track i) { <div class="px-5 py-4"><m-skeleton height="64px" /></div> } }
+</div>
+
+<m-segmented class="mb-4 inline-flex" [options]="tabs()" [value]="tab()" (valueChange)="tab.set($event)" aria-label="লাইব্রেরি অংশ" />
+
+@if (tab() === 'books') {
+  <div class="flex flex-wrap items-center gap-3 mb-3">
+    <m-chips [options]="langs" [value]="lang()" (valueChange)="lang.set($event)" aria-label="ভাষা" />
+    <select class="ctl !w-auto" [ngModel]="category()" (ngModelChange)="category.set($event)" aria-label="বিষয়">
+      <option value="">সব বিষয়</option>
+      @for (c of summary()?.categories ?? []; track c) { <option [value]="c">{{ c }}</option> }
+    </select>
+  </div>
+  <m-data-table [rows]="books() ?? []" [columns]="bookCols" [loading]="!books()" exportName="books" searchPlaceholder="বইয়ের নাম, লেখক বা তাক"
+    emptyTitle="কোনো বই নেই" emptyText="নতুন বই যোগ করুন।" (rowClick)="editBook($event)">
+    <ng-template mCell="title" let-b><b class="font-semibold">{{ b.title }}</b>@if (b.titleAr) { <span class="ar text-mut ml-1" lang="ar">{{ b.titleAr }}</span> }
+      @if (b.author) { <small class="block text-mut text-[13px]">{{ b.author }}</small> }</ng-template>
+    <ng-template mCell="language" let-b>{{ lLabel(b.language) }}</ng-template>
+    <ng-template mCell="shelfNo" let-b><span class="tabular">{{ b.shelfNo | digits }}</span></ng-template>
+    <ng-template mCell="available" let-b><b class="tabular" [class.text-red]="!b.available">{{ b.available | num }}</b><span class="text-mut tabular">/{{ b.totalCopies | num }}</span></ng-template>
+    <ng-template mRowActions let-b><button mButton size="sm" variant="outline" [disabled]="!b.available" (click)="openIssue(b); $event.stopPropagation()">ইস্যু</button></ng-template>
+  </m-data-table>
+} @else {
+  <m-data-table [rows]="issues() ?? []" [columns]="issueCols" [loading]="!issues()" [exportName]="'library-' + tab()" searchPlaceholder="বই বা নাম"
+    [emptyTitle]="tab() === 'overdue' ? 'মেয়াদ পেরোনো কোনো বই নেই' : tab() === 'out' ? 'কোনো বই ইস্যু করা নেই' : 'এখনও কোনো বই ফেরত আসেনি'">
+    <ng-template mCell="title" let-i><b class="font-semibold">{{ i.title }}</b></ng-template>
+    <ng-template mCell="borrowerName" let-i>{{ i.borrowerName }}<small class="block text-mut text-[13px]">{{ i.borrowerCode }} · {{ i.borrowerKind === 'staff' ? 'স্টাফ' : 'শিক্ষার্থী' }}</small></ng-template>
+    <ng-template mCell="issuedOn" let-i><span class="tabular">{{ i.issuedOn | bdate }}</span></ng-template>
+    <ng-template mCell="dueOn" let-i><span class="tabular">{{ i.dueOn | bdate }}</span>
+      @if (i.returnedOn) { <small class="block text-mut text-[13px]">ফেরত {{ i.returnedOn | bdate }}</small> }
+      @else if (i.lateDays) { <m-badge tone="danger">{{ i.lateDays | num }} দিন দেরি</m-badge> }</ng-template>
+    <ng-template mCell="fineDue" let-i><span class="tabular">{{ (i.returnedOn ? i.fine : i.fineDue) ? ((i.returnedOn ? i.fine : i.fineDue) | money) : '—' }}</span></ng-template>
+    <ng-template mRowActions let-i>@if (!i.returnedOn) { <button mButton size="sm" variant="outline" (click)="openReturn(i)">ফেরত নিন</button> }</ng-template>
+  </m-data-table>
+}
+
+<m-modal [(open)]="bookOpen" [title]="bookId() ? 'বইয়ের তথ্য' : 'নতুন বই'">
+  <form id="bookForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveBook()">
+    <m-field label="বইয়ের নাম" for="b-t" class="col-span-2" [required]="true" [error]="errs()['title']"><input id="b-t" class="ctl" name="title" [ngModel]="form().title" (ngModelChange)="patch({ title: $event })" [attr.aria-invalid]="!!errs()['title']"></m-field>
+    <m-field label="আরবি নাম" for="b-ar" class="col-span-2"><input id="b-ar" class="ctl ar" dir="rtl" lang="ar" name="titleAr" [ngModel]="form().titleAr" (ngModelChange)="patch({ titleAr: $event })"></m-field>
+    <m-field label="লেখক" for="b-au" class="col-span-2"><input id="b-au" class="ctl" name="author" [ngModel]="form().author" (ngModelChange)="patch({ author: $event })"></m-field>
+    <m-field label="ভাষা" for="b-l" [error]="errs()['language']">
+      <select id="b-l" class="ctl" name="language" [ngModel]="form().language" (ngModelChange)="patch({ language: $event })">
+        @for (l of langs.slice(1); track l.value) { <option [value]="l.value">{{ l.label }}</option> }
+      </select>
+    </m-field>
+    <m-field label="বিষয়" for="b-c" hint="যেমন: হাদীস, ফিকহ"><input id="b-c" class="ctl" name="category" list="cats" [ngModel]="form().category" (ngModelChange)="patch({ category: $event })">
+      <datalist id="cats">@for (c of summary()?.categories ?? []; track c) { <option [value]="c"></option> }</datalist></m-field>
+    <m-field label="তাক নম্বর" for="b-s"><input id="b-s" class="ctl tabular" name="shelfNo" [ngModel]="form().shelfNo" (ngModelChange)="patch({ shelfNo: $event })"></m-field>
+    <m-field label="কপি সংখ্যা" for="b-n" [required]="true" [error]="errs()['totalCopies']"><input id="b-n" class="ctl tabular" inputmode="numeric" name="totalCopies" [ngModel]="form().totalCopies" (ngModelChange)="patch({ totalCopies: $event })"></m-field>
+  </form>
+  <div modalFooter class="flex gap-2 w-full">
+    @if (bookId()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="deleteBook()"><m-icon name="trash" [size]="16" /> মুছুন</button> }
+    <button mButton variant="ghost" (click)="bookOpen.set(false)">বাতিল</button>
+    <button mButton type="submit" form="bookForm" [loading]="saving()">সংরক্ষণ</button>
+  </div>
+</m-modal>
+
+<m-modal [(open)]="issueOpen" title="বই ইস্যু">
+  @if (issueBook(); as b) { <div class="rounded-xl bg-soft px-4 py-3 mb-4"><b>{{ b.title }}</b><small class="block text-mut">তাকে আছে {{ b.available | num }} কপি</small></div> }
+  @if (borrower(); as p) {
+    <div class="flex items-center gap-3 p-3 rounded-xl border border-line mb-3">
+      <span class="flex-1 leading-tight"><b>{{ p.name }}</b><small class="block text-mut">{{ p.code }} · {{ p.detail }}</small></span>
+      <button mButton size="sm" variant="ghost" (click)="borrower.set(null)">বদলান</button>
+    </div>
+  } @else {
+    <m-field label="কাকে দিচ্ছেন" for="i-q">
+      <input id="i-q" class="ctl" [ngModel]="bq()" (ngModelChange)="bq.set($event)" placeholder="শিক্ষার্থী বা স্টাফের নাম/আইডি" autocomplete="off">
+    </m-field>
+    <ul class="m-0 mt-1 p-0 list-none">
+      @for (p of borrowers(); track p.kind + p.id) {
+        <li><button type="button" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-soft text-left cursor-pointer bg-transparent border-0 text-ink" (click)="borrower.set(p)">
+          <span class="flex-1 leading-tight"><b class="font-semibold">{{ p.name }}</b><small class="block text-mut text-[13px]">{{ p.code }} · {{ p.detail }}</small></span>
+          <m-badge>{{ p.kind === 'staff' ? 'স্টাফ' : 'শিক্ষার্থী' }}</m-badge></button></li>
+      } @empty { @if (bq().length > 1) { <li class="px-3 py-4 text-center text-mut text-sm">কাউকে পাওয়া যায়নি</li> } }
+    </ul>
+  }
+  <m-field label="কত দিনের জন্য" for="i-d" class="mt-3"><input id="i-d" class="ctl !w-32 tabular" inputmode="numeric" [ngModel]="days()" (ngModelChange)="days.set($event)"></m-field>
+  <div modalFooter class="flex gap-2">
+    <button mButton variant="ghost" (click)="issueOpen.set(false)">বাতিল</button>
+    <button mButton [disabled]="!borrower()" [loading]="issuing()" (click)="issue()"><m-icon name="check" [size]="18" /> ইস্যু করুন</button>
+  </div>
+</m-modal>
+
+<m-modal [(open)]="retOpen" title="বই ফেরত">
+  @if (retIssue(); as i) {
+    <p class="mt-0"><b>{{ i.title }}</b><br><span class="text-mut text-sm">{{ i.borrowerName }} · ফেরতের তারিখ ছিল {{ i.dueOn | bdate }}</span></p>
+    @if (i.lateDays) { <p class="text-sm">{{ i.lateDays | num }} দিন দেরি হয়েছে। নিয়ম অনুযায়ী জরিমানা {{ i.fineDue | money }}।</p> }
+    <m-field label="জরিমানা (টাকা)" for="r-f" hint="মাফ করলে ০ লিখুন"><input id="r-f" class="ctl !w-40 tabular" inputmode="numeric" [ngModel]="retFine()" (ngModelChange)="retFine.set($event)"></m-field>
+  }
+  <div modalFooter class="flex gap-2">
+    <button mButton variant="ghost" (click)="retOpen.set(false)">বাতিল</button>
+    <button mButton [loading]="returning()" (click)="doReturn()"><m-icon name="check" [size]="18" /> ফেরত নিন</button>
+  </div>
+</m-modal>

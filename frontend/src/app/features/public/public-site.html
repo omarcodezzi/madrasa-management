@@ -1,0 +1,137 @@
+<div class="pub min-h-dvh bg-bg text-ink">
+  <header class="pub-hero">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center gap-3">
+      <img [src]="logo()" alt="" class="size-11 object-contain rounded-lg bg-white p-0.5">
+      <b class="font-serif text-lg flex-1 truncate">{{ info()?.nameBn }}</b>
+      <nav class="hidden md:flex gap-5 text-[15px]" aria-label="ওয়েবসাইট">
+        <a href="#about">পরিচিতি</a><a href="#classes">বিভাগ</a><a href="#notices">নোটিশ</a><a href="#admission">ভর্তি</a><a href="#contact">যোগাযোগ</a>
+      </nav>
+      <a mButton size="sm" variant="gold" routerLink="/login">লগইন</a>
+    </div>
+    <div class="max-w-6xl mx-auto px-5 pt-10 pb-16 text-center">
+      @if (info(); as i) {
+        @if (i.nameAr) { <p class="ar text-3xl m-0 mb-2 opacity-90" lang="ar" dir="rtl">{{ i.nameAr }}</p> }
+        <h1 class="font-serif text-3xl md:text-5xl font-extrabold m-0">{{ i.nameBn }}</h1>
+        <p class="mt-3 mb-0 opacity-90">{{ i.address }}@if (i.establishedYear) { · প্রতিষ্ঠা {{ i.establishedYear | digits }} }</p>
+        <div class="flex flex-wrap justify-center gap-3 mt-7">
+          @if (i.onlineAdmission) { <a mButton variant="gold" size="lg" href="#admission"><m-icon name="form" /> অনলাইনে ভর্তির আবেদন</a> }
+          <a mButton variant="outline" size="lg" class="!bg-white/10 !text-white !border-white/40" href="#notices">নোটিশ দেখুন</a>
+        </div>
+      } @else if (error()) { <p>{{ error() }}</p> } @else { <m-skeleton height="120px" /> }
+    </div>
+  </header>
+
+  @if (info(); as i) {
+    <main>
+      <section id="about" class="max-w-6xl mx-auto px-5 -mt-8 relative">
+        <div class="grid grid-cols-3 bg-card border border-line rounded-2xl shadow-sm text-center">
+          <div class="py-5"><b class="block font-serif text-3xl font-extrabold text-g2">{{ i.students | num }}</b><span class="text-sm text-mut">শিক্ষার্থী</span></div>
+          <div class="py-5 border-x border-line"><b class="block font-serif text-3xl font-extrabold text-g2">{{ i.teachers | num }}</b><span class="text-sm text-mut">উস্তাদ ও স্টাফ</span></div>
+          <div class="py-5"><b class="block font-serif text-3xl font-extrabold text-g2">{{ i.huffaz | num }}</b><span class="text-sm text-mut">হাফেজ (৩০ পারা)</span></div>
+        </div>
+      </section>
+
+      <section id="classes" class="max-w-6xl mx-auto px-5 py-12">
+        <h2 class="font-serif text-2xl m-0 mb-1">বিভাগ ও শ্রেণি</h2>
+        <p class="m-0 mb-5 text-mut">@if (i.sessionName) { শিক্ষাবর্ষ {{ i.sessionName | digits }} · } মাসিক বেতন শ্রেণি অনুযায়ী</p>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          @for (d of departments(); track d.name) {
+            <div class="bg-card border border-line rounded-2xl p-5">
+              <h3 class="m-0 mb-3 font-serif text-lg text-g2">{{ d.name }}</h3>
+              <ul class="m-0 p-0 list-none grid gap-2 text-[15px]">
+                @for (c of d.classes; track c.id) { <li class="flex justify-between gap-2"><span>{{ c.nameBn }}</span>@if (c.monthlyFee) { <span class="text-mut tabular">{{ c.monthlyFee | money }}</span> }</li> }
+              </ul>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section id="notices" class="bg-soft/60 border-y border-line">
+        <div class="max-w-6xl mx-auto px-5 py-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+          <div>
+            <h2 class="font-serif text-2xl m-0 mb-4">নোটিশ</h2>
+            <div class="grid gap-3">
+              @for (n of i.notices; track n.id) {
+                <article class="bg-card border border-line rounded-2xl p-5"><small class="text-mut tabular">{{ n.date | bdate }}</small><h3 class="m-0 mt-0.5 text-lg font-semibold">{{ n.title }}</h3><p class="m-0 mt-1.5 whitespace-pre-line leading-relaxed">{{ n.body }}</p></article>
+              } @empty { <p class="text-mut">এখন কোনো নোটিশ নেই।</p> }
+            </div>
+          </div>
+          <div>
+            <h2 class="font-serif text-2xl m-0 mb-4">সামনের অনুষ্ঠান</h2>
+            <ul class="m-0 p-0 list-none grid gap-2">
+              @for (e of i.events; track e.id) {
+                <li class="flex items-center gap-3 bg-card border border-line rounded-2xl p-3">
+                  <span class="grid place-items-center size-12 rounded-xl bg-soft font-serif font-bold tabular">{{ e.startDate.slice(8, 10) | digits }}</span>
+                  <span class="flex-1 leading-tight"><b>{{ e.title }}</b><small class="block text-mut tabular">{{ e.startDate | bdate }}@if (e.endDate) { থেকে {{ e.endDate | bdate }} }</small></span>
+                  <m-badge>{{ eLabel(e.kind) }}</m-badge>
+                </li>
+              } @empty { <li class="text-mut">সামনে কোনো অনুষ্ঠান নেই।</li> }
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="admission" class="max-w-6xl mx-auto px-5 py-12 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] items-start">
+        <div class="bg-card border border-line rounded-2xl p-5 md:p-7">
+          <h2 class="font-serif text-2xl m-0 mb-1">অনলাইনে ভর্তির আবেদন</h2>
+          @if (!i.onlineAdmission) {
+            <p class="text-mut">এখন অনলাইনে আবেদন নেওয়া হচ্ছে না। ভর্তির জন্য মাদরাসার অফিসে যোগাযোগ করুন।</p>
+          } @else if (done(); as d) {
+            <div class="mt-4 p-5 rounded-2xl bg-soft text-center" role="status">
+              <m-icon name="check" [size]="40" class="text-g2" />
+              <p class="m-0 mt-2 text-lg font-semibold">{{ d.message }}</p>
+              <p class="m-0 mt-2">আপনার আবেদন নম্বর <b class="font-serif text-2xl tabular">{{ d.applicationNo | digits }}</b></p>
+              <p class="m-0 mt-1 text-sm text-mut">নম্বরটি লিখে রাখুন। পাশের ঘর থেকে আবেদনের অবস্থা দেখতে পারবেন।</p>
+              <button mButton variant="outline" class="mt-4" (click)="again()">আরেকটি আবেদন</button>
+            </div>
+          } @else {
+            <p class="m-0 mb-5 text-mut">তারকা (*) চিহ্নিত ঘর পূরণ করুন। আবেদনের পর ভর্তি পরীক্ষার তারিখ জানাতে অফিস থেকে ফোন করা হবে।</p>
+            <form class="grid gap-3 sm:grid-cols-2" (ngSubmit)="apply()" novalidate>
+              <m-field label="শিক্ষার্থীর নাম" for="a-n" class="sm:col-span-2" [required]="true" [error]="errs()['applicantName']"><input id="a-n" class="ctl" name="name" autocomplete="off" [ngModel]="form().applicantName" (ngModelChange)="patch({ applicantName: $event })" [attr.aria-invalid]="!!errs()['applicantName']"></m-field>
+              <m-field label="ছাত্র / ছাত্রী" for="a-g" [required]="true"><select id="a-g" class="ctl" name="gender" [ngModel]="form().gender" (ngModelChange)="patch({ gender: $event })"><option value="Male">ছাত্র</option><option value="Female">ছাত্রী</option></select></m-field>
+              <m-field label="কোন শ্রেণিতে" for="a-c" [required]="true" [error]="errs()['classId']"><select id="a-c" class="ctl" name="classId" [ngModel]="form().classId" (ngModelChange)="patch({ classId: +$event })">
+                @for (c of i.classes; track c.id) { <option [ngValue]="c.id">{{ c.nameBn }} ({{ c.department }})</option> }</select></m-field>
+              <m-field label="জন্মতারিখ" for="a-d" [error]="errs()['dateOfBirth']"><input id="a-d" type="date" class="ctl" name="dob" [max]="today" [ngModel]="form().dateOfBirth" (ngModelChange)="patch({ dateOfBirth: $event })"></m-field>
+              <m-field label="পিতার নাম" for="a-f"><input id="a-f" class="ctl" name="father" [ngModel]="form().fatherName" (ngModelChange)="patch({ fatherName: $event })"></m-field>
+              <m-field label="অভিভাবকের মোবাইল" for="a-p" [required]="true" [error]="errs()['guardianPhone']" hint="এই নম্বরে যোগাযোগ করা হবে"><input id="a-p" class="ctl tabular" type="tel" inputmode="tel" name="phone" autocomplete="tel" [ngModel]="form().guardianPhone" (ngModelChange)="patch({ guardianPhone: $event })" [attr.aria-invalid]="!!errs()['guardianPhone']"></m-field>
+              <m-field label="আগের প্রতিষ্ঠান" for="a-i"><input id="a-i" class="ctl" name="inst" [ngModel]="form().previousInstitution" (ngModelChange)="patch({ previousInstitution: $event })"></m-field>
+              <m-field label="ঠিকানা" for="a-a" class="sm:col-span-2" [error]="errs()['address']"><input id="a-a" class="ctl" name="address" autocomplete="street-address" [ngModel]="form().address" (ngModelChange)="patch({ address: $event })"></m-field>
+              <div class="sm:col-span-2 flex items-center gap-3">
+                @if (preview()) { <img [src]="preview()" alt="" class="w-14 h-16 object-cover rounded-lg border border-line"> }
+                <label class="cursor-pointer"><span class="text-sm font-semibold text-g2 underline">শিক্ষার্থীর ছবি (ঐচ্ছিক)</span><input type="file" accept="image/*" class="sr-only" (change)="pickPhoto($event)"></label>
+                @if (errs()['photo']) { <small class="text-red" role="alert">{{ errs()['photo'] }}</small> }
+              </div>
+              <!-- Hidden from people; bots fill it -->
+              <div aria-hidden="true" class="absolute -left-[9999px] w-px h-px overflow-hidden"><label>Website <input tabindex="-1" name="website" autocomplete="off" [ngModel]="form().website" (ngModelChange)="patch({ website: $event })"></label></div>
+              @if (formError()) { <p class="sm:col-span-2 m-0 text-red" role="alert">{{ formError() }}</p> }
+              <div class="sm:col-span-2"><button mButton variant="gold" size="lg" type="submit" [loading]="sending()"><m-icon name="check" /> আবেদন জমা দিন</button></div>
+            </form>
+          }
+        </div>
+
+        <aside class="bg-card border border-line rounded-2xl p-5">
+          <h2 class="font-serif text-xl m-0 mb-3">আবেদনের অবস্থা</h2>
+          <form class="grid gap-3" (ngSubmit)="check()">
+            <m-field label="আবেদন নম্বর" for="s-n"><input id="s-n" class="ctl tabular uppercase" name="no" placeholder="A-2026-0001" [ngModel]="stNo()" (ngModelChange)="stNo.set($event)"></m-field>
+            <m-field label="মোবাইল নম্বর" for="s-p"><input id="s-p" class="ctl tabular" type="tel" inputmode="tel" name="phone" [ngModel]="stPhone()" (ngModelChange)="stPhone.set($event)"></m-field>
+            <button mButton variant="outline" type="submit" [loading]="checking()" [disabled]="!stNo() || !stPhone()">দেখুন</button>
+          </form>
+          @if (status(); as s) {
+            <div class="mt-4 p-4 rounded-xl bg-soft" role="status"><b>{{ s.applicantName }}</b><small class="block text-mut">{{ s.className }} · {{ s.appliedAt.slice(0, 10) | bdate }}</small>
+              <p class="m-0 mt-2">অবস্থা: <m-badge [tone]="s.stage === 'Rejected' ? 'danger' : s.stage === 'Admitted' || s.stage === 'Approved' ? 'success' : 'info'">{{ sLabel(s.stage) }}</m-badge></p></div>
+          }
+          @if (stError()) { <p class="mt-3 mb-0 text-red text-sm" role="alert">{{ stError() }}</p> }
+        </aside>
+      </section>
+
+      <footer id="contact" class="pub-foot">
+        <div class="max-w-6xl mx-auto px-5 py-10 grid gap-6 md:grid-cols-3">
+          <div><b class="font-serif text-lg">{{ i.nameBn }}</b><p class="m-0 mt-2 opacity-85">{{ i.address }}</p></div>
+          <div>@if (i.phone) { <p class="m-0"><m-icon name="phone" [size]="16" /> <a [href]="'tel:' + i.phone" class="tabular">{{ i.phone | digits }}</a></p> }
+            @if (i.email) { <p class="m-0 mt-1"><m-icon name="globe" [size]="16" /> <a [href]="'mailto:' + i.email">{{ i.email }}</a></p> }</div>
+          <div class="md:text-right"><a routerLink="/login">উস্তাদ ও অভিভাবক লগইন</a></div>
+        </div>
+      </footer>
+    </main>
+  }
+</div>

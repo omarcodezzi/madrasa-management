@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { fileUrl } from '../../core/api';
-import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe } from '../../core/format';
+import { PreferencesService } from '../../core/preferences.service';
+import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, reportCell, todayIso } from '../../core/format';
 import { IdCard } from '../../features/idcards/id-card';
 import { METHOD_LABEL } from '../../features/fees/fee.models';
 import { GENDER_LABEL } from '../../features/students/student.models';
@@ -86,6 +87,57 @@ import { PrintService } from './print.service';
               </div>
             }
           }
+          @case ('voucher') {
+            @let v = $any(j.data);
+            <div class="doc">
+              <m-doc-header />
+              <h2>{{ v.direction === 'In' ? 'দানের রসিদ' : 'খরচের ভাউচার' }}</h2>
+              <table>
+                <tr><th style="width:22%">ভাউচার নং</th><td>{{ v.voucherNo }}</td><th style="width:16%">তারিখ</th><td>{{ v.date | bdate }}</td></tr>
+                @if (v.donor) { <tr><th>দাতা</th><td colspan="3">{{ v.donor }}@if (v.donorPhone) { · {{ v.donorPhone | digits }} }</td></tr> }
+                <tr><th>খাত</th><td>{{ v.category }}</td><th>ফান্ড</th><td>{{ v.fund }}</td></tr>
+                @if (v.description) { <tr><th>বিবরণ</th><td colspan="3">{{ v.description }}</td></tr> }
+                <tr><th>টাকার পরিমাণ</th><td colspan="3"><b>{{ v.amount | money }}</b></td></tr>
+              </table>
+              @if (v.direction === 'In') { <p style="text-align:center;font-size:11pt">জাযাকাল্লাহু খাইরান। আপনার দান মাদরাসার {{ v.fund }}-এ জমা হয়েছে।</p> }
+              <div class="signs"><span>গ্রহণকারী</span><span>হিসাবরক্ষক</span><span>মুহতামিম</span></div>
+            </div>
+          }
+          @case ('payslip') {
+            @for (p of $any(j.data); track p.staffId) {
+              <div class="doc">
+                <m-doc-header />
+                <h2>বেতন স্লিপ · {{ p.month | month }}</h2>
+                <table>
+                  <tr><th style="width:22%">নাম</th><td>{{ p.name }}</td><th style="width:16%">আইডি</th><td>{{ p.staffCode }}</td></tr>
+                  <tr><th>পদবি</th><td>{{ p.designation }}</td><th>উপস্থিতি</th><td>{{ p.present | digits }} / {{ p.workDays | digits }} দিন</td></tr>
+                </table>
+                <table>
+                  <tr><th>বিবরণ</th><th class="r">টাকা</th></tr>
+                  <tr><td>মূল বেতন</td><td class="r">{{ p.basic | money }}</td></tr>
+                  <tr><td>ভাতা</td><td class="r">{{ p.allowance | money }}</td></tr>
+                  <tr><td>কর্তন</td><td class="r">− {{ p.deduction | money }}</td></tr>
+                  <tr><th>মোট প্রদান</th><th class="r">{{ p.netPaid | money }}</th></tr>
+                  <tr><td>প্রদানের তারিখ</td><td class="r">{{ p.paidOn | bdate }}@if (p.fund) { · {{ p.fund }} }</td></tr>
+                </table>
+                <div class="signs"><span>গ্রহণকারীর স্বাক্ষর</span><span>হিসাবরক্ষক</span><span>মুহতামিম</span></div>
+              </div>
+            }
+          }
+          @case ('report') {
+            @let t = $any(j.data);
+            <div class="doc">
+              <m-doc-header />
+              <h2>{{ t.title }}</h2>
+              <p style="text-align:center;margin:-8px 0 10px;font-size:11pt">{{ t.subtitle }}</p>
+              <table class="rep">
+                <tr>@for (c of t.columns; track c.key) { <th [class.r]="isNum(c.kind)">{{ c.label }}</th> }</tr>
+                @for (r of t.rows; track $index) { <tr>@for (c of t.columns; track c.key) { <td [class.r]="isNum(c.kind)">{{ cell(r[c.key], c.kind) }}</td> }</tr> }
+                @if (t.totals) { <tr>@for (c of t.columns; track c.key) { <th [class.r]="isNum(c.kind)">{{ cell(t.totals[c.key], c.kind) }}</th> }</tr> }
+              </table>
+              <p style="font-size:9pt;color:#555">প্রিন্টের তারিখ: {{ today | bdate }}</p>
+            </div>
+          }
           @case ('admission') {
             @let s = $any(j.data);
             <div class="doc">
@@ -130,4 +182,8 @@ export class PrintHost {
   protected method = (m: keyof typeof METHOD_LABEL) => METHOD_LABEL[m];
   protected gender = (g: keyof typeof GENDER_LABEL) => GENDER_LABEL[g];
   protected photo = (p?: string) => fileUrl(p);
+  protected today = todayIso();
+  protected isNum = (k: string) => k === 'num' || k === 'money' || k === 'pct';
+  private prefs = inject(PreferencesService);
+  protected cell = (v: unknown, k: string) => reportCell(v, k, this.prefs.digits());
 }

@@ -31,6 +31,7 @@ public static class DependencyInjection
 
         services.Configure<JwtOptions>(cfg.GetSection("Jwt"));
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<Madrasa.Application.Settings.IUserAdmin, UserAdmin>();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();

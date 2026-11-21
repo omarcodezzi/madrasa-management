@@ -90,7 +90,7 @@ public class ExamService(IAppDbContext db, AcademicService academic)
             var key = $"{e.StudentId}:{e.ClassSubjectId}";
             if (!subj.TryGetValue(e.ClassSubjectId, out var cs)) { err[key] = "এই কিতাব এই শ্রেণির নয়"; continue; }
             if (!studentIds.Contains(e.StudentId)) { err[key] = "শিক্ষার্থী এই শ্রেণির নয়"; continue; }
-            if (e.Marks is decimal m && (m < 0 || m > cs.FullMarks)) err[key] = $"নম্বর ০ থেকে {cs.FullMarks} এর মধ্যে দিন";
+            if (e.Marks is decimal m && (m < 0 || m > cs.FullMarks)) err[key] = $"নম্বর ০ থেকে {Digits.ToBangla(cs.FullMarks)} এর মধ্যে দিন";
             if (e.Marks is decimal m2 && decimal.Round(m2 * 2) != m2 * 2) err[key] = "নম্বর পূর্ণ বা অর্ধেক হতে পারে";
         }
         if (err.Count > 0) throw AppException.Invalid(err);

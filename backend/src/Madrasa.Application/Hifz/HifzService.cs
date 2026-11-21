@@ -88,8 +88,8 @@ public class HifzService(IAppDbContext db, IClock clock)
         var err = new Dictionary<string, string>();
         if (d > clock.Today) err["date"] = "ভবিষ্যতের তারিখে সবক লেখা যাবে না";
         if (input.SabakJuz is < 1 or > 30) err["sabakJuz"] = "পারা ১ থেকে ৩০ এর মধ্যে দিন";
-        if (input.SabakFromPage is < 1 or > PagesPerJuz) err["sabakFromPage"] = $"পৃষ্ঠা ১ থেকে {PagesPerJuz} এর মধ্যে দিন";
-        if (input.SabakToPage is < 1 or > PagesPerJuz) err["sabakToPage"] = $"পৃষ্ঠা ১ থেকে {PagesPerJuz} এর মধ্যে দিন";
+        if (input.SabakFromPage is < 1 or > PagesPerJuz) err["sabakFromPage"] = $"পৃষ্ঠা ১ থেকে {Digits.ToBangla(PagesPerJuz)} এর মধ্যে দিন";
+        if (input.SabakToPage is < 1 or > PagesPerJuz) err["sabakToPage"] = $"পৃষ্ঠা ১ থেকে {Digits.ToBangla(PagesPerJuz)} এর মধ্যে দিন";
         if (input.SabakFromPage is short f && input.SabakToPage is short t && t < f) err["sabakToPage"] = "শেষ পৃষ্ঠা শুরুর পৃষ্ঠার আগে হতে পারে না";
         if ((input.SabakFromPage != null || input.SabakToPage != null) && input.SabakJuz is null) err["sabakJuz"] = "কোন পারার সবক তা দিন";
         if (input.Mistakes is < 0 or > 200) err["mistakes"] = "ভুলের সংখ্যা ঠিক নেই";

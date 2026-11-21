@@ -160,9 +160,9 @@ public class AcademicService(IAppDbContext db)
         var periods = req.Periods.OrderBy(p => p.PeriodNo).ToList();
         var err = new Dictionary<string, string>();
         foreach (var p in periods)
-            if (p.End <= p.Start) err[$"periods[{p.PeriodNo}]"] = $"{p.PeriodNo} নং ঘণ্টার শেষ সময় শুরুর পরে হতে হবে";
+            if (p.End <= p.Start) err[$"periods[{p.PeriodNo}]"] = $"{Digits.ToBangla(p.PeriodNo)} নং ঘণ্টার শেষ সময় শুরুর পরে হতে হবে";
         for (int i = 1; i < periods.Count; i++)
-            if (periods[i].Start < periods[i - 1].End) err[$"periods[{periods[i].PeriodNo}]"] = $"{periods[i].PeriodNo} নং ঘণ্টা আগের ঘণ্টার সাথে মিলে যাচ্ছে";
+            if (periods[i].Start < periods[i - 1].End) err[$"periods[{periods[i].PeriodNo}]"] = $"{Digits.ToBangla(periods[i].PeriodNo)} নং ঘণ্টা আগের ঘণ্টার সাথে মিলে যাচ্ছে";
         var subjects = await db.ClassSubjects.Where(s => s.ClassId == classId && s.SessionId == sessionId)
             .Select(s => new { s.Id, s.TeacherId, Teacher = s.Teacher!.Name }).ToDictionaryAsync(s => s.Id, ct);
         var byPeriod = periods.ToDictionary(p => p.PeriodNo);

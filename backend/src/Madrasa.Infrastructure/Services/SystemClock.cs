@@ -9,6 +9,7 @@ public class SystemClock(IConfiguration cfg, TimeProvider time) : IClock
     private readonly TimeZoneInfo _tz = TimeZoneInfo.FindSystemTimeZoneById(cfg["TimeZone"] ?? "Asia/Dhaka");
     private DateTime Local => TimeZoneInfo.ConvertTime(time.GetUtcNow(), _tz).DateTime;
     public DateOnly Today => DateOnly.FromDateTime(Local);
+    public DateTime ToLocal(DateTime utc) => TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), _tz);
     public TimeOnly Now { get { var l = Local; return new TimeOnly(l.Hour, l.Minute, l.Second); } }
 }
 

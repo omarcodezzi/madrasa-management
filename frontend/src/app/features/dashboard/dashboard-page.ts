@@ -28,7 +28,7 @@ export class DashboardPage {
   protected actions = computed(() => ([
     { icon: 'scan', label: 'হাজিরা নিন', link: '/attendance', perm: P.attendance },
     { icon: 'wallet', label: 'বেতন নিন', link: '/fees', perm: P.fees },
-    { icon: 'plus', label: 'নতুন ভর্তি', link: '/admission', perm: P.studentsEdit },
+    { icon: 'plus', label: 'নতুন ভর্তি', link: '/admission/new', perm: P.studentsEdit },
     { icon: 'card', label: 'আইডি কার্ড', link: '/idcards', perm: P.studentsView },
   ] as { icon: IconName; label: string; link: string; perm: string }[]).filter((a) => this.auth.can(a.perm)));
 

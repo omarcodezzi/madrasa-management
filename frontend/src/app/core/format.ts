@@ -124,3 +124,16 @@ export class TimePipe implements PipeTransform {
   private prefs = inject(PreferencesService);
   transform(v: string | null | undefined) { return formatTime(v, this.prefs.digits()); }
 }
+
+/** One report cell as text, by column kind (used on screen, in print and in CSV). */
+export function reportCell(v: unknown, kind: string, digits: 'bn' | 'en' = 'bn'): string {
+  if (v === null || v === undefined || v === '') return '';
+  switch (kind) {
+    case 'money': return formatMoney(Number(v), digits);
+    case 'num': return formatNumber(v as number, digits);
+    case 'pct': { const n = Math.round(Number(v) * 10) / 10; const t = groupBd(n, Number.isInteger(n) ? 0 : 1); return (digits === 'bn' ? toBnDigits(t) : t) + '%'; }
+    case 'date': return /^\d{4}-\d{2}-\d{2}/.test(String(v)) ? formatDate(String(v), digits) : String(v);
+    case 'month': return /^\d{4}-\d{2}$/.test(String(v)) ? monthName(String(v), digits) : String(v);
+    default: return digits === 'bn' ? String(v) : toEnDigits(String(v));
+  }
+}

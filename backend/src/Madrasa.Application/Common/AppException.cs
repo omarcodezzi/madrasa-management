@@ -15,6 +15,8 @@ public interface IClock
     /// <summary>Today in the madrasa's time zone (Asia/Dhaka by default).</summary>
     DateOnly Today { get; }
     TimeOnly Now { get; }
+    /// <summary>Converts a stored UTC timestamp to the madrasa's local time.</summary>
+    DateTime ToLocal(DateTime utc);
 }
 
 public interface IFileStorage
@@ -27,6 +29,9 @@ public record PagedResult<T>(IReadOnlyList<T> Items, int Total, int Page, int Pa
 
 public static class Months
 {
+    private static readonly string[] Names = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+    /// <summary>"2026-11" → "নভেম্বর ২০২৬"</summary>
+    public static string Label(string ym) => IsValid(ym) ? $"{Names[int.Parse(ym[5..]) - 1]} {Digits.ToBangla(ym[..4])}" : ym;
     public static string Of(DateOnly d) => $"{d.Year:0000}-{d.Month:00}";
     public static DateOnly First(string ym) => new(int.Parse(ym[..4]), int.Parse(ym[5..7]), 1);
     public static bool IsValid(string? ym) => ym is { Length: 7 } && ym[4] == '-' && int.TryParse(ym[..4], out _) && int.TryParse(ym[5..], out var m) && m is >= 1 and <= 12;

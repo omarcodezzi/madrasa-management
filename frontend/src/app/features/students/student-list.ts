@@ -15,7 +15,7 @@ import { StudentsApi } from './students.service';
   imports: [RouterLink, NumPipe, DigitsPipe, Avatar, Badge, Button, Chips, DataTable, CellDef, RowActionsDef, BulkActionsDef, Icon, IconButton, PageHeader],
   template: `
     <m-page-header title="শিক্ষার্থী" [description]="'মোট ' + (rows().length | num) + ' জন শিক্ষার্থী, ' + (lookups.classes().length | num) + 'টি শ্রেণি'">
-      @if (canEdit()) { <a mButton routerLink="/admission"><m-icon name="plus" /> নতুন শিক্ষার্থী</a> }
+      @if (canEdit()) { <a mButton routerLink="/admission/new"><m-icon name="plus" /> নতুন শিক্ষার্থী</a> }
     </m-page-header>
 
     @if (error()) {
@@ -29,7 +29,7 @@ import { StudentsApi } from './students.service';
       searchPlaceholder="নাম, আইডি, রোল বা মোবাইল দিয়ে খুঁজুন" emptyTitle="এখনো কোনো শিক্ষার্থী নেই" emptyText="প্রথম শিক্ষার্থীকে ভর্তি করে শুরু করুন।"
       (rowClick)="open($event)">
       <m-chips tableFilters [options]="classChips()" [value]="cls()" (valueChange)="cls.set($event)" />
-      @if (canEdit()) { <a emptyAction mButton routerLink="/admission"><m-icon name="plus" /> নতুন ভর্তি</a> }
+      @if (canEdit()) { <a emptyAction mButton routerLink="/admission/new"><m-icon name="plus" /> নতুন ভর্তি</a> }
 
       <ng-template mCell="name" let-r>
         <div class="flex items-center gap-2.5">
