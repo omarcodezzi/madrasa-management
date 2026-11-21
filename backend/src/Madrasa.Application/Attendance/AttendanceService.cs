@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Madrasa.Application.Attendance;
 
 public record AttendanceRow(int StudentId, string StudentCode, string Name, string? PhotoPath, int ClassId, string ClassName, int Roll,
-    AttendanceStatus? Status, TimeOnly? CheckIn, AttendanceMethod? Method);
+    AttendanceStatus? Status, TimeOnly? CheckIn, AttendanceMethod? Method, string? Phone = null);
 public record ClassTally(int ClassId, string ClassName, int Total, int Present, int Late, int Absent, int Leave);
 public record AttendanceDay(DateOnly Date, bool IsWorkDay, string? HolidayTitle, IReadOnlyList<AttendanceRow> Rows, IReadOnlyList<ClassTally> Classes);
 public record MarkEntry(int StudentId, AttendanceStatus? Status);
@@ -34,10 +34,11 @@ public class AttendanceService(IAppDbContext db, IClock clock, ICurrentUser user
             .Select(e => new
             {
                 e.StudentId, e.Student!.StudentCode, e.Student.Name, e.Student.PhotoPath, e.ClassId, ClassName = e.Class!.NameBn, e.Roll,
+                Phone = e.Student.Guardians.OrderByDescending(g => g.IsPrimary).Select(g => g.Guardian!.Phone).FirstOrDefault() ?? e.Student.Phone,
                 A = db.StudentAttendance.Where(a => a.StudentId == e.StudentId && a.Date == d).Select(a => new { a.Status, a.CheckIn, a.Method }).FirstOrDefault(),
             }).ToListAsync(ct);
         var list = rows.Select(r => new AttendanceRow(r.StudentId, r.StudentCode, r.Name, r.PhotoPath, r.ClassId, r.ClassName, r.Roll,
-            r.A?.Status, r.A?.CheckIn, r.A?.Method)).ToList();
+            r.A?.Status, r.A?.CheckIn, r.A?.Method, r.Phone)).ToList();
         var tallies = list.GroupBy(r => (r.ClassId, r.ClassName)).Select(g => new ClassTally(g.Key.ClassId, g.Key.ClassName, g.Count(),
             g.Count(r => r.Status == AttendanceStatus.Present), g.Count(r => r.Status == AttendanceStatus.Late),
             g.Count(r => r.Status == AttendanceStatus.Absent), g.Count(r => r.Status == AttendanceStatus.Leave))).ToList();

@@ -42,7 +42,9 @@ public class DashboardService(IAppDbContext db, IClock clock, AttendanceService 
         var workDays = (await db.WorkDaysAsync(from, today, ct)).TakeLast(30).ToList();
         var counts = await db.StudentAttendance.Where(a => a.Date >= from && a.Date <= today && (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late))
             .GroupBy(a => a.Date).Select(g => new { g.Key, N = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.N, ct);
-        var trend = workDays.Select(d => new TrendPoint(d, total == 0 ? 0 : Math.Round(counts.GetValueOrDefault(d) * 100.0 / total, 1))).ToList();
+        // Days on which nobody took attendance (before the system was in use) are left out, not shown as 0%
+        var takenDays = (await db.StudentAttendance.Where(a => a.Date >= from && a.Date <= today).Select(a => a.Date).Distinct().ToListAsync(ct)).ToHashSet();
+        var trend = workDays.Where(d => d == today || takenDays.Contains(d)).Select(d => new TrendPoint(d, total == 0 ? 0 : Math.Round(counts.GetValueOrDefault(d) * 100.0 / total, 1))).ToList();
         var yesterday = trend.Where(t => t.Date < today).Select(t => t.Percent).LastOrDefault();
 
         var summary = await fees.MonthSummaryAsync(thisMonth, ct);

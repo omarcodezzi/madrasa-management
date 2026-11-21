@@ -5,6 +5,8 @@ namespace Madrasa.Application.Common;
 
 public interface IAppDbContext
 {
+    /// <summary>Display name of a sign-in user (receipts, logs show who did it).</summary>
+    Task<string?> UserNameAsync(string? userId, CancellationToken ct);
     DbSet<MadrasaProfile> MadrasaProfiles { get; }
     DbSet<AcademicSession> AcademicSessions { get; }
     DbSet<AppSetting> AppSettings { get; }

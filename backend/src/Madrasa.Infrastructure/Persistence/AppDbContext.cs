@@ -11,6 +11,9 @@ namespace Madrasa.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser)
     : IdentityDbContext<AppUser>(options), IAppDbContext
 {
+    public async Task<string?> UserNameAsync(string? userId, CancellationToken ct) =>
+        userId is null ? null : await Users.Where(u => u.Id == userId).Select(u => u.FullName).FirstOrDefaultAsync(ct);
+
     public DbSet<MadrasaProfile> MadrasaProfiles => Set<MadrasaProfile>();
     public DbSet<AcademicSession> AcademicSessions => Set<AcademicSession>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();

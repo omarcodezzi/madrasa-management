@@ -27,6 +27,9 @@
   --info: light-dark(#1d4ed8, #93c5fd);
   --infobg: light-dark(#e0ecff, #142542);
   --side: #0a4729;
+  /* Chart series (validated for colour-blind separation in light and dark) */
+  --chart-1: light-dark(#0e7a43, #38a068);
+  --chart-2: light-dark(#d08f00, #b08214);
   --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04);
   --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='none' stroke='%23e0a50f' stroke-opacity='.10'%3E%3Cpath d='M28 6l6 16 16 6-16 6-6 16-6-16-16-6 16-6z'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
 }
@@ -101,6 +104,77 @@ textarea.ctl { min-height: 110px; resize: vertical; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
+/* ---------- Print ----------
+   Documents render into <app-print-host>; everything else is hidden while printing. */
+#print-root { display: none; }
 @media print {
+  body { background: #fff !important; }
+  body.printing app-root > *:not(app-print-host) { display: none !important; }
+  body.printing #print-root { display: block !important; color: #000; font: 12pt/1.5 "Hind Siliguri", sans-serif; }
   .no-print { display: none !important; }
+}
+.doc { page-break-after: always; color: #000; }
+.doc:last-child { page-break-after: auto; }
+.dhd { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #0b5d33; padding-bottom: 10px; margin-bottom: 14px; }
+.dhd img { width: 56px; height: 64px; object-fit: contain; }
+.dhd h1 { font-size: 20pt; color: #0b5d33; margin: 0; }
+.dhd p { margin: 0; font-size: 10pt; }
+.doc h2 { text-align: center; margin: 6px 0 14px; font-size: 15pt; }
+.doc table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.doc td, .doc th { border: 1px solid #777; padding: 6px 8px; color: #000; font-size: 11pt; text-align: left; }
+.doc th { background: #edf5ee; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.doc .r { text-align: right; font-variant-numeric: tabular-nums; }
+.signs { display: flex; justify-content: space-between; gap: 12px; margin-top: 56px; }
+.signs span { border-top: 1px solid #333; padding-top: 4px; min-width: 140px; text-align: center; font-size: 10pt; }
+.pr-pos .doc { width: 72mm; margin: 0 auto; font-size: 10pt; }
+.pr-pos .dhd { flex-direction: column; text-align: center; gap: 4px; }
+.pr-pos .dhd h1 { font-size: 12pt; }
+.pr-pos .dhd img { width: 36px; height: 40px; }
+.pr-pos .doc td, .pr-pos .doc th { font-size: 9pt; padding: 3px 4px; }
+.pr-pos .signs { margin-top: 32px; }
+.pr-pos .signs span { min-width: 0; flex: 1; }
+.sheet { display: grid; grid-template-columns: 85.6mm 85.6mm; gap: 6mm; justify-content: center; }
+.sheet .idc { width: 85.6mm; height: 54mm; font-size: 7.6pt; box-shadow: none; border: .3mm solid #9ab; }
+
+/* ---------- ID card (CR80, 85.6 × 54 mm) — layout from the prototype ---------- */
+.idc { width: 340px; height: 214px; font-size: 11px; border-radius: 12px; overflow: hidden; position: relative; background: #fff; color: #12281b;
+  border: 1px solid #cfdccf; box-shadow: 0 6px 18px #0b5d3318; flex: none; font-family: "Hind Siliguri", sans-serif; line-height: 1.4;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.idc .ct { background: #0b5d33; color: #fff; display: flex; align-items: center; gap: .8em; padding: .7em 1em; height: 28%; }
+.idc .ct img { height: 3.4em; width: 3em; object-fit: contain; background: #fff; border-radius: .5em; padding: .15em; }
+.idc .ct b { font: 700 1.25em/1.15 "Noto Serif Bengali", serif; display: block; }
+.idc .ct i { font: 700 .95em/1.2 Amiri, serif; color: #f3cf6b; font-style: normal; display: block; direction: rtl; text-align: left; }
+.idc .cb { display: flex; gap: 1em; padding: .8em 1em; height: 58%; }
+.idc .pho { width: 5.6em; height: 6.8em; border-radius: .5em; background: #edf4ea; border: 2px solid #e0a50f; display: grid; place-items: center;
+  font: 700 2.2em "Noto Serif Bengali", serif; color: #0e7a43; overflow: hidden; flex: none; margin: 0; }
+.idc .pho img { width: 100%; height: 100%; object-fit: cover; }
+.idc .cd { flex: 1; line-height: 1.45; }
+.idc .cd b { display: block; font-size: 1.3em; line-height: 1.25; margin-bottom: .2em; }
+.idc .cd span { color: #5a6d60; }
+.idc .cd em { font-style: normal; white-space: nowrap; }
+.idc .qr { width: 6.2em; height: 6.2em; flex: none; align-self: center; }
+.idc .qr img { width: 100%; height: 100%; image-rendering: pixelated; }
+.idc .cf { position: absolute; bottom: 0; left: 0; right: 0; height: 14%; background: #e0a50f; color: #2b1f00; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 1em; font-weight: 700; }
+.idc.back .bb { padding: 1.2em; line-height: 1.65; }
+.idc.back .bb p { margin: 0 0 .5em; }
+.idc .sig { position: absolute; right: 1.2em; bottom: 20%; border-top: 1px solid #5a6d60; padding-top: .2em; width: 9em; text-align: center; color: #5a6d60; }
+
+/* One-tap attendance buttons (44px targets) */
+@layer components {
+  .att-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--mut); font-weight: 700; cursor: pointer; transition: background .12s, color .12s; }
+  .att-btn:hover:not(:disabled) { background: var(--soft); }
+  .att-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .att-btn[aria-pressed='true'][data-s='Present'] { background: var(--g2); border-color: var(--g2); color: light-dark(#fff, #0b1410); }
+  .att-btn[aria-pressed='true'][data-s='Absent'] { background: var(--red); border-color: var(--red); color: light-dark(#fff, #0b1410); }
+  .att-btn[aria-pressed='true'][data-s='Late'] { background: var(--warn); border-color: var(--warn); color: light-dark(#fff, #0b1410); }
+  .att-btn[aria-pressed='true'][data-s='Leave'] { background: var(--info, #2563eb); border-color: var(--info, #2563eb); color: light-dark(#fff, #0b1410); }
+}
+
+/* Dashboard roll-call hero: one token per roll number, filled when present */
+@layer components {
+  .hero { background: var(--g); }
+  .tok { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 7px; font-size: 12px; font-weight: 700;
+    border: 1px solid rgb(255 255 255 / .35); color: rgb(255 255 255 / .8); font-variant-numeric: tabular-nums; }
+  .tok.on { background: var(--gold); border-color: var(--gold); color: #1d1600; }
 }

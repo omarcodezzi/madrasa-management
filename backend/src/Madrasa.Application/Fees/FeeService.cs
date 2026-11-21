@@ -132,7 +132,7 @@ public class FeeService(IAppDbContext db, IClock clock, ICurrentUser user)
             }).FirstOrDefaultAsync(ct) ?? throw AppException.NotFound("রসিদ");
         var remaining = (await OpenInvoicesQuery().Where(i => i.StudentId == r.StudentId).Select(i => i.Due).ToListAsync(ct)).Where(d => d > 0).Sum();
         return new ReceiptDto(r.Id, r.ReceiptNo, r.Date, r.StudentId, r.StudentCode, r.Name, r.FatherName, r.E?.NameBn, r.E?.Roll, r.TotalPaid, r.Method, r.Reference,
-            r.IsVoided, r.CollectedBy, r.Lines.OrderBy(l => l.Month).ToList(), remaining);
+            r.IsVoided, await db.UserNameAsync(r.CollectedBy, ct) ?? r.CollectedBy, r.Lines.OrderBy(l => l.Month).ToList(), remaining);
     }
 
     public async Task<ReceiptDto> VoidAsync(int receiptNo, CancellationToken ct)
