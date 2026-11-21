@@ -63,10 +63,12 @@ export class Shell {
   protected current = computed(() => ALL_NAV.find((n) => n.key === this.navKey()) ?? null);
   protected currentGroup = computed(() => NAV.find((g) => g.items.some((i) => i.key === this.navKey()))?.key ?? null);
   protected roleLabel = computed(() => {
-    this.lang();
+    this.lang(); this.loaded();
     return (this.auth.user()?.roles ?? []).map((r) => this.t.translate('roles.' + r)).join(', ');
   });
   private lang = toSignal(this.t.langChanges$, { initialValue: this.t.getActiveLang() });
+  /** translate() is synchronous: re-run once the language file has arrived. */
+  private loaded = toSignal(this.t.events$.pipe(filter((e) => e.type === 'translationLoadSuccess')), { initialValue: null });
 
   protected toggleCollapse() {
     this.collapsed.update((c) => !c);

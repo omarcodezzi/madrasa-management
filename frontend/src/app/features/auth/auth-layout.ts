@@ -15,7 +15,7 @@ import { Segmented } from '../../shared/ui';
       <div class="relative z-10 max-w-md">
         <div class="mx-auto lg:mx-0 w-[150px] lg:w-[180px] aspect-[3/3.6] rounded-t-full border-[1.5px] border-[#e0a50f88] grid place-items-center mb-6 lg:mb-8">
           <div class="size-20 lg:size-24 rounded-2xl bg-white border-2 border-gold grid place-items-center text-g font-serif font-extrabold text-4xl">
-            @if (session.profile()?.logoPath; as logo) { <img [src]="logo" alt="" class="size-full object-contain p-1.5"> } @else { م }
+            <img [src]="session.logoUrl()" alt="" class="size-full object-contain p-1.5">
           </div>
         </div>
         <p class="text-[#f3cf6b] font-semibold m-0 text-center lg:text-left">{{ 'auth.welcome' | transloco }}</p>

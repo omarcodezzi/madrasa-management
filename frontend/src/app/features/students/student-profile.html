@@ -1,0 +1,195 @@
+@if (error()) {
+  <m-card><m-empty-state title="শিক্ষার্থীর তথ্য পাওয়া যায়নি" [description]="error()!" icon="alert">
+    <a mButton variant="outline" routerLink="/students">শিক্ষার্থী তালিকা</a>
+  </m-empty-state></m-card>
+} @else if (!s()) {
+  <div class="grid gap-4"><div class="flex gap-4 items-center"><m-skeleton width="88px" height="88px" class="!rounded-full" /><div class="flex-1 grid gap-2"><m-skeleton width="40%" height="28px" /><m-skeleton width="25%" /></div></div><m-skeleton height="96px" /><m-skeleton height="240px" /></div>
+} @else {
+  @let st = s()!;
+  <a routerLink="/students" class="inline-flex items-center gap-1 text-sm no-underline mb-3"><m-icon name="chevronLeft" [size]="16" /> শিক্ষার্থী তালিকা</a>
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-center gap-x-5 gap-y-4 mb-5">
+    <m-avatar [name]="st.name" [src]="photo()" [size]="88" />
+    <div class="flex-1 min-w-[220px]">
+      <h1 class="!text-[clamp(24px,3vw,32px)]">{{ st.name }}</h1>
+      @if (st.nameAr) { <p class="ar m-0 text-lg text-mut text-left">{{ st.nameAr }}</p> }
+      <p class="m-0 mt-1 text-mut">{{ st.studentCode }} · {{ st.className }} · রোল {{ st.roll | num }}</p>
+      <div class="flex flex-wrap gap-1.5 mt-2">
+        <m-badge [tone]="st.status === 'Active' ? 'success' : 'neutral'" [dot]="true">{{ statusLabel[st.status] }}</m-badge>
+        <m-badge>{{ genderLabel[st.gender] }}</m-badge>
+        @if (st.isOrphan) { <m-badge tone="gold">ইয়াতিম</m-badge> }
+        @if (st.isResidential) { <m-badge tone="info">আবাসিক</m-badge> }
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      @if (canFees()) { <a mButton variant="gold" routerLink="/fees" [queryParams]="{ student: st.id }"><m-icon name="wallet" /> বেতন নিন</a> }
+      @if (canEdit()) { <a mButton variant="outline" [routerLink]="['/students', st.id, 'edit']"><m-icon name="edit" /> সম্পাদনা</a> }
+      <button mButton variant="outline" (click)="printCard()"><m-icon name="card" /> আইডি কার্ড</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(min(170px,100%),1fr))] bg-card border border-line rounded-[var(--radius-card)] mb-5">
+    <div class="px-5 py-4">
+      <span class="text-sm text-mut">এ মাসে উপস্থিতি</span>
+      <b class="block font-serif font-extrabold text-2xl">@if (att(); as a) { {{ (a.present + a.late) | num }}/{{ a.workDays | num }} দিন } @else { — }</b>
+      @if (att(); as a) { <em class="not-italic text-[13px] text-mut">{{ a.percent | num }}%</em> }
+    </div>
+    @if (canFees()) {
+      <div class="px-5 py-4 border-l border-line">
+        <span class="text-sm text-mut">মোট বকেয়া</span>
+        <b class="block font-serif font-extrabold text-2xl" [class.text-red]="(dues()?.totalDue ?? 0) > 0" [class.text-g2]="dues() && !dues()!.totalDue">
+          @if (dues(); as d) { {{ d.totalDue ? (d.totalDue | money) : 'নেই' }} } @else { — }</b>
+        @if (dues()?.items?.length) { <em class="not-italic text-[13px] text-mut">{{ dues()!.items.length | num }}টি খাত</em> }
+      </div>
+    }
+    <div class="px-5 py-4 border-l border-line">
+      <span class="text-sm text-mut">মাসিক বেতন</span>
+      <b class="block font-serif font-extrabold text-2xl">{{ (st.monthlyFeeOverride ?? st.monthlyFee) | money }}</b>
+      @if (st.monthlyFeeOverride != null) { <em class="not-italic text-[13px] text-goldink">বিশেষ হার</em> }
+    </div>
+    <div class="px-5 py-4 border-l border-line">
+      <span class="text-sm text-mut">ভর্তির তারিখ</span>
+      <b class="block font-serif font-extrabold text-xl leading-9">{{ st.admissionDate | bdate }}</b>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto mb-4 -mx-1 px-1"><m-segmented [options]="tabs()" [value]="tab()" (valueChange)="tab.set($event)" aria-label="প্রোফাইলের অংশ" /></div>
+
+  @switch (tab()) {
+    @case ('overview') {
+      <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] items-start">
+        <m-card title="ব্যক্তিগত তথ্য">
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2.5 m-0">
+            <dt class="text-mut text-sm">পিতার নাম</dt><dd class="m-0 font-medium">{{ st.fatherName || '—' }}</dd>
+            <dt class="text-mut text-sm">মাতার নাম</dt><dd class="m-0 font-medium">{{ st.motherName || '—' }}</dd>
+            <dt class="text-mut text-sm">মোবাইল</dt><dd class="m-0 font-medium">@if (primary()?.phone; as ph) { <a [href]="'tel:' + ph" class="tabular">{{ ph | digits }}</a> } @else { — }</dd>
+            <dt class="text-mut text-sm">জন্মতারিখ</dt><dd class="m-0 font-medium">{{ (st.dateOfBirth | bdate) || '—' }}</dd>
+            <dt class="text-mut text-sm">জন্ম নিবন্ধন</dt><dd class="m-0 font-medium tabular">{{ (st.birthRegNo | digits) || '—' }}</dd>
+            <dt class="text-mut text-sm">রক্তের গ্রুপ</dt><dd class="m-0 font-medium">{{ st.bloodGroup || '—' }}</dd>
+            <dt class="text-mut text-sm">বিভাগ</dt><dd class="m-0 font-medium">{{ st.departmentName || '—' }}</dd>
+            <dt class="text-mut text-sm">বর্তমান ঠিকানা</dt><dd class="m-0 font-medium">{{ st.presentAddress || '—' }}</dd>
+            <dt class="text-mut text-sm">স্থায়ী ঠিকানা</dt><dd class="m-0 font-medium">{{ st.permanentAddress || '—' }}</dd>
+          </dl>
+          <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-line">
+            <button mButton variant="outline" size="sm" (click)="printForm()"><m-icon name="print" [size]="16" /> ভর্তি ফরম</button>
+            @if (canEdit()) { <button mButton variant="destructive" size="sm" class="ml-auto" (click)="remove()"><m-icon name="trash" [size]="16" /> তালিকা থেকে সরান</button> }
+          </div>
+        </m-card>
+        <m-card title="আইডি কার্ড" subtitle="কার্ডের QR দিয়ে হাজিরা নেওয়া হয়">
+          <div class="overflow-x-auto"><div class="origin-top-left scale-[.92] w-[340px]"><app-id-card [s]="st" /></div></div>
+        </m-card>
+      </div>
+    }
+    @case ('attendance') {
+      <div class="grid gap-5 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] items-start">
+        <m-card>@if (att(); as a) { <app-attendance-calendar [data]="a" [today]="today" (move)="moveMonth($event)" /> } @else { <m-skeleton height="320px" /> }</m-card>
+        @if (att(); as a) {
+          <m-card [title]="(a.month | month) + ' সারসংক্ষেপ'">
+            <div class="mb-2 flex justify-between text-sm"><span class="text-mut">উপস্থিতির হার</span><b>{{ a.percent | num }}%</b></div>
+            <div class="h-2.5 rounded-full bg-soft overflow-hidden mb-4"><i class="block h-full rounded-full bg-g2" [style.width.%]="a.percent"></i></div>
+            <dl class="grid grid-cols-2 gap-3 m-0">
+              <div class="p-3 rounded-xl bg-soft"><dt class="text-sm text-mut">কর্মদিবস</dt><dd class="m-0 font-serif text-xl font-bold">{{ a.workDays | num }}</dd></div>
+              <div class="p-3 rounded-xl bg-okbg"><dt class="text-sm text-mut">উপস্থিত</dt><dd class="m-0 font-serif text-xl font-bold text-g2">{{ a.present | num }}</dd></div>
+              <div class="p-3 rounded-xl bg-[var(--warnbg)]"><dt class="text-sm text-mut">দেরি</dt><dd class="m-0 font-serif text-xl font-bold text-[var(--warn)]">{{ a.late | num }}</dd></div>
+              <div class="p-3 rounded-xl bg-redbg"><dt class="text-sm text-mut">অনুপস্থিত</dt><dd class="m-0 font-serif text-xl font-bold text-red">{{ a.absent | num }}</dd></div>
+            </dl>
+          </m-card>
+        }
+      </div>
+    }
+    @case ('fees') {
+      @if (dues(); as d) {
+        <div class="grid gap-5 lg:grid-cols-2 items-start">
+          <m-card title="বকেয়া">
+            @if (canFees() && d.totalDue) { <a cardActions mButton size="sm" variant="gold" routerLink="/fees" [queryParams]="{ student: st.id }"><m-icon name="wallet" [size]="16" /> আদায় করুন</a> }
+            @for (i of d.items; track i.invoiceId) {
+              <div class="flex justify-between gap-3 py-2.5 border-b border-line last:border-0">
+                <span>{{ i.feeHead }} @if (i.month) { <span class="text-mut text-sm">· {{ i.month | month }}</span> }</span>
+                <b class="text-red tabular">{{ i.due | money }}</b>
+              </div>
+            } @empty { <p class="m-0 text-g2 font-medium">আলহামদুলিল্লাহ, কোনো বকেয়া নেই।</p> }
+          </m-card>
+          <m-card title="পরিশোধের ইতিহাস">
+            @for (r of d.recentReceipts; track r.id) {
+              <div class="flex justify-between gap-3 py-2.5 border-b border-line last:border-0" [class.opacity-50]="r.isVoided">
+                <span>রসিদ {{ r.receiptNo | digits }} <span class="text-mut text-sm">· {{ r.date | bdate }}</span>
+                  @if (r.isVoided) { <m-badge tone="danger" class="ml-1">বাতিল</m-badge> }</span>
+                <b class="tabular">{{ r.totalPaid | money }}</b>
+              </div>
+            } @empty { <p class="m-0 text-mut">এখনো কোনো পরিশোধ হয়নি।</p> }
+          </m-card>
+        </div>
+      } @else { <m-skeleton height="200px" /> }
+    }
+    @case ('guardian') {
+      <div class="grid gap-4 md:grid-cols-2">
+        @for (g of st.guardians; track $index) {
+          <m-card>
+            <div class="flex items-center gap-3 mb-3">
+              <m-avatar [name]="g.name" [size]="44" />
+              <div class="flex-1"><b>{{ g.name }}</b><small class="block text-mut">{{ g.relation }}</small></div>
+              @if (g.isPrimary) { <m-badge tone="success">প্রধান</m-badge> }
+            </div>
+            <a mButton variant="outline" [block]="true" [href]="'tel:' + g.phone"><m-icon name="phone" [size]="18" /> {{ g.phone | digits }}</a>
+            @if (g.occupation || g.address) { <p class="m-0 mt-3 text-sm text-mut">{{ g.occupation }} @if (g.occupation && g.address) {·} {{ g.address }}</p> }
+          </m-card>
+        } @empty { <m-card><m-empty-state title="কোনো অভিভাবক যোগ করা হয়নি" icon="users" /></m-card> }
+      </div>
+    }
+    @case ('academic') {
+      @if (results(); as list) {
+        @for (r of list; track r.examId) {
+          <m-card class="mb-4 block" [title]="r.examName" [subtitle]="(r.startDate ? (r.startDate | bdate) + ' · ' : '') + (r.isPublished ? 'প্রকাশিত' : 'এখনো প্রকাশিত হয়নি')">
+            <button cardActions mButton variant="outline" size="sm" (click)="printMarkSheet(r)"><m-icon name="print" [size]="16" /> মার্কশিট</button>
+            <div class="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] items-start">
+              <table class="w-full text-[15px] border-collapse">
+                <thead><tr class="text-left text-sm text-mut border-b border-line"><th class="py-2 font-medium">কিতাব</th><th class="py-2 font-medium text-right">পূর্ণমান</th><th class="py-2 font-medium text-right">প্রাপ্ত</th></tr></thead>
+                <tbody>
+                  @for (x of r.subjects; track $index) {
+                    <tr class="border-b border-line last:border-0"><td class="py-2">{{ x.subject }}</td><td class="py-2 text-right tabular text-mut">{{ x.fullMarks | num }}</td>
+                      <td class="py-2 text-right tabular font-semibold" [class.text-red]="failed(x)">{{ x.isAbsent ? 'অনুপস্থিত' : x.marks == null ? '—' : (x.marks | num) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+              <dl class="grid grid-cols-2 gap-3 m-0">
+                <div class="p-3 rounded-xl bg-soft"><dt class="text-sm text-mut">মোট</dt><dd class="m-0 font-serif text-xl font-bold">{{ r.total | num }}</dd></div>
+                <div class="p-3 rounded-xl bg-soft"><dt class="text-sm text-mut">গড়</dt><dd class="m-0 font-serif text-xl font-bold">{{ r.average | num }}</dd></div>
+                <div class="p-3 rounded-xl col-span-2" [class]="r.failedSubjects ? 'bg-redbg' : 'bg-okbg'"><dt class="text-sm text-mut">বিভাগ</dt>
+                  <dd class="m-0 font-serif text-xl font-bold" [class.text-red]="r.failedSubjects" [class.text-g2]="!r.failedSubjects">{{ r.grade || 'অসম্পূর্ণ' }}</dd></div>
+                <div class="p-3 rounded-xl bg-soft col-span-2"><dt class="text-sm text-mut">মেধা স্থান</dt><dd class="m-0 font-serif text-xl font-bold">@if (r.merit) { {{ r.merit | num }} <small class="text-sm text-mut font-sans font-normal">/ {{ r.classSize | num }} জন</small> } @else { — }</dd></div>
+              </dl>
+            </div>
+          </m-card>
+        } @empty { <m-card><m-empty-state title="এখনো কোনো পরীক্ষার নম্বর নেই" icon="exam" /></m-card> }
+      } @else { <m-skeleton height="240px" /> }
+    }
+    @case ('hifz') {
+      @if (hifz(); as h) {
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-start">
+          <m-card>
+            <div class="flex items-center gap-5 mb-4"><app-juz-ring [done]="h.completedJuz" />
+              <div><b class="font-serif text-xl">৩০ পারার অগ্রগতি</b>
+                @if (canHifz()) { <a mButton variant="outline" size="sm" class="mt-2" routerLink="/hifz" [queryParams]="{ student: h.studentId }"><m-icon name="edit" [size]="16" /> আজকের পড়া লিখুন</a> }</div></div>
+            <app-juz-grid [cells]="h.juz" />
+          </m-card>
+          <m-card title="সাম্প্রতিক পড়া" [padded]="false">
+            <ul class="m-0 p-0 list-none">
+              @for (l of h.logs.slice(0, 8); track l.id) {
+                <li class="px-5 py-2.5 border-b border-line last:border-0">
+                  <div class="flex justify-between gap-2"><b class="font-semibold">@if (l.sabakJuz) { পারা {{ l.sabakJuz | num }}@if (l.sabakFromPage) {, পৃ. {{ l.sabakFromPage | num }}@if (l.sabakToPage && l.sabakToPage !== l.sabakFromPage) {–{{ l.sabakToPage | num }}} } } @else { {{ l.sabakText || '—' }} }</b>
+                    <small class="text-mut whitespace-nowrap">{{ l.date | bdate }}</small></div>
+                  <small class="text-mut">ভুল {{ l.mistakes | num }}@if (l.quality) { · {{ qLabel[l.quality] }} }@if (l.remarks) { · {{ l.remarks }} }</small>
+                </li>
+              } @empty { <li class="px-5 py-6 text-center text-mut text-sm">এখনো কোনো পড়া লেখা হয়নি</li> }
+            </ul>
+          </m-card>
+        </div>
+      } @else { <m-skeleton height="240px" /> }
+    }
+    @default {
+      <m-card [padded]="false"><m-empty-state [title]="'ধাপ ' + (later[tab()]!.phase | num) + '-এ যুক্ত হবে'" [description]="later[tab()]!.text" icon="book" /></m-card>
+    }
+  }
+}

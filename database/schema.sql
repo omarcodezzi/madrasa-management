@@ -1567,3 +1567,487 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    DROP INDEX [IX_FeeReceipts_StudentId] ON [FeeReceipts];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_StudentDocuments_StudentId] ON [StudentDocuments] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_StudentDiscounts_FeeHeadId] ON [StudentDiscounts] ([FeeHeadId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_StudentDiscounts_SponsorFundId] ON [StudentDiscounts] ([SponsorFundId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_StudentDiscounts_StudentId] ON [StudentDiscounts] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_SalaryPayments_FundId] ON [SalaryPayments] ([FundId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_RoutineSlots_SessionId] ON [RoutineSlots] ([SessionId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_MessageLogs_RelatedNoticeId] ON [MessageLogs] ([RelatedNoticeId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_LedgerEntries_DonorId] ON [LedgerEntries] ([DonorId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_LedgerEntries_FeeReceiptId] ON [LedgerEntries] ([FeeReceiptId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_LedgerEntries_SalaryPaymentId] ON [LedgerEntries] ([SalaryPaymentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_HostelLeaves_StudentId] ON [HostelLeaves] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_HostelAllocations_StudentId] ON [HostelAllocations] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_HifzDailyLogs_TeacherId] ON [HifzDailyLogs] ([TeacherId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_FeeReceipts_StudentId_Date] ON [FeeReceipts] ([StudentId], [Date]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_FeeReceiptLines_InvoiceId] ON [FeeReceiptLines] ([InvoiceId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_FeeInvoices_Month] ON [FeeInvoices] ([Month]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_FeeInvoices_SessionId] ON [FeeInvoices] ([SessionId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_Exams_SessionId] ON [Exams] ([SessionId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_ExamResults_StudentId] ON [ExamResults] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_ExamMarks_StudentId] ON [ExamMarks] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_BookIssues_StaffId] ON [BookIssues] ([StaffId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_BookIssues_StudentId] ON [BookIssues] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_AdmissionApplications_SessionId] ON [AdmissionApplications] ([SessionId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    CREATE INDEX [IX_AdmissionApplications_StudentId] ON [AdmissionApplications] ([StudentId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [AdmissionApplications] ADD CONSTRAINT [FK_AdmissionApplications_AcademicSessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [AcademicSessions] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [AdmissionApplications] ADD CONSTRAINT [FK_AdmissionApplications_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [BookIssues] ADD CONSTRAINT [FK_BookIssues_Staff_StaffId] FOREIGN KEY ([StaffId]) REFERENCES [Staff] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [BookIssues] ADD CONSTRAINT [FK_BookIssues_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [ExamMarks] ADD CONSTRAINT [FK_ExamMarks_Exams_ExamId] FOREIGN KEY ([ExamId]) REFERENCES [Exams] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [ExamMarks] ADD CONSTRAINT [FK_ExamMarks_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [ExamResults] ADD CONSTRAINT [FK_ExamResults_Exams_ExamId] FOREIGN KEY ([ExamId]) REFERENCES [Exams] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [ExamResults] ADD CONSTRAINT [FK_ExamResults_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [Exams] ADD CONSTRAINT [FK_Exams_AcademicSessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [AcademicSessions] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [FeeInvoices] ADD CONSTRAINT [FK_FeeInvoices_AcademicSessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [AcademicSessions] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [FeeInvoices] ADD CONSTRAINT [FK_FeeInvoices_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [FeeReceiptLines] ADD CONSTRAINT [FK_FeeReceiptLines_FeeInvoices_InvoiceId] FOREIGN KEY ([InvoiceId]) REFERENCES [FeeInvoices] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [HifzDailyLogs] ADD CONSTRAINT [FK_HifzDailyLogs_Staff_TeacherId] FOREIGN KEY ([TeacherId]) REFERENCES [Staff] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [HifzDailyLogs] ADD CONSTRAINT [FK_HifzDailyLogs_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [HifzJuzProgress] ADD CONSTRAINT [FK_HifzJuzProgress_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [HostelAllocations] ADD CONSTRAINT [FK_HostelAllocations_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [HostelLeaves] ADD CONSTRAINT [FK_HostelLeaves_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [LedgerEntries] ADD CONSTRAINT [FK_LedgerEntries_Donors_DonorId] FOREIGN KEY ([DonorId]) REFERENCES [Donors] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [LedgerEntries] ADD CONSTRAINT [FK_LedgerEntries_FeeReceipts_FeeReceiptId] FOREIGN KEY ([FeeReceiptId]) REFERENCES [FeeReceipts] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [LedgerEntries] ADD CONSTRAINT [FK_LedgerEntries_SalaryPayments_SalaryPaymentId] FOREIGN KEY ([SalaryPaymentId]) REFERENCES [SalaryPayments] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [MessageLogs] ADD CONSTRAINT [FK_MessageLogs_Notices_RelatedNoticeId] FOREIGN KEY ([RelatedNoticeId]) REFERENCES [Notices] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [RoutineSlots] ADD CONSTRAINT [FK_RoutineSlots_AcademicSessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [AcademicSessions] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [SalaryPayments] ADD CONSTRAINT [FK_SalaryPayments_Funds_FundId] FOREIGN KEY ([FundId]) REFERENCES [Funds] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [StudentDiscounts] ADD CONSTRAINT [FK_StudentDiscounts_FeeHeads_FeeHeadId] FOREIGN KEY ([FeeHeadId]) REFERENCES [FeeHeads] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [StudentDiscounts] ADD CONSTRAINT [FK_StudentDiscounts_Funds_SponsorFundId] FOREIGN KEY ([SponsorFundId]) REFERENCES [Funds] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [StudentDiscounts] ADD CONSTRAINT [FK_StudentDiscounts_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    ALTER TABLE [StudentDocuments] ADD CONSTRAINT [FK_StudentDocuments_Students_StudentId] FOREIGN KEY ([StudentId]) REFERENCES [Students] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261121205736_AddMissingForeignKeys'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261121205736_AddMissingForeignKeys', N'8.0.11');
+END;
+GO
+
+COMMIT;
+GO
+

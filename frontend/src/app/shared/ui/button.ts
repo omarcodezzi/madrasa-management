@@ -52,7 +52,7 @@ export class Button {
 
 /** Square icon-only button; always give it an aria-label. */
 @Component({
-  selector: 'button[mIconButton]',
+  selector: 'button[mIconButton], a[mIconButton]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:

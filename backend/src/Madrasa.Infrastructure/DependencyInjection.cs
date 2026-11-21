@@ -2,6 +2,7 @@ using Madrasa.Application.Auth;
 using Madrasa.Application.Common;
 using Madrasa.Infrastructure.Identity;
 using Madrasa.Infrastructure.Persistence;
+using Madrasa.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -30,6 +31,9 @@ public static class DependencyInjection
 
         services.Configure<JwtOptions>(cfg.GetSection("Jwt"));
         services.AddScoped<IAuthService, AuthService>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IFileStorage, LocalFileStorage>();
         return services;
     }
 }

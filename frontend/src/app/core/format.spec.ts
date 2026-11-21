@@ -1,4 +1,4 @@
-import { formatMoney, formatNumber, toBnDigits, toEnDigits } from './format';
+import { addMonths, formatDate, formatMoney, formatNumber, formatTime, monthName, toBnDigits, toEnDigits } from './format';
 
 describe('format', () => {
   it('converts digits both ways', () => {
@@ -11,5 +11,11 @@ describe('format', () => {
   });
   it('accepts Bangla digit strings', () => {
     expect(formatNumber('১২৩৪', 'en')).toBe('1,234');
+  });
+  it('formats dates, months and times', () => {
+    expect(formatDate('2026-11-22')).toBe('২২ নভেম্বর ২০২৬');
+    expect(monthName('2026-01', 'en', 'en')).toBe('January 2026');
+    expect(formatTime('14:05:00', 'en')).toBe('2:05');
+    expect(addMonths('2026-11', 2)).toBe('2027-01');
   });
 });

@@ -1,0 +1,105 @@
+@if (error()) {
+  <m-card><m-empty-state title="ড্যাশবোর্ড লোড হয়নি" [description]="error()!" icon="alert"><button mButton variant="outline" (click)="load()">আবার চেষ্টা করুন</button></m-empty-state></m-card>
+} @else if (!d()) {
+  <div class="grid gap-4"><m-skeleton width="45%" height="36px" /><m-skeleton height="200px" /><m-skeleton height="110px" /><div class="grid gap-4 md:grid-cols-2"><m-skeleton height="240px" /><m-skeleton height="240px" /></div></div>
+} @else {
+  @let x = d()!;
+  <!-- Greeting -->
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+    <div>
+      <p class="m-0 text-mut">{{ greeting }}, {{ auth.user()?.fullName }}</p>
+      <h1 class="!text-[clamp(26px,3.4vw,36px)]">আজ {{ x.today | bdate }}</h1>
+      <p class="m-0 text-goldink font-medium">{{ hijri() }}</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      @for (a of actions(); track a.link) { <a mButton [variant]="$first ? 'primary' : 'outline'" [routerLink]="a.link"><m-icon [name]="a.icon" [size]="18" /> {{ a.label }}</a> }
+    </div>
+  </div>
+
+  <!-- Roll-call hero -->
+  <section class="hero rounded-[var(--radius-card)] p-5 sm:p-6 mb-5 text-white relative overflow-hidden" aria-labelledby="rc-h">
+    <div class="pattern absolute inset-0 opacity-[.08] pointer-events-none"></div>
+    <div class="relative flex flex-wrap items-end justify-between gap-4 mb-4">
+      <div>
+        <h2 id="rc-h" class="!text-white !text-xl">আজকের হাজিরা</h2>
+        @if (x.isWorkDay) {
+          <p class="m-0 mt-1"><b class="font-serif text-[44px] leading-none font-extrabold">{{ x.presentToday | num }}</b><span class="text-white/80 text-lg"> / {{ x.totalStudents | num }} জন উপস্থিত</span></p>
+        } @else { <p class="m-0 mt-1 text-lg">আজ {{ x.holidayTitle || 'সাপ্তাহিক ছুটি' }}</p> }
+      </div>
+      @if (x.isWorkDay) {
+        <div class="text-right">
+          <b class="font-serif text-[32px] font-extrabold">{{ x.todayPercent | num }}%</b>
+          <small class="block text-white/80">গতকাল {{ x.yesterdayPercent | num }}% @if (attDelta()) { ({{ attDelta() > 0 ? '+' : '' }}{{ attDelta() | num }}) }</small>
+        </div>
+      }
+    </div>
+    <div class="relative grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      @for (c of x.rollCall; track c.classId) {
+        <div class="rounded-xl bg-white/10 px-3.5 py-3">
+          <div class="flex justify-between text-sm mb-2"><b>{{ c.className }}</b><span class="text-white/80">{{ c.present | num }}/{{ c.total | num }}</span></div>
+          <div class="flex flex-wrap gap-1" role="list" [attr.aria-label]="c.className + ' এর রোল'">
+            @for (s of c.students; track s.studentId) {
+              <span role="listitem" class="tok" [class.on]="s.present" [title]="s.name + (s.present ? ' · উপস্থিত' : ' · এখনো আসেনি')">{{ s.roll | num }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <p class="relative m-0 mt-3 text-[13px] text-white/75"><span class="tok on !inline-grid align-middle mr-1">১</span> উপস্থিত &nbsp; <span class="tok !inline-grid align-middle mr-1">২</span> এখনো আসেনি</p>
+  </section>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
+    <a routerLink="/students" class="px-5 py-4 no-underline text-ink hover:bg-soft/50 rounded-l-[var(--radius-card)]"><span class="text-sm text-mut">মোট শিক্ষার্থী</span><b class="block font-serif font-extrabold text-[28px]">{{ x.totalStudents | num }}</b>
+      <em class="not-italic text-[13px] text-mut">এ মাসে নতুন {{ x.newThisMonth | num }} জন</em></a>
+    <a routerLink="/fees" class="px-5 py-4 border-l border-line no-underline text-ink hover:bg-soft/50"><span class="text-sm text-mut">এ মাসের আদায়</span><b class="block font-serif font-extrabold text-[28px]">{{ x.collectedThisMonth | money }}</b>
+      <div class="h-1.5 rounded-full bg-soft overflow-hidden my-1" aria-hidden="true"><i class="block h-full bg-g2 rounded-full" [style.width.%]="feePercent()"></i></div>
+      <em class="not-italic text-[13px] text-mut">লক্ষ্য {{ x.expectedThisMonth | money }} এর {{ feePercent() | num }}%</em></a>
+    <a routerLink="/fees" class="px-5 py-4 max-lg:border-t lg:border-l border-line no-underline text-ink hover:bg-soft/50"><span class="text-sm text-mut">মোট বকেয়া</span><b class="block font-serif font-extrabold text-[28px] text-red">{{ x.totalDue | money }}</b>
+      <em class="not-italic text-[13px] text-mut">{{ x.dueStudents | num }} জন শিক্ষার্থী</em></a>
+    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">গত মাসের আদায়</span><b class="block font-serif font-extrabold text-[28px]">{{ x.collectedLastMonth | money }}</b></div>
+  </div>
+
+  <div class="grid gap-5 lg:grid-cols-2 mb-5">
+    <m-card title="উপস্থিতির হার" subtitle="গত ৩০ কর্মদিবস"><app-trend-bars [points]="x.attendanceTrend" [today]="x.today" /></m-card>
+    <m-card title="আয় ও ব্যয়" subtitle="গত ৬ মাস"><app-money-bars [data]="x.incomeExpense" /></m-card>
+  </div>
+
+  <div class="grid gap-5 lg:grid-cols-3">
+    <m-card title="বিভাগ অনুযায়ী শিক্ষার্থী">
+      @for (dp of x.byDepartment; track dp.name) {
+        <div class="mb-3 last:mb-0">
+          <div class="flex justify-between text-sm mb-1"><span>{{ dp.name }}</span><b class="tabular">{{ dp.count | num }}</b></div>
+          <div class="h-2 rounded-full bg-soft overflow-hidden"><i class="block h-full rounded-full bg-[var(--chart-1)]" [style.width.%]="(dp.count / deptMax()) * 100"></i></div>
+        </div>
+      }
+    </m-card>
+    <m-card title="সবচেয়ে বেশি বকেয়া" [padded]="false">
+      <a cardActions mButton variant="ghost" size="sm" routerLink="/fees">সব দেখুন</a>
+      <ul class="m-0 p-0 list-none">
+        @for (r of x.topDues; track r.studentId) {
+          <li><a [routerLink]="'/fees'" [queryParams]="{ student: r.studentId }" class="flex justify-between gap-3 px-5 py-2.5 border-b border-line last:border-0 no-underline text-ink hover:bg-soft/50">
+            <span class="leading-tight"><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.className }} · {{ r.monthsDue | num }} মাস</small></span>
+            <b class="text-red tabular">{{ r.totalDue | money }}</b></a></li>
+        } @empty { <li class="px-5 py-6 text-center text-mut text-sm">কোনো বকেয়া নেই</li> }
+      </ul>
+    </m-card>
+    <div class="grid gap-5 content-start">
+      <m-card title="সাম্প্রতিক ভর্তি" [padded]="false">
+        <ul class="m-0 p-0 list-none">
+          @for (r of x.recentAdmissions; track r.id) {
+            <li><a [routerLink]="['/students', r.id]" class="flex justify-between gap-3 px-5 py-2.5 border-b border-line last:border-0 no-underline text-ink hover:bg-soft/50">
+              <span><b class="font-semibold">{{ r.name }}</b> <small class="text-mut">· {{ r.className }}</small></span><small class="text-mut whitespace-nowrap">{{ r.admissionDate | bdate }}</small></a></li>
+          } @empty { <li class="px-5 py-6 text-center text-mut text-sm">এখনো কেউ ভর্তি হয়নি</li> }
+        </ul>
+      </m-card>
+      <m-card title="নোটিশ" [padded]="false">
+        <ul class="m-0 p-0 list-none">
+          @for (n of x.notices; track n.id) {
+            <li class="flex gap-3 px-5 py-2.5 border-b border-line last:border-0"><m-icon name="mega" [size]="18" class="text-goldink mt-0.5" /><span class="flex-1">{{ n.title }}<small class="block text-mut">{{ n.date | bdate }}</small></span></li>
+          } @empty { <li class="px-5 py-6 text-center text-mut text-sm">কোনো নোটিশ নেই। নোটিশ বোর্ড ধাপ ৬-এ আসবে।</li> }
+        </ul>
+      </m-card>
+    </div>
+  </div>
+}

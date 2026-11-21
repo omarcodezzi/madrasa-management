@@ -11,7 +11,7 @@
       transition-transform duration-200 lg:translate-x-0" [class.-translate-x-full]="!drawer()" aria-label="প্রধান মেনু">
     <div class="pattern flex items-center gap-3 border-b border-white/10" [class]="collapsed() ? 'lg:justify-center lg:px-2 px-4 py-4' : 'px-4 py-4'">
       <div class="size-11 shrink-0 rounded-xl bg-white border-2 border-gold grid place-items-center text-g font-serif font-extrabold text-xl overflow-hidden">
-        @if (session.profile()?.logoPath; as logo) { <img [src]="logo" alt="" class="size-full object-contain p-1"> } @else { م }
+        <img [src]="session.logoUrl()" alt="" class="size-full object-contain p-1">
       </div>
       <div class="leading-tight" [class.lg:hidden]="collapsed()">
         <b class="block font-serif text-[15px]">{{ session.profile()?.nameBn ?? ('app.name' | transloco) }}</b>

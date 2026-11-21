@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { API } from './api';
+import { API, fileUrl } from './api';
 import { AuthService } from './auth/auth.service';
 
 export interface AcademicSession { id: number; name: string; startDate: string; endDate: string; isCurrent: boolean; }
@@ -13,6 +13,8 @@ export class SessionService {
   private auth = inject(AuthService);
 
   readonly profile = signal<MadrasaProfile | null>(null);
+  /** Uploaded logo, or the bundled one until Settings sets it. */
+  readonly logoUrl = computed(() => fileUrl(this.profile()?.logoPath) ?? '/logo.jpg');
   readonly sessions = signal<AcademicSession[]>([]);
   private selectedId = signal<number | null>(Number(localStorage.getItem('mms.session')) || null);
   readonly current = computed(() => {

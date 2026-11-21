@@ -11,6 +11,9 @@ namespace Madrasa.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser)
     : IdentityDbContext<AppUser>(options), IAppDbContext
 {
+    public async Task<string?> UserNameAsync(string? userId, CancellationToken ct) =>
+        userId is null ? null : await Users.Where(u => u.Id == userId).Select(u => u.FullName).FirstOrDefaultAsync(ct);
+
     public DbSet<MadrasaProfile> MadrasaProfiles => Set<MadrasaProfile>();
     public DbSet<AcademicSession> AcademicSessions => Set<AcademicSession>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
@@ -135,6 +138,37 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
         b.Entity<HifzJuzProgress>().Property(x => x.JuzNo);
         b.Entity<HifzJuzProgress>().ToTable(t => t.HasCheckConstraint("CK_Juz", "[JuzNo] BETWEEN 1 AND 30"));
         b.Entity<LedgerEntry>().ToTable(t => t.HasCheckConstraint("CK_Ledger_Amount", "[Amount] > 0"));
+
+        // Foreign keys for id columns that have no navigation property, so the database rejects orphan rows
+        b.Entity<FeeInvoice>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<FeeInvoice>().HasOne<AcademicSession>().WithMany().HasForeignKey(x => x.SessionId);
+        b.Entity<FeeReceiptLine>().HasOne<FeeInvoice>().WithMany().HasForeignKey(x => x.InvoiceId);
+        b.Entity<StudentDiscount>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<StudentDiscount>().HasOne<FeeHead>().WithMany().HasForeignKey(x => x.FeeHeadId);
+        b.Entity<StudentDiscount>().HasOne<Fund>().WithMany().HasForeignKey(x => x.SponsorFundId);
+        b.Entity<StudentDocument>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<AdmissionApplication>().HasOne<AcademicSession>().WithMany().HasForeignKey(x => x.SessionId);
+        b.Entity<AdmissionApplication>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<HifzJuzProgress>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<HifzDailyLog>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<HifzDailyLog>().HasOne<Staff>().WithMany().HasForeignKey(x => x.TeacherId);
+        b.Entity<Exam>().HasOne<AcademicSession>().WithMany().HasForeignKey(x => x.SessionId);
+        b.Entity<ExamMark>().HasOne<Exam>().WithMany().HasForeignKey(x => x.ExamId);
+        b.Entity<ExamMark>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<ExamResult>().HasOne<Exam>().WithMany().HasForeignKey(x => x.ExamId);
+        b.Entity<ExamResult>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<RoutineSlot>().HasOne<AcademicSession>().WithMany().HasForeignKey(x => x.SessionId);
+        b.Entity<SalaryPayment>().HasOne<Fund>().WithMany().HasForeignKey(x => x.FundId);
+        b.Entity<LedgerEntry>().HasOne<Donor>().WithMany().HasForeignKey(x => x.DonorId);
+        b.Entity<LedgerEntry>().HasOne(x => x.FeeReceipt).WithMany().HasForeignKey(x => x.FeeReceiptId);
+        b.Entity<LedgerEntry>().HasOne<SalaryPayment>().WithMany().HasForeignKey(x => x.SalaryPaymentId);
+        b.Entity<HostelAllocation>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<HostelLeave>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<BookIssue>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
+        b.Entity<BookIssue>().HasOne<Staff>().WithMany().HasForeignKey(x => x.StaffId);
+        b.Entity<MessageLog>().HasOne<Notice>().WithMany().HasForeignKey(x => x.RelatedNoticeId);
+        b.Entity<FeeReceipt>().HasIndex(x => new { x.StudentId, x.Date });
+        b.Entity<FeeInvoice>().HasIndex(x => x.Month);
 
         foreach (var fk in b.Model.GetEntityTypes().SelectMany(t => t.GetForeignKeys())
                      .Where(f => f.DeleteBehavior == DeleteBehavior.Cascade && f.DeclaringEntityType.ClrType.Namespace == typeof(Student).Namespace))

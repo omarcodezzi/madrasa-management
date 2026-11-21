@@ -107,6 +107,7 @@ public class LedgerEntry
     public string? VoucherNo { get; set; }
     public int? DonorId { get; set; }
     public int? FeeReceiptId { get; set; }
+    public FeeReceipt? FeeReceipt { get; set; }
     public int? SalaryPaymentId { get; set; }
     public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }

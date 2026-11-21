@@ -1,0 +1,212 @@
+<m-page-header [title]="isEdit() ? 'শিক্ষার্থীর তথ্য সম্পাদনা' : 'নতুন ভর্তি'"
+  [description]="isEdit() ? (existing()?.name ?? '') + ' · ' + (existing()?.studentCode ?? '') : 'তারকা (*) চিহ্নিত ঘরগুলো পূরণ করা জরুরি। আইডি ও রোল নিজে থেকেই তৈরি হয়।'">
+  @if (isEdit()) { <a mButton variant="ghost" [routerLink]="['/students', id()]">বাতিল</a> }
+</m-page-header>
+
+@if (hadDraft() && !isEdit()) {
+  <div class="mb-4 flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-goldbg text-goldink">
+    <m-icon name="info" /><span class="flex-1">আগের অসম্পূর্ণ ভর্তি ফরমটি ফিরিয়ে আনা হয়েছে।</span>
+    <button mButton size="sm" variant="outline" (click)="discardDraft()">নতুন করে শুরু করুন</button>
+  </div>
+}
+
+@if (loading()) {
+  <m-card><div class="grid gap-4"><m-skeleton height="40px" width="60%" /><m-skeleton height="44px" /><m-skeleton height="44px" /><m-skeleton height="44px" /></div></m-card>
+} @else {
+<div class="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] items-start max-w-[1000px]">
+  <!-- Stepper -->
+  <ol class="list-none m-0 p-0 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24" aria-label="ধাপ">
+    @for (s of steps; track s; let i = $index) {
+      <li class="flex-1 lg:flex-none">
+        <button type="button" (click)="goTo(i)" [attr.aria-current]="i === step() ? 'step' : null"
+          class="w-full flex items-center gap-3 px-3 min-h-12 rounded-xl text-left cursor-pointer transition-colors"
+          [class]="i === step() ? 'bg-card border border-line shadow-sm font-bold text-ink' : 'text-mut hover:bg-soft border border-transparent'">
+          <span class="size-7 shrink-0 rounded-full grid place-items-center text-sm font-bold"
+            [class]="i < step() ? 'bg-g2 text-white' : i === step() ? 'bg-g text-white' : 'bg-soft text-mut'">
+            @if (i < step()) { <m-icon name="check" [size]="16" /> } @else { {{ i + 1 | num }} }
+          </span>
+          <span class="hidden sm:inline whitespace-nowrap">{{ s }}</span>
+        </button>
+      </li>
+    }
+  </ol>
+
+  <form class="grid gap-5" (ngSubmit)="step() < 3 ? next() : save()" novalidate>
+    <m-card [title]="steps[step()]">
+      @switch (step()) {
+        @case (0) {
+          <div class="flex items-center gap-4 mb-5">
+            <div class="w-[84px] h-[96px] rounded-xl bg-soft text-g2 grid place-items-center overflow-hidden border border-line shrink-0">
+              @if (photo()) { <img [src]="photo()" alt="শিক্ষার্থীর ছবি" class="size-full object-cover"> } @else { <m-icon name="cam" [size]="28" /> }
+            </div>
+            <div>
+              <button type="button" mButton variant="outline" size="sm" (click)="photoInput.click()">
+                <m-icon name="cam" [size]="16" /> {{ photo() ? 'ছবি বদলান' : 'ছবি যোগ করুন' }}</button>
+              <input #photoInput id="f-photo" type="file" accept="image/*" class="sr-only" tabindex="-1" aria-label="ছবি" (change)="onPhoto($event)">
+              <p class="m-0 mt-1.5 text-sm text-mut">ঐচ্ছিক। আইডি কার্ডের মাপে কেটে নেওয়া হবে।</p>
+              @if (err('photo')) { <p class="m-0 mt-1 text-sm text-red">{{ err('photo') }}</p> }
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <m-field label="শিক্ষার্থীর নাম" for="f-name" [required]="true" [error]="err('name')">
+              <input id="f-name" class="ctl" name="name" [ngModel]="f().name" (ngModelChange)="set('name', $event)" [attr.aria-invalid]="!!err('name')" autocomplete="off">
+            </m-field>
+            <m-field label="আরবি নাম" for="f-ar" hint="ঐচ্ছিক, সনদ ও মার্কশিটে লাগবে">
+              <input id="f-ar" class="ctl ar text-right" dir="rtl" name="nameAr" [ngModel]="f().nameAr" (ngModelChange)="set('nameAr', $event)">
+            </m-field>
+            <m-field label="ছাত্র/ছাত্রী" for="f-gender" [required]="true">
+              <select id="f-gender" class="ctl" name="gender" [ngModel]="f().gender" (ngModelChange)="set('gender', $event)">
+                @for (g of genders; track g.v) { <option [value]="g.v">{{ g.l }}</option> }
+              </select>
+            </m-field>
+            <m-field label="জন্মতারিখ" for="f-dob" [error]="err('dateOfBirth')">
+              <input id="f-dob" type="date" class="ctl" name="dob" [max]="'9999-12-31'" [ngModel]="f().dateOfBirth" (ngModelChange)="set('dateOfBirth', $event || null)" [attr.aria-invalid]="!!err('dateOfBirth')">
+            </m-field>
+            <m-field label="জন্ম নিবন্ধন নম্বর" for="f-brn">
+              <input id="f-brn" class="ctl tabular" inputmode="numeric" name="brn" [ngModel]="f().birthRegNo" (ngModelChange)="set('birthRegNo', $event)">
+            </m-field>
+            <m-field label="রক্তের গ্রুপ" for="f-blood">
+              <select id="f-blood" class="ctl" name="blood" [ngModel]="f().bloodGroup ?? ''" (ngModelChange)="set('bloodGroup', $event || null)">
+                <option value="">জানা নেই</option>
+                @for (b of bloodGroups; track b) { <option [value]="b">{{ b }}</option> }
+              </select>
+            </m-field>
+          </div>
+        }
+        @case (1) {
+          <div class="grid gap-4 sm:grid-cols-2">
+            <m-field label="পিতার নাম" for="f-father" [required]="true" [error]="err('fatherName')">
+              <input id="f-father" class="ctl" name="father" [ngModel]="f().fatherName" (ngModelChange)="fatherChanged($event)" [attr.aria-invalid]="!!err('fatherName')">
+            </m-field>
+            <m-field label="মাতার নাম" for="f-mother">
+              <input id="f-mother" class="ctl" name="mother" [ngModel]="f().motherName" (ngModelChange)="set('motherName', $event)">
+            </m-field>
+          </div>
+
+          <h3 class="mt-6 mb-3 !text-base">অভিভাবক</h3>
+          <div class="grid gap-3">
+            @for (g of f().guardians; track $index; let i = $index) {
+              <fieldset class="m-0 p-4 rounded-xl border border-line grid gap-3 sm:grid-cols-[1fr_140px_1fr] items-start">
+                <legend class="sr-only">অভিভাবক {{ i + 1 | num }}</legend>
+                <m-field label="নাম" [for]="'g-name-' + i" [required]="true" [error]="err('guardians[' + i + '].name')">
+                  <input [id]="'g-name-' + i" class="ctl" [name]="'gname' + i" [ngModel]="g.name" (ngModelChange)="setG(i, 'name', $event)" [attr.aria-invalid]="!!err('guardians[' + i + '].name')">
+                </m-field>
+                <m-field label="সম্পর্ক" [for]="'g-rel-' + i">
+                  <select [id]="'g-rel-' + i" class="ctl" [name]="'grel' + i" [ngModel]="g.relation" (ngModelChange)="setG(i, 'relation', $event)">
+                    @for (r of relations; track r) { <option [value]="r">{{ r }}</option> }
+                  </select>
+                </m-field>
+                <m-field label="মোবাইল" [for]="'g-phone-' + i" [required]="true" [error]="err('guardians[' + i + '].phone')" [hint]="g.isPrimary ? 'নোটিশ ও SMS এই নম্বরে যাবে' : undefined">
+                  <input [id]="'g-phone-' + i" class="ctl tabular" inputmode="tel" autocomplete="tel" [name]="'gphone' + i" placeholder="০১৭XXXXXXXX"
+                    [ngModel]="g.phone" (ngModelChange)="setG(i, 'phone', $event)" [attr.aria-invalid]="!!err('guardians[' + i + '].phone')">
+                </m-field>
+                <div class="sm:col-span-3 flex flex-wrap items-center gap-3 -mt-1">
+                  <label class="inline-flex items-center gap-2 font-normal text-ink cursor-pointer">
+                    <input type="radio" name="primary" class="size-4 accent-[var(--g)]" [checked]="g.isPrimary" (change)="setG(i, 'isPrimary', true)"> প্রধান অভিভাবক
+                  </label>
+                  @if (f().guardians.length > 1) {
+                    <button type="button" mButton variant="ghost" size="sm" class="ml-auto !text-red" (click)="removeGuardian(i)"><m-icon name="trash" [size]="16" /> বাদ দিন</button>
+                  }
+                </div>
+              </fieldset>
+            }
+            <div><button type="button" mButton variant="outline" size="sm" (click)="addGuardian()"><m-icon name="plus" [size]="16" /> আরেকজন অভিভাবক</button></div>
+          </div>
+
+          <h3 class="mt-6 mb-3 !text-base">ঠিকানা</h3>
+          <div class="grid gap-4">
+            <m-field label="বর্তমান ঠিকানা" for="f-addr">
+              <input id="f-addr" class="ctl" name="addr" placeholder="গ্রাম, ডাকঘর, উপজেলা, জেলা" [ngModel]="f().presentAddress" (ngModelChange)="set('presentAddress', $event)">
+            </m-field>
+            <label class="inline-flex items-center gap-2 font-normal text-ink cursor-pointer -mt-1">
+              <input type="checkbox" class="size-4 accent-[var(--g)]" [checked]="sameAddress()" (change)="sameAddress.set(!sameAddress())"> স্থায়ী ঠিকানা একই
+            </label>
+            @if (!sameAddress()) {
+              <m-field label="স্থায়ী ঠিকানা" for="f-paddr">
+                <input id="f-paddr" class="ctl" name="paddr" [ngModel]="f().permanentAddress" (ngModelChange)="set('permanentAddress', $event)">
+              </m-field>
+            }
+          </div>
+        }
+        @case (2) {
+          <div class="grid gap-4 sm:grid-cols-2">
+            <m-field label="শ্রেণি" for="f-cls" [required]="true" [error]="err('classId')">
+              <select id="f-cls" class="ctl" name="cls" [ngModel]="f().classId" (ngModelChange)="set('classId', $event ? +$event : null)" [attr.aria-invalid]="!!err('classId')">
+                <option [ngValue]="null">বাছাই করুন</option>
+                @for (d of lookups.departments(); track d.id) {
+                  <optgroup [label]="d.nameBn">
+                    @for (c of lookups.classes(); track c.id) { @if (c.departmentId === d.id) { <option [ngValue]="c.id">{{ c.nameBn }}</option> } }
+                  </optgroup>
+                }
+              </select>
+            </m-field>
+            <m-field label="রোল" for="f-roll" [error]="err('roll')" [hint]="!isEdit() && suggested() ? 'খালি রাখলে রোল ' + (suggested()!.roll | num) + ' দেওয়া হবে' : undefined">
+              <input id="f-roll" class="ctl tabular" inputmode="numeric" name="roll" [ngModel]="f().roll" (ngModelChange)="set('roll', +toEn($event) || null)" [attr.aria-invalid]="!!err('roll')">
+            </m-field>
+            <m-field label="ভর্তির তারিখ" for="f-adm">
+              <input id="f-adm" type="date" class="ctl" name="adm" [ngModel]="f().admissionDate" (ngModelChange)="set('admissionDate', $event || null)">
+            </m-field>
+            <m-field label="মাসিক বেতন" for="f-fee" [error]="err('monthlyFeeOverride')"
+              [hint]="selectedClass()?.monthlyFee ? 'খালি রাখলে শ্রেণির বেতন ' + (selectedClass()!.monthlyFee! | money) : 'খালি রাখলে শ্রেণির নির্ধারিত বেতন'">
+              <input id="f-fee" class="ctl tabular" inputmode="numeric" name="fee" [ngModel]="f().monthlyFeeOverride" (ngModelChange)="set('monthlyFeeOverride', $event === '' || $event == null ? null : +toEn($event))">
+            </m-field>
+          </div>
+          <div class="grid gap-3 mt-5">
+            <label class="flex items-start gap-3 p-3 rounded-xl border border-line cursor-pointer font-normal text-ink">
+              <input type="checkbox" class="size-5 mt-0.5 accent-[var(--g)]" [checked]="f().isOrphan" (change)="set('isOrphan', !f().isOrphan)">
+              <span><b class="font-semibold">ইয়াতিম শিক্ষার্থী</b><small class="block text-mut text-sm">বৃত্তি ও যাকাত ফান্ডের রিপোর্টে আলাদা দেখাবে</small></span>
+            </label>
+            <label class="flex items-start gap-3 p-3 rounded-xl border border-line cursor-pointer font-normal text-ink">
+              <input type="checkbox" class="size-5 mt-0.5 accent-[var(--g)]" [checked]="f().isResidential" (change)="set('isResidential', !f().isResidential)">
+              <span><b class="font-semibold">আবাসিক (বোর্ডিংয়ে থাকে)</b><small class="block text-mut text-sm">প্রতি মাসে বোর্ডিং ফি যোগ হবে</small></span>
+            </label>
+            @if (isEdit()) {
+              <m-field label="অবস্থা" for="f-status">
+                <select id="f-status" class="ctl" name="status" [ngModel]="f().status" (ngModelChange)="set('status', $event)">
+                  <option value="Active">সক্রিয়</option><option value="Left">চলে গেছে</option><option value="Graduated">পাস করেছে</option><option value="Suspended">স্থগিত</option>
+                </select>
+              </m-field>
+            }
+          </div>
+        }
+        @case (3) {
+          <div class="flex items-center gap-4 mb-5">
+            <m-avatar [name]="f().name" [src]="photo()" [size]="64" />
+            <div>
+              <h2>{{ f().name }}</h2>
+              <p class="m-0 text-mut">{{ isEdit() ? existing()?.studentCode : suggested()?.studentCode }} · {{ selectedClass()?.nameBn }} · রোল {{ (f().roll || suggested()?.roll) | num }}</p>
+            </div>
+          </div>
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 m-0">
+            <dt class="text-mut text-sm">ছাত্র/ছাত্রী</dt><dd class="m-0">{{ f().gender === 'Male' ? 'ছাত্র' : 'ছাত্রী' }}</dd>
+            <dt class="text-mut text-sm">জন্মতারিখ</dt><dd class="m-0">{{ (f().dateOfBirth | bdate) || '—' }}</dd>
+            <dt class="text-mut text-sm">পিতা / মাতা</dt><dd class="m-0">{{ f().fatherName }} / {{ f().motherName || '—' }}</dd>
+            @for (g of f().guardians; track $index) {
+              <dt class="text-mut text-sm">অভিভাবক ({{ g.relation }})</dt><dd class="m-0">{{ g.name }}, <span class="tabular">{{ g.phone | digits }}</span> @if (g.isPrimary) { <span class="text-sm text-mut">· প্রধান</span> }</dd>
+            }
+            <dt class="text-mut text-sm">ঠিকানা</dt><dd class="m-0">{{ f().presentAddress || '—' }}</dd>
+            <dt class="text-mut text-sm">ভর্তির তারিখ</dt><dd class="m-0">{{ f().admissionDate | bdate }}</dd>
+            <dt class="text-mut text-sm">মাসিক বেতন</dt><dd class="m-0">{{ (f().monthlyFeeOverride ?? selectedClass()?.monthlyFee) | money }}@if (f().isResidential) { + বোর্ডিং ফি }</dd>
+            @if (f().isOrphan) { <dt class="text-mut text-sm">বিশেষ</dt><dd class="m-0">ইয়াতিম</dd> }
+          </dl>
+        }
+      }
+    </m-card>
+
+    <!-- Sticky footer with the actions (spec 7) -->
+    <div class="sticky bottom-20 lg:bottom-4 z-10 flex flex-wrap items-center gap-2 px-4 py-3 rounded-2xl bg-card border border-line shadow-lg">
+      @if (step() > 0) { <button type="button" mButton variant="ghost" (click)="back()"><m-icon name="chevronLeft" [size]="18" /> আগের ধাপ</button> }
+      <span class="text-sm text-mut ml-1">ধাপ {{ step() + 1 | num }} / {{ steps.length | num }}</span>
+      <div class="ml-auto flex flex-wrap gap-2">
+        @if (step() < 3) {
+          @if (isEdit()) { <button type="button" mButton variant="outline" [loading]="saving()" (click)="save()">এখনই সংরক্ষণ</button> }
+          <button type="submit" mButton>পরের ধাপ <m-icon name="chevronRight" [size]="18" /></button>
+        } @else {
+          <button type="button" mButton variant="outline" [disabled]="saving()" (click)="save(true)"><m-icon name="print" [size]="18" /> সংরক্ষণ ও ফরম প্রিন্ট</button>
+          <button type="submit" mButton [loading]="saving()">{{ isEdit() ? 'পরিবর্তন সংরক্ষণ' : 'ভর্তি সম্পন্ন করুন' }}</button>
+        }
+      </div>
+    </div>
+  </form>
+</div>
+}

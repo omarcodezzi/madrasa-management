@@ -12,3 +12,5 @@ export * from './modal';
 export * from './confirm';
 export * from './toaster';
 export * from './data-table';
+export * from './qr-code';
+export * from './photo';

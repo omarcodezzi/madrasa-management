@@ -128,6 +128,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ClassId");
 
+                    b.HasIndex("SessionId");
+
+                    b.HasIndex("StudentId");
+
                     b.ToTable("AdmissionApplications");
                 });
 
@@ -262,6 +266,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BookId");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("BookIssues");
                 });
@@ -452,6 +460,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SessionId");
+
                     b.ToTable("Exams");
                 });
 
@@ -482,6 +492,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClassSubjectId");
+
+                    b.HasIndex("StudentId");
 
                     b.HasIndex("ExamId", "StudentId", "ClassSubjectId")
                         .IsUnique();
@@ -517,6 +529,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasKey("ExamId", "StudentId");
 
                     b.HasIndex("GradeRuleId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("ExamResults");
                 });
@@ -617,6 +631,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("FeeHeadId");
 
+                    b.HasIndex("Month");
+
+                    b.HasIndex("SessionId");
+
                     b.HasIndex("StudentId", "FeeHeadId", "Month")
                         .IsUnique()
                         .HasFilter("[Month] IS NOT NULL");
@@ -662,7 +680,7 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasIndex("ReceiptNo")
                         .IsUnique();
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId", "Date");
 
                     b.ToTable("FeeReceipts");
                 });
@@ -694,6 +712,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FeeHeadId");
+
+                    b.HasIndex("InvoiceId");
 
                     b.HasIndex("ReceiptId");
 
@@ -912,6 +932,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TeacherId");
+
                     b.HasIndex("StudentId", "Date")
                         .IsUnique();
 
@@ -990,6 +1012,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RoomId");
 
+                    b.HasIndex("StudentId");
+
                     b.ToTable("HostelAllocations");
                 });
 
@@ -1020,6 +1044,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasColumnType("date");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("HostelLeaves");
                 });
@@ -1163,6 +1189,12 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("DonorId");
+
+                    b.HasIndex("FeeReceiptId");
+
+                    b.HasIndex("SalaryPaymentId");
+
                     b.HasIndex("FundId", "Date");
 
                     b.ToTable("LedgerEntries", t =>
@@ -1254,6 +1286,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RelatedNoticeId");
+
                     b.ToTable("MessageLogs");
                 });
 
@@ -1328,6 +1362,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SectionId");
 
+                    b.HasIndex("SessionId");
+
                     b.ToTable("RoutineSlots");
                 });
 
@@ -1369,6 +1405,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FundId");
 
                     b.HasIndex("StaffId", "Month")
                         .IsUnique();
@@ -1720,6 +1758,12 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FeeHeadId");
+
+                    b.HasIndex("SponsorFundId");
+
+                    b.HasIndex("StudentId");
+
                     b.ToTable("StudentDiscounts");
                 });
 
@@ -1746,6 +1790,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("StudentDocuments");
                 });
@@ -2020,6 +2066,16 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.AcademicSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId");
+
                     b.Navigation("Class");
                 });
 
@@ -2030,6 +2086,14 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId");
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId");
 
                     b.Navigation("Book");
                 });
@@ -2101,6 +2165,15 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Madrasa.Domain.Entities.Exam", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.AcademicSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Madrasa.Domain.Entities.ExamMark", b =>
                 {
                     b.HasOne("Madrasa.Domain.Entities.ClassSubject", "ClassSubject")
@@ -2109,14 +2182,38 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.Exam", null)
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("ClassSubject");
                 });
 
             modelBuilder.Entity("Madrasa.Domain.Entities.ExamResult", b =>
                 {
+                    b.HasOne("Madrasa.Domain.Entities.Exam", null)
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Madrasa.Domain.Entities.GradeRule", "GradeRule")
                         .WithMany()
                         .HasForeignKey("GradeRuleId");
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("GradeRule");
                 });
@@ -2126,6 +2223,18 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.HasOne("Madrasa.Domain.Entities.FeeHead", "FeeHead")
                         .WithMany()
                         .HasForeignKey("FeeHeadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.AcademicSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -2151,6 +2260,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.FeeInvoice", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId");
+
                     b.HasOne("Madrasa.Domain.Entities.FeeReceipt", null)
                         .WithMany("Lines")
                         .HasForeignKey("ReceiptId")
@@ -2158,6 +2271,28 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("FeeHead");
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.HifzDailyLog", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId");
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.HifzJuzProgress", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Madrasa.Domain.Entities.HostelAllocation", b =>
@@ -2168,7 +2303,22 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.HostelLeave", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Madrasa.Domain.Entities.LedgerEntry", b =>
@@ -2179,15 +2329,36 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.Donor", null)
+                        .WithMany()
+                        .HasForeignKey("DonorId");
+
+                    b.HasOne("Madrasa.Domain.Entities.FeeReceipt", "FeeReceipt")
+                        .WithMany()
+                        .HasForeignKey("FeeReceiptId");
+
                     b.HasOne("Madrasa.Domain.Entities.Fund", "Fund")
                         .WithMany()
                         .HasForeignKey("FundId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.SalaryPayment", null)
+                        .WithMany()
+                        .HasForeignKey("SalaryPaymentId");
+
                     b.Navigation("Category");
 
+                    b.Navigation("FeeReceipt");
+
                     b.Navigation("Fund");
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.MessageLog", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.Notice", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedNoticeId");
                 });
 
             modelBuilder.Entity("Madrasa.Domain.Entities.RoutineSlot", b =>
@@ -2204,6 +2375,12 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Madrasa.Domain.Entities.AcademicSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("ClassSubject");
 
                     b.Navigation("Section");
@@ -2211,6 +2388,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Madrasa.Domain.Entities.SalaryPayment", b =>
                 {
+                    b.HasOne("Madrasa.Domain.Entities.Fund", null)
+                        .WithMany()
+                        .HasForeignKey("FundId");
+
                     b.HasOne("Madrasa.Domain.Entities.Staff", "Staff")
                         .WithMany()
                         .HasForeignKey("StaffId")
@@ -2262,6 +2443,34 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.StudentDiscount", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.FeeHead", null)
+                        .WithMany()
+                        .HasForeignKey("FeeHeadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Madrasa.Domain.Entities.Fund", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorFundId");
+
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Madrasa.Domain.Entities.StudentDocument", b =>
+                {
+                    b.HasOne("Madrasa.Domain.Entities.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Madrasa.Domain.Entities.StudentGuardian", b =>
