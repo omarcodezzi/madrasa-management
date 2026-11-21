@@ -71,7 +71,7 @@ export class CommandPalette {
   private actions = computed(() => {
     this.lang();
     const a: (Item & { perm: string })[] = [
-      { kind: 'action', label: this.t.translate('palette.addStudent'), icon: 'plus', url: '/admission', perm: P.admission },
+      { kind: 'action', label: this.t.translate('palette.addStudent'), icon: 'plus', url: '/admission/new', perm: P.admission },
       { kind: 'action', label: this.t.translate('palette.takeAttendance'), icon: 'scan', url: '/attendance', perm: P.attendance },
       { kind: 'action', label: this.t.translate('palette.collectFee'), icon: 'wallet', url: '/fees', perm: P.fees },
       { kind: 'action', label: this.t.translate('palette.publishNotice'), icon: 'mega', url: '/notices', perm: P.notices },

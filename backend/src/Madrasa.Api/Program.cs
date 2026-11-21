@@ -6,6 +6,7 @@ using Madrasa.Application.Auth;
 using Madrasa.Application.Common;
 using Madrasa.Infrastructure;
 using Madrasa.Infrastructure.Persistence;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -53,6 +54,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Public website forms (online admission, status check): per-IP fixed window
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.OnRejected = async (ctx, ct) =>
+    {
+        ctx.HttpContext.Response.ContentType = "application/problem+json";
+        await ctx.HttpContext.Response.WriteAsync("{\"title\":\"অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।\",\"status\":429}", ct);
+    };
+    o.AddPolicy("public", http => RateLimitPartition.GetFixedWindowLimiter(http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(10), QueueLimit = 0 }));
+});
+
 var origins = cfg.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:4200" };
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod()));
 
@@ -71,6 +85,7 @@ Directory.CreateDirectory(uploads);
 app.UseStaticFiles(new StaticFileOptions { FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploads), RequestPath = "/uploads" });
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 

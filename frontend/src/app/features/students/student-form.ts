@@ -10,6 +10,7 @@ import { PrintService } from '../../shared/print/print.service';
 import { Avatar, Button, Card, FormField, Icon, PageHeader, resizePhoto, Skeleton } from '../../shared/ui';
 import { Guardian, StudentDetail, StudentInput, GENDER_LABEL } from './student.models';
 import { StudentsApi } from './students.service';
+import { OfficeApi } from '../office/office.api';
 
 const DRAFT_KEY = 'mms.admission-draft';
 const STEPS = ['শিক্ষার্থীর তথ্য', 'অভিভাবক ও ঠিকানা', 'শ্রেণি ও বেতন', 'যাচাই করুন'] as const;
@@ -30,6 +31,9 @@ const blank = (): StudentInput => ({
 export class StudentFormPage implements HasUnsavedChanges {
   /** Route param for edit (students/:id/edit) */
   readonly id = input<string>();
+  /** ?application=12: admitting an online/office application, prefilled from it */
+  readonly application = input<string>();
+  private office = inject(OfficeApi);
   private api = inject(StudentsApi);
   private router = inject(Router);
   private toast = inject(ToastService);
@@ -57,7 +61,8 @@ export class StudentFormPage implements HasUnsavedChanges {
   constructor() {
     effect(() => {
       const id = this.id();
-      untracked(() => (id ? this.loadExisting(+id) : this.loadDraft()));
+      const app = this.application();
+      untracked(() => (id ? this.loadExisting(+id) : app ? this.loadApplication(+app) : this.loadDraft()));
     });
     // Suggest the next roll when the class changes on a new admission
     effect(() => {
@@ -68,7 +73,7 @@ export class StudentFormPage implements HasUnsavedChanges {
     // Autosave the draft of a new admission (spec 7: autosave long forms)
     effect(() => {
       const v = this.f();
-      if (!this.isEdit() && this.dirty()) try { localStorage.setItem(DRAFT_KEY, JSON.stringify(v)); } catch { /* full */ }
+      if (!this.isEdit() && !this.application() && this.dirty()) try { localStorage.setItem(DRAFT_KEY, JSON.stringify(v)); } catch { /* full */ }
     });
   }
 
@@ -89,6 +94,16 @@ export class StudentFormPage implements HasUnsavedChanges {
       this.photo.set(fileUrl(s.photoPath));
     } catch (e) { this.toast.error(errorMessage(e)); this.router.navigate(['/students']); }
     finally { this.loading.set(false); }
+  }
+  protected fromApplication = signal<string | null>(null);
+  private async loadApplication(appId: number) {
+    try {
+      const a = (await this.office.applications()).find((x) => x.id === appId);
+      if (!a) { this.loadDraft(); return; }
+      this.fromApplication.set(a.applicationNo);
+      this.f.set({ ...blank(), name: a.applicantName, gender: a.gender, dateOfBirth: a.dateOfBirth, fatherName: a.fatherName ?? '', classId: a.classId,
+        presentAddress: a.address ?? '', guardians: [{ ...blankGuardian(), name: a.fatherName ?? '', phone: a.guardianPhone }] } as StudentInput);
+    } catch { this.loadDraft(); }
   }
   private loadDraft() {
     try {
@@ -187,7 +202,8 @@ export class StudentFormPage implements HasUnsavedChanges {
     try {
       const s = this.isEdit() ? await this.api.update(+this.id()!, payload) : await this.api.create(payload);
       this.dirty.set(false);
-      if (!this.isEdit()) try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      if (!this.isEdit() && !this.application()) try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      if (!this.isEdit() && this.application()) await this.office.admitted(+this.application()!, s.id).catch(() => {});
       this.toast.success(this.isEdit() ? 'পরিবর্তন সংরক্ষণ হয়েছে' : `${s.name} এর ভর্তি সম্পন্ন হয়েছে (আইডি ${s.studentCode})`);
       if (printAfter) this.print.print({ kind: 'admission', data: s });
       this.router.navigate(['/students', s.id]);

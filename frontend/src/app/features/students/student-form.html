@@ -3,6 +3,11 @@
   @if (isEdit()) { <a mButton variant="ghost" [routerLink]="['/students', id()]">বাতিল</a> }
 </m-page-header>
 
+@if (fromApplication()) {
+  <div class="mb-4 flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-soft">
+    <m-icon name="info" /><span class="flex-1">আবেদন {{ fromApplication() }} থেকে তথ্য নেওয়া হয়েছে। বাকি ঘরগুলো পূরণ করে ভর্তি সম্পন্ন করুন।</span>
+  </div>
+}
 @if (hadDraft() && !isEdit()) {
   <div class="mb-4 flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-goldbg text-goldink">
     <m-icon name="info" /><span class="flex-1">আগের অসম্পূর্ণ ভর্তি ফরমটি ফিরিয়ে আনা হয়েছে।</span>

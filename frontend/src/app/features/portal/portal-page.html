@@ -1,0 +1,108 @@
+<m-page-header [title]="'আসসালামু আলাইকুম, ' + (auth.user()?.fullName ?? '')" [description]="home()?.kind === 'student' ? 'তোমার হাজিরা, হিফজ, ফলাফল ও বেতনের হিসাব' : 'আপনার সন্তানের হাজিরা, হিফজ, ফলাফল ও বেতনের হিসাব'" />
+
+@if (error()) {
+  <m-empty-state title="তথ্য দেখানো যাচ্ছে না" [description]="error()!" icon="alert" />
+} @else if (!home()) {
+  <m-skeleton height="80px" />
+} @else {
+  @let h = home()!;
+  @if (h.children.length > 1) {
+    <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="সন্তান বাছাই">
+      @for (c of h.children; track c.studentId) {
+        <button type="button" role="tab" class="child-tab" [attr.aria-selected]="childId() === c.studentId" (click)="pick(c.studentId)">
+          <m-avatar [name]="c.name" [src]="photo(c.photoPath)" [size]="32" /> {{ c.name }}</button>
+      }
+    </div>
+  }
+  @if (!h.children.length) { <m-empty-state title="কোনো শিক্ষার্থী যুক্ত নেই" description="অফিসে যোগাযোগ করুন।" icon="users" /> }
+
+  @if (detail(); as d) {
+    <div class="flex items-center gap-4 p-4 mb-5 bg-card border border-line rounded-[var(--radius-card)]">
+      <m-avatar [name]="d.student.name" [src]="photo(d.student.photoPath)" [size]="64" />
+      <div class="flex-1 leading-tight"><b class="font-serif text-xl">{{ d.student.name }}</b>
+        <small class="block text-mut">{{ d.student.studentCode }} · {{ d.student.className }}@if (d.student.roll) { · রোল {{ d.student.roll | num }} }</small></div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
+      <div class="px-5 py-4"><span class="text-sm text-mut">এ মাসের হাজিরা</span><b class="block font-serif font-extrabold text-[26px]">{{ d.attendance.percent | num }}%</b><em class="not-italic text-[13px] text-mut">{{ (d.attendance.present + d.attendance.late) | num }}/{{ d.attendance.workDays | num }} দিন</em></div>
+      <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">বকেয়া বেতন</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="d.dues.totalDue > 0" [class.text-g2]="!d.dues.totalDue">{{ d.dues.totalDue | money }}</b>
+        <em class="not-italic text-[13px] text-mut">{{ d.dues.totalDue ? 'অফিসে বা বিকাশে পরিশোধ করুন' : 'সব পরিশোধ করা আছে' }}</em></div>
+      <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">সর্বশেষ ফলাফল</span>
+        @if (latest(); as r) { <b class="block font-serif font-extrabold text-[22px]">{{ r.grade || 'অকৃতকার্য' }}</b><em class="not-italic text-[13px] text-mut">{{ r.examName }} · গড় {{ r.average | num }}</em> }
+        @else { <b class="block text-mut mt-1">এখনও প্রকাশিত হয়নি</b> }</div>
+      <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">হিফজ</span>
+        @if (d.hifz; as hz) { <b class="block font-serif font-extrabold text-[26px] text-g2">{{ hz.completedJuz | num }}/৩০ পারা</b> }
+        @else { <b class="block text-mut mt-1">প্রযোজ্য নয়</b> }</div>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-2 items-start">
+      <m-card title="হাজিরা" [subtitle]="(month() | month)">
+        <app-attendance-calendar [data]="d.attendance" [today]="today" (move)="move($event)" />
+      </m-card>
+
+      <m-card title="বকেয়া" [padded]="false">
+        @if (d.dues.items.length) {
+          <ul class="m-0 p-0 list-none">
+            @for (i of d.dues.items; track i.invoiceId) { <li class="flex justify-between gap-3 px-4 py-2.5 border-b border-line last:border-0"><span>{{ i.feeHead }}@if (i.month) { <small class="text-mut"> · {{ i.month | month }}</small> }</span><b class="tabular text-red">{{ i.due | money }}</b></li> }
+          </ul>
+        } @else { <m-empty-state title="কোনো বকেয়া নেই" description="জাযাকাল্লাহু খাইরান।" icon="check" /> }
+        @if (d.dues.recentReceipts.length) {
+          <h4 class="px-4 pt-3 m-0 text-sm text-mut font-semibold">সাম্প্রতিক পরিশোধ</h4>
+          <ul class="m-0 p-0 list-none">
+            @for (r of d.dues.recentReceipts; track r.id) { <li class="flex justify-between gap-3 px-4 py-2 text-sm"><span>রসিদ {{ r.receiptNo | digits }} <small class="text-mut">· {{ r.date | bdate }}</small></span><span class="tabular">{{ r.totalPaid | money }}</span></li> }
+          </ul>
+        }
+      </m-card>
+
+      @if (d.hifz; as hz) {
+        <m-card title="হিফজের অগ্রগতি" class="lg:col-span-2">
+          <div class="flex flex-wrap items-center gap-6">
+            <app-juz-ring [done]="hz.completedJuz" />
+            <div class="flex-1 min-w-[16rem]"><app-juz-grid [cells]="hz.juz" /></div>
+          </div>
+          @if (hz.logs.length) {
+            <h4 class="mt-4 mb-2 text-sm text-mut font-semibold">সাম্প্রতিক সবক</h4>
+            <ul class="m-0 p-0 list-none text-sm">
+              @for (l of hz.logs.slice(0, 5); track l.id) {
+                <li class="flex flex-wrap gap-x-3 py-1.5 border-b border-line last:border-0"><span class="tabular w-28">{{ l.date | bdate }}</span>
+                  <span class="flex-1">@if (l.sabakJuz) { {{ l.sabakJuz | num }} পারা, পৃষ্ঠা {{ l.sabakFromPage | num }}–{{ l.sabakToPage | num }} } @else { {{ l.sabakText }} }</span>
+                  <span class="text-mut">ভুল {{ l.mistakes | num }}</span></li>
+              }
+            </ul>
+          }
+        </m-card>
+      }
+
+      <m-card title="পরীক্ষার ফলাফল" class="lg:col-span-2" [padded]="false">
+        @for (r of d.results; track r.examId) {
+          <details class="border-b border-line last:border-0" [open]="$first">
+            <summary class="flex flex-wrap items-center gap-3 px-4 py-3 cursor-pointer">
+              <b class="flex-1">{{ r.examName }}</b>
+              <span class="text-sm tabular">মোট {{ r.total | num }} · গড় {{ r.average | num }}</span>
+              <m-badge [tone]="r.grade ? 'success' : 'danger'">{{ r.grade || 'অকৃতকার্য' }}</m-badge>
+              @if (r.merit) { <m-badge tone="gold">মেধা {{ r.merit | num }}</m-badge> }
+            </summary>
+            <table class="w-full text-sm mb-2">
+              <thead><tr class="text-mut"><th class="text-left px-4 py-1.5 font-semibold">কিতাব</th><th class="text-right px-4 py-1.5 font-semibold">পূর্ণমান</th><th class="text-right px-4 py-1.5 font-semibold">প্রাপ্ত</th></tr></thead>
+              <tbody>
+                @for (s of r.subjects; track $index) {
+                  <tr class="border-t border-line"><td class="px-4 py-1.5">{{ s.subject }}</td><td class="px-4 py-1.5 text-right tabular">{{ s.fullMarks | num }}</td>
+                    <td class="px-4 py-1.5 text-right tabular font-semibold" [class.text-red]="s.isAbsent || (s.marks ?? 0) < s.passMarks">{{ s.isAbsent ? 'অনুপস্থিত' : s.marks === null || s.marks === undefined ? '—' : (s.marks | num) }}</td></tr>
+                }
+              </tbody>
+            </table>
+          </details>
+        } @empty { <m-empty-state title="এখনও কোনো ফলাফল প্রকাশিত হয়নি" icon="exam" /> }
+      </m-card>
+    </div>
+  } @else if (childId()) { <div class="grid gap-4"><m-skeleton height="96px" /><m-skeleton height="240px" /></div> }
+
+  @if (h.notices.length) {
+    <h3 class="mt-6 mb-2 font-serif">নোটিশ</h3>
+    <div class="grid gap-3 md:grid-cols-2">
+      @for (n of h.notices; track n.id) {
+        <article class="bg-card border border-line rounded-[var(--radius-card)] p-4"><small class="text-mut tabular">{{ n.date | bdate }}</small><h4 class="m-0 font-semibold">{{ n.title }}</h4><p class="m-0 mt-1 text-sm whitespace-pre-line">{{ n.body }}</p></article>
+      }
+    </div>
+  }
+}

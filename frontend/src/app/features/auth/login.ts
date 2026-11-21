@@ -46,6 +46,7 @@ import { AuthLayout } from './auth-layout';
         </div>
         <button mButton type="submit" size="lg" [block]="true" [loading]="busy()">{{ 'auth.signIn' | transloco }}</button>
       </form>
+      <p class="mt-5 mb-0 text-center text-sm"><a routerLink="/site">মাদরাসার ওয়েবসাইট ও অনলাইন ভর্তি</a></p>
     </app-auth-layout>
   `,
 })

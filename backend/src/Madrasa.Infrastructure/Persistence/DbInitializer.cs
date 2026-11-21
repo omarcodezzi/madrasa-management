@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Madrasa.Application.Auth;
+using Madrasa.Application.Common;
 using Madrasa.Domain.Entities;
 using Madrasa.Domain.Enums;
 using Madrasa.Infrastructure.Identity;
@@ -24,13 +25,22 @@ public static class DbInitializer
         await db.Database.MigrateAsync();
 
         var roles = s.GetRequiredService<RoleManager<IdentityRole>>();
+        // Default permissions are granted once per (role, permission). Settings can then take one away and it stays away
+        // across restarts; a permission added in a later release is still granted to its default roles.
+        var seeded = await db.AppSettings.FirstOrDefaultAsync(x => x.Key == "perm.seeded");
+        var done = (seeded?.Value ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
         foreach (var (name, perms) in Permissions.Defaults)
         {
             var role = await roles.FindByNameAsync(name);
             if (role is null) { role = new IdentityRole(name); await roles.CreateAsync(role); }
             var have = (await roles.GetClaimsAsync(role)).Where(c => c.Type == "perm").Select(c => c.Value).ToHashSet();
-            foreach (var p in perms.Where(p => !have.Contains(p))) await roles.AddClaimAsync(role, new Claim("perm", p));
+            foreach (var p in perms.Where(p => !have.Contains(p) && (name == Roles.SuperAdmin || !done.Contains($"{name}:{p}"))))
+                await roles.AddClaimAsync(role, new Claim("perm", p));
+            foreach (var p in perms) done.Add($"{name}:{p}");
         }
+        if (seeded is null) db.AppSettings.Add(new AppSetting { Key = "perm.seeded", Value = string.Join(',', done) });
+        else seeded.Value = string.Join(',', done);
+        await db.SaveChangesAsync();
 
         var users = s.GetRequiredService<UserManager<AppUser>>();
         var adminName = cfg["Seed:AdminUser"] ?? "admin";
@@ -47,6 +57,7 @@ public static class DbInitializer
 
         if (env.IsDevelopment() && !await db.Students.AnyAsync()) await SeedSampleAsync(db, s);
         if (env.IsDevelopment() && !await db.Subjects.AnyAsync() && await db.Students.AnyAsync()) await SeedAcademicSampleAsync(db, s);
+        if (env.IsDevelopment() && !await db.Books.AnyAsync() && await db.Staff.AnyAsync()) await SeedOfficeSampleAsync(db, s);
     }
 
     private static async Task SeedSampleAsync(AppDbContext db, IServiceProvider sp)
@@ -136,7 +147,6 @@ public static class DbInitializer
         {
             var d = new DateOnly(today.Year, today.Month, 1).AddMonths(-m).AddDays(4);
             if (d > today) continue;
-            db.LedgerEntries.Add(new LedgerEntry { Date = d, FundId = general, CategoryId = 3, Direction = Direction.Out, Amount = 42000 + m * 500, Description = "শিক্ষক-কর্মচারী বেতন", CreatedAt = DateTime.UtcNow });
             db.LedgerEntries.Add(new LedgerEntry { Date = d.AddDays(6), FundId = general, CategoryId = 5, Direction = Direction.Out, Amount = 3500 + m * 120, Description = "বিদ্যুৎ বিল", CreatedAt = DateTime.UtcNow });
             db.LedgerEntries.Add(new LedgerEntry { Date = d.AddDays(2), FundId = general, CategoryId = 2, Direction = Direction.In, Amount = 25000 + m * 3000, Description = "সাধারণ দান", CreatedAt = DateTime.UtcNow });
         }
@@ -247,6 +257,148 @@ public static class DbInitializer
             }
             await exams.PublishAsync(ex.Id, true, default);
         }
+    }
+
+    /// <summary>Development sample for phase 6: donations and salaries, staff attendance, hostel, library, events, applications, portal users.</summary>
+    private static async Task SeedOfficeSampleAsync(AppDbContext db, IServiceProvider sp)
+    {
+        var clock = sp.GetRequiredService<Madrasa.Application.Common.IClock>();
+        var accounts = sp.GetRequiredService<Madrasa.Application.Accounts.AccountsService>();
+        var staffSvc = sp.GetRequiredService<Madrasa.Application.Staffing.StaffService>();
+        var hostel = sp.GetRequiredService<Madrasa.Application.Hostel.HostelService>();
+        var library = sp.GetRequiredService<Madrasa.Application.Library.LibraryService>();
+        var users = sp.GetRequiredService<UserManager<AppUser>>();
+        var today = clock.Today;
+        var funds = await db.Funds.ToDictionaryAsync(f => f.Code, f => f.Id);
+        string[][] donors = [["হাজী আব্দুল মালেক", "01712345601", "লাকসাম বাজার"], ["আলহাজ্ব নুরুল ইসলাম", "01712345602", "কুমিল্লা শহর"],
+            ["মোঃ সিরাজুল হক", "01712345603", "চাঁদপুর"], ["প্রবাসী ভাইদের পক্ষে", "01712345604", "দুবাই"]];
+
+        // Donations and a few expenses for the last three months, then two months of salary from the general fund
+        for (int m = 2; m >= 0; m--)
+        {
+            var first = new DateOnly(today.Year, today.Month, 1).AddMonths(-m);
+            var day = (int k) => { var d = first.AddDays(k); return d > today ? today : d; };
+            await accounts.AddAsync(new(day(1), funds["GENERAL"], 2, 150000 + m * 5000, "মাসিক সাধারণ দান", donors[0][0], donors[0][1], donors[0][2]), default);
+            await accounts.AddAsync(new(day(3), funds["ZAKAT"], 2, 40000 + m * 2500, "যাকাতের টাকা (গরিব ছাত্রদের জন্য)", donors[1][0], donors[1][1], donors[1][2]), default);
+            await accounts.AddAsync(new(day(5), funds["LILLAH"], 2, 18000, "লিল্লাহ বোর্ডিংয়ের জন্য", donors[3][0], donors[3][1], donors[3][2]), default);
+            if (m < 2) await accounts.AddAsync(new(day(7), funds["SADAQAH"], 2, 7500, "সদকা", donors[2][0], donors[2][1], donors[2][2]), default);
+            await accounts.AddAsync(new(day(8), funds["LILLAH"], 4, 14500 + m * 300, "বোর্ডিংয়ের চাল, ডাল ও তেল", null, null, null), default);
+            await accounts.AddAsync(new(day(9), funds["ZAKAT"], 7, 12000, "গরিব ছাত্রদের বই ও পোশাক", null, null, null), default);
+            if (m == 1) await accounts.AddAsync(new(day(12), funds["GENERAL"], 6, 23000, "ছাদের পানি নিরোধক মেরামত", null, null, null), default);
+        }
+        foreach (var monthsAgo in new[] { 2, 1 })
+        {
+            var month = Madrasa.Application.Common.Months.Of(today.AddMonths(-monthsAgo));
+            var paidOn = new DateOnly(today.Year, today.Month, 1).AddMonths(-monthsAgo + 1).AddDays(1);
+            if (paidOn > today) paidOn = today;
+            foreach (var st in await db.Staff.Where(x => x.IsActive && x.BasicSalary != null).OrderBy(x => x.Id).ToListAsync())
+                await staffSvc.PayAsync(new(st.Id, month, st.Id % 3 == 0 ? 1000 : 0, st.Id % 4 == 0 ? 500 : 0, funds["GENERAL"], paidOn), default);
+        }
+
+        // Staff attendance for the last two weeks
+        var staffIds = await db.Staff.Where(x => x.IsActive).Select(x => x.Id).ToListAsync();
+        foreach (var d in await db.WorkDaysAsync(today.AddDays(-14), today, default))
+            foreach (var sid in staffIds)
+            {
+                var r = (sid * 7 + d.DayNumber) % 23;
+                db.StaffAttendance.Add(new StaffAttendance { StaffId = sid, Date = d,
+                    Status = r == 0 ? AttendanceStatus.Absent : r == 1 ? AttendanceStatus.Leave : r == 2 ? AttendanceStatus.Late : AttendanceStatus.Present,
+                    CheckIn = r is 0 or 1 ? null : new TimeOnly(r == 2 ? 8 : 7, 30 + r % 25) });
+            }
+        await db.SaveChangesAsync();
+
+        // Hostel: four rooms for boys, two for girls; seat the hifz students and a few more
+        var rooms = new[] { ("ভবন ক", "101", 6, Gender.Male), ("ভবন ক", "102", 6, Gender.Male), ("ভবন ক", "103", 4, Gender.Male),
+            ("ভবন খ", "201", 8, Gender.Male), ("ছাত্রী ভবন", "১", 6, Gender.Female), ("ছাত্রী ভবন", "২", 4, Gender.Female) };
+        foreach (var (b, no, seats, g) in rooms) await hostel.SaveRoomAsync(null, new(b, no, seats, g), default);
+        var roomIds = await db.HostelRooms.OrderBy(r => r.Id).Select(r => new { r.Id, r.ForGender }).ToListAsync();
+        var students = await db.Students.Where(x => x.Status == StudentStatus.Active).OrderBy(x => x.Id).Select(x => new { x.Id, x.Gender }).ToListAsync();
+        int bi = 0, gi = 0;
+        foreach (var st in students.Where((_, i) => i % 3 != 2))
+        {
+            var pool = roomIds.Where(r => r.ForGender == st.Gender).ToList();
+            var room = st.Gender == Gender.Male ? pool[bi++ % pool.Count] : pool[gi++ % pool.Count];
+            await hostel.AllocateAsync(new(st.Id, room.Id, null, today.AddDays(-60)), default);
+        }
+        var seated = await db.HostelAllocations.Where(a => a.ToDate == null).OrderBy(a => a.Id).Select(a => a.StudentId).ToListAsync();
+        if (seated.Count >= 3)
+        {
+            await hostel.AddLeaveAsync(new(seated[0], today.AddDays(-2), today.AddDays(2), "বাড়িতে বিয়ের অনুষ্ঠান", "পিতা"), default);
+            await hostel.AddLeaveAsync(new(seated[1], today.AddDays(-6), today.AddDays(-1), "অসুস্থতা", "বড় ভাই"), default);
+            db.HostelLeaves.Add(new HostelLeave { StudentId = seated[2], FromDate = today.AddDays(-20), ToDate = today.AddDays(-17), Reason = "ঈদের ছুটি", TakenBy = "পিতা", ReturnedOn = today.AddDays(-17) });
+            await db.SaveChangesAsync();
+        }
+
+        // Library
+        var books = new (string, string?, string?, BookLanguage, string, string, int)[]
+        {
+            ("সহীহ বুখারী (১ম খণ্ড)", "صحيح البخاري", "ইমাম বুখারী (রহ.)", BookLanguage.Arabic, "হাদীস", "A-01", 4),
+            ("সহীহ মুসলিম", "صحيح مسلم", "ইমাম মুসলিম (রহ.)", BookLanguage.Arabic, "হাদীস", "A-02", 3),
+            ("মিশকাতুল মাসাবীহ", "مشكاة المصابيح", "খতীব তাবরেযী (রহ.)", BookLanguage.Arabic, "হাদীস", "A-03", 5),
+            ("হিদায়া (১ম খণ্ড)", "الهداية", "আল্লামা মারগীনানী (রহ.)", BookLanguage.Arabic, "ফিকহ", "B-01", 3),
+            ("কুদুরী", "مختصر القدوري", "ইমাম কুদুরী (রহ.)", BookLanguage.Arabic, "ফিকহ", "B-02", 6),
+            ("তাফসীরে জালালাইন", "تفسير الجلالين", "জালালুদ্দীন মহল্লী ও সুয়ূতী", BookLanguage.Arabic, "তাফসীর", "C-01", 4),
+            ("নাহবেমীর", "نحو مير", "মীর সাইয়্যেদ শরীফ", BookLanguage.Urdu, "নাহু-সরফ", "D-01", 8),
+            ("মীযানুস সরফ", "ميزان الصرف", null, BookLanguage.Urdu, "নাহু-সরফ", "D-02", 8),
+            ("রিয়াদুস সালেহীন", "رياض الصالحين", "ইমাম নববী (রহ.)", BookLanguage.Bangla, "হাদীস", "E-01", 5),
+            ("আর-রাহীকুল মাখতূম", "الرحيق المختوم", "সফিউর রহমান মুবারকপুরী", BookLanguage.Bangla, "সীরাত", "E-02", 3),
+            ("ফাযায়েলে আমাল", null, "মাওলানা যাকারিয়া (রহ.)", BookLanguage.Bangla, "আখলাক", "E-03", 4),
+            ("তাজবীদ শিক্ষা", null, "ক্বারী বেলায়েত হুসাইন", BookLanguage.Bangla, "তাজবীদ", "F-01", 10),
+            ("আল-কিরাআতুর রাশিদা", "القراءة الراشدة", "আবুল হাসান আলী নদভী", BookLanguage.Arabic, "আরবি সাহিত্য", "G-01", 6),
+            ("Elementary English Grammar", null, null, BookLanguage.English, "ইংরেজি", "H-01", 5),
+        };
+        foreach (var (t, ar, au, lang, cat, shelf, n) in books) await library.SaveBookAsync(null, new(t, ar, au, lang, cat, shelf, n), default);
+        var bookIds = await db.Books.OrderBy(b => b.Id).Select(b => b.Id).ToListAsync();
+        for (int i = 0; i < 8 && i < students.Count; i++)
+            db.BookIssues.Add(new BookIssue { BookId = bookIds[i % bookIds.Count], StudentId = students[i].Id, IssuedOn = today.AddDays(-(i * 3 + 2)),
+                DueOn = today.AddDays(-(i * 3 + 2) + 14), ReturnedOn = i == 7 ? today.AddDays(-1) : null, Fine = 0 });
+        db.BookIssues.Add(new BookIssue { BookId = bookIds[0], StaffId = staffIds[0], IssuedOn = today.AddDays(-10), DueOn = today.AddDays(20) });
+        await db.SaveChangesAsync();
+
+        // Events
+        var nextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+        db.Events.AddRange(
+            new SchoolEvent { Title = "বার্ষিক পরীক্ষা", StartDate = nextMonth.AddDays(4), EndDate = nextMonth.AddDays(14), Kind = EventKind.Exam },
+            new SchoolEvent { Title = "অভিভাবক সমাবেশ", StartDate = today.AddDays(9), Kind = EventKind.Meeting },
+            new SchoolEvent { Title = "শীতকালীন ছুটি", StartDate = nextMonth.AddDays(20), EndDate = nextMonth.AddDays(27), Kind = EventKind.Holiday },
+            new SchoolEvent { Title = "হিফজ সমাপনী ও দস্তারবন্দী", StartDate = today.AddDays(3), Kind = EventKind.General });
+        db.Notices.Add(new Notice { Title = "ভর্তি চলছে", Body = "নতুন শিক্ষাবর্ষে নূরানী, নাজেরা, হিফজ ও কিতাব বিভাগে ভর্তি চলছে। অনলাইনে আবেদন করা যাবে।", Date = today.AddDays(-3), Audience = NoticeAudience.All, IsPublic = true });
+        await db.SaveChangesAsync();
+
+        // Admission applications at every stage
+        var cls = await db.Classes.OrderBy(c => c.SortOrder).Select(c => c.Id).ToListAsync();
+        var apps = new (string, Gender, string, AdmissionStage, AdmissionSource, decimal?)[]
+        {
+            ("আবু বকর সিদ্দিক", Gender.Male, "মোঃ আব্দুল হাই", AdmissionStage.Applied, AdmissionSource.Online, null),
+            ("রুকাইয়া জান্নাত", Gender.Female, "মোঃ শফিকুল ইসলাম", AdmissionStage.Applied, AdmissionSource.Online, null),
+            ("ইব্রাহীম খলীল", Gender.Male, "মাওলানা আবু তাহের", AdmissionStage.Test, AdmissionSource.Office, null),
+            ("উসমান গনি", Gender.Male, "মোঃ কামাল হোসেন", AdmissionStage.Approved, AdmissionSource.Online, 78),
+            ("হামযা আল-আমিন", Gender.Male, "মোঃ আলমগীর", AdmissionStage.Rejected, AdmissionSource.Online, 31),
+        };
+        var sessionId = await db.AcademicSessions.Where(x => x.IsCurrent).Select(x => x.Id).FirstAsync();
+        for (int i = 0; i < apps.Length; i++)
+        {
+            var (name, g, father, stage, src, marks) = apps[i];
+            var a = new AdmissionApplication { SessionId = sessionId, ClassId = cls[i % cls.Count], ApplicantName = name, Gender = g, FatherName = father,
+                GuardianPhone = $"0191200{i + 1:0000}", Address = "লাকসাম, কুমিল্লা", Source = src, Stage = stage, TestMarks = marks,
+                DateOfBirth = today.AddYears(-(8 + i)), AppliedAt = DateTime.UtcNow.AddDays(-(10 - i * 2)), ApplicationNo = $"tmp-{i}",
+                Remarks = stage == AdmissionStage.Rejected ? "ভর্তি পরীক্ষায় উত্তীর্ণ হয়নি" : null };
+            db.AdmissionApplications.Add(a);
+            await db.SaveChangesAsync();
+            a.ApplicationNo = $"A-{today.Year}-{a.Id:0000}";
+        }
+        await db.SaveChangesAsync();
+
+        // Portal sign-ins: the first student's guardian, and a student
+        var firstSt = await db.StudentGuardians.Where(x => x.IsPrimary).OrderBy(x => x.StudentId).FirstAsync();
+        if (await users.FindByNameAsync("guardian") is null)
+        {
+            var gu = new AppUser { UserName = "guardian", FullName = "অভিভাবক (নমুনা)", GuardianId = firstSt.GuardianId };
+            await users.CreateAsync(gu, "Guardian123");
+            await users.AddToRoleAsync(gu, Roles.Guardian);
+        }
+        var accountant = new AppUser { UserName = "hisab", FullName = "হিসাবরক্ষক (নমুনা)" };
+        if (await users.FindByNameAsync("hisab") is null) { await users.CreateAsync(accountant, "Hisab12345"); await users.AddToRoleAsync(accountant, Roles.Accountant); }
     }
 
     private static string Bn(string s) => string.Concat(s.Select(c => c is >= '0' and <= '9' ? (char)('০' + (c - '0')) : c));

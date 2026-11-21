@@ -30,6 +30,12 @@ export class SessionService {
     });
   }
 
+  /** After Settings changes the profile or the current session. */
+  reload() {
+    this.http.get<MadrasaProfile>(`${API}/meta/profile`).subscribe({ next: (p) => this.profile.set(p), error: () => {} });
+    if (this.auth.isLoggedIn()) this.http.get<AcademicSession[]>(`${API}/meta/sessions`).subscribe({ next: (s) => this.sessions.set(s), error: () => {} });
+  }
+
   select(id: number) {
     this.selectedId.set(id);
     try { localStorage.setItem('mms.session', String(id)); } catch { /* ignore */ }
