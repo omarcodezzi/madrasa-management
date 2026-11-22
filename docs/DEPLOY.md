@@ -49,8 +49,8 @@ HTTPS সার্টিফিকেট Caddy নিজেই Let's Encrypt থ�
 ### ব্যাকআপ থেকে ফেরত আনা
 ```bash
 ./restore.sh                                                    # কোন কোন ব্যাকআপ আছে
-./restore.sh MadrasaDb_20261123-0200.bak.gz                     # শুধু ডেটাবেস
-./restore.sh MadrasaDb_20261123-0200.bak.gz uploads_20261123-0200.tar.gz   # ডেটাবেস + ছবি
+./restore.sh MMS_20261123-0200.bak.gz                     # শুধু ডেটাবেস
+./restore.sh MMS_20261123-0200.bak.gz uploads_20261123-0200.tar.gz   # ডেটাবেস + ছবি
 ```
 স্ক্রিপ্ট `RESTORE` লিখে নিশ্চিত করতে বলবে। চলমান ডেটাবেস পুরোপুরি ওই ব্যাকআপ দিয়ে বদলে যায়।
 
