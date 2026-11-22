@@ -19,7 +19,7 @@ docker compose up -d --build
 The API applies migrations on start, creates 9 roles with permissions and the first admin (`admin` / `ADMIN_PASSWORD`).
 In Development it also adds sample classes, 18 students and a notice. Swagger: http://localhost:5080/swagger
 
-**Without Docker (Visual Studio / `dotnet run`):** `appsettings.Development.json` already has a dev JWT key, admin password `Admin12345` and a Windows-auth connection string to `localhost` database `MMS` (edit it if your SQL Server is `.\SQLEXPRESS` or uses a sa password). Then
+**Without Docker (Visual Studio / `dotnet run`):** `appsettings.Development.json` already has a dev JWT key, admin password `Admin12345` and a Windows-auth connection string to LocalDB `(localdb)\MSSQLLocalDB` (installed with Visual Studio), database `MMS`. Edit it if you use `.\SQLEXPRESS` or a sa password. Then
 ```bash
 cd backend && dotnet run --project src/Madrasa.Api
 ```
