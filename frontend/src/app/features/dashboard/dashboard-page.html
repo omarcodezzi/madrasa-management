@@ -61,8 +61,14 @@
   </div>
 
   <div class="grid gap-5 lg:grid-cols-2 mb-5">
-    <m-card title="উপস্থিতির হার" subtitle="গত ৩০ কর্মদিবস"><app-trend-bars [points]="x.attendanceTrend" [today]="x.today" /></m-card>
-    <m-card title="আয় ও ব্যয়" subtitle="গত ৬ মাস"><app-money-bars [data]="x.incomeExpense" /></m-card>
+    <m-card title="উপস্থিতির হার" subtitle="গত ৩০ কর্মদিবস">
+      @if (hasTrend()) { <app-trend-bars [points]="x.attendanceTrend" [today]="x.today" /> }
+      @else { <p class="m-0 py-16 text-center text-mut">এখনো কোনো হাজিরা নেওয়া হয়নি</p> }
+    </m-card>
+    <m-card title="আয় ও ব্যয়" subtitle="গত ৬ মাস">
+      @if (hasMoney()) { <app-money-bars [data]="x.incomeExpense" /> }
+      @else { <p class="m-0 py-16 text-center text-mut">এই ছয় মাসে কোনো আয়-ব্যয় লেখা হয়নি</p> }
+    </m-card>
   </div>
 
   <div class="grid gap-5 lg:grid-cols-3">

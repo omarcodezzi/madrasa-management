@@ -53,7 +53,7 @@
     </m-empty-state>
   } @else {
     <!-- desktop / tablet -->
-    <div class="hidden md:block overflow-x-auto max-h-[70vh]">
+    <div class="hidden md:block overflow-x-auto max-h-[70vh] scroll-region" tabindex="0" role="region" [attr.aria-label]="'তালিকা'">
       <table class="w-full border-collapse">
         <thead class="sticky top-0 z-10 bg-card">
           <tr>

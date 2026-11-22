@@ -1,6 +1,8 @@
 <m-page-header title="লাইব্রেরি" description="বই, ইস্যু ও ফেরত">
   <button mButton (click)="newBook()"><m-icon name="plus" [size]="18" /> নতুন বই</button>
 </m-page-header>
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
   @if (summary(); as s) {

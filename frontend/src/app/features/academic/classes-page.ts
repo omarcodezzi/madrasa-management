@@ -28,6 +28,7 @@ export class ClassesPage {
   protected depts = signal<DepartmentOverview[] | null>(null);
   protected error = signal<string | null>(null);
   protected selectedId = signal<number | null>(null);
+  protected hasClasses = computed(() => (this.depts() ?? []).some((d) => d.classes.length > 0));
   protected selected = computed(() => this.depts()?.flatMap((d) => d.classes).find((c) => c.id === this.selectedId()) ?? null);
   protected deptOf = computed(() => this.depts()?.find((d) => d.id === this.selected()?.departmentId) ?? null);
   protected tab = signal<Tab>('subjects');

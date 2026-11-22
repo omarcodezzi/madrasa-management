@@ -1,6 +1,8 @@
 <m-page-header title="বেতন ও ফি" [description]="(month() | month) + ' মাসের হিসাব'">
   <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" aria-label="মাস">
 </m-page-header>
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <!-- KPIs -->
 <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">

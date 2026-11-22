@@ -7,7 +7,7 @@ import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayI
 import { LookupsService } from '../../core/lookups.service';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
-import { Avatar, Badge, Button, Card, CellDef, Chips, Column, ConfirmService, DataTable, EmptyState, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
+import { Avatar, Badge, Button, Card, CellDef, Chips, Column, ConfirmService, DataTable, EmptyState, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
 import { StudentRow } from '../students/student.models';
 import { StudentsApi } from '../students/students.service';
 import { DueListRow, METHOD_LABEL, MonthSummary, Receipt, ReceiptSummary, StudentDues } from './fee.models';
@@ -19,7 +19,7 @@ type Tab = 'collect' | 'dues' | 'receipts';
 @Component({
   selector: 'app-fees-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, CellDef, Chips, DataTable, EmptyState, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton, ReceiptView],
+  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, CellDef, Chips, DataTable, EmptyState, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton, ReceiptView],
   templateUrl: './fees-page.html',
 })
 export class FeesPage {
@@ -85,6 +85,10 @@ export class FeesPage {
   protected mLabel = (m: string) => (METHOD_LABEL as Record<string, string>)[m] ?? m;
   protected dueTrack = (r: DueListRow) => r.studentId;
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.refresh(this.month()); this.loadList(this.tab(), this.month(), this.dueClass()); }
+
   constructor() {
     this.students.all({ status: 'Active' }).then((r) => this.all.set(r.items)).catch(() => {});
     const sid = +(inject(ActivatedRoute).snapshot.queryParamMap.get('student') ?? 0);
@@ -93,12 +97,12 @@ export class FeesPage {
     effect(() => { const t = this.tab(), m = this.month(), c = this.dueClass(); untracked(() => this.loadList(t, m, c)); });
   }
 
-  private refresh(m: string) { this.api.summary(m).then((s) => this.summary.set(s)).catch(() => {}); }
+  private refresh(m: string) { this.api.summary(m).then((s) => this.summary.set(s)).catch((e) => this.failed(e)); }
   private async loadList(t: Tab, m: string, c: number) {
     try {
       if (t === 'dues') { this.dueRows.set(null); this.dueRows.set(await this.api.dues(m, c)); }
       if (t === 'receipts') { this.receiptRows.set(null); this.receiptRows.set((await this.api.receipts(m)).items); }
-    } catch (e) { this.toast.error(errorMessage(e)); }
+    } catch (e) { this.failed(e); }
   }
 
   protected async pick(id: number) {

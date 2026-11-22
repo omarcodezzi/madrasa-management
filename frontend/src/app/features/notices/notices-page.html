@@ -4,6 +4,8 @@
     @else { <button mButton (click)="newNotice()"><m-icon name="mega" [size]="18" /> নতুন নোটিশ</button> }
   }
 </m-page-header>
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <m-segmented class="mb-4 inline-flex" [options]="canManage() ? tabs : tabs.slice(0, 2)" [value]="tab()" (valueChange)="tab.set($event)" aria-label="নোটিশ অংশ" />
 
@@ -19,7 +21,7 @@
               @if (n.isPublic) { <m-badge tone="success">ওয়েবসাইটে</m-badge> }
               @if (n.smsQueued) { <m-badge tone="info">SMS {{ n.smsQueued | num }}টি তালিকায়</m-badge> }
             </div>
-            <h3 class="m-0 font-serif text-lg">{{ n.title }}</h3>
+            <h2 class="m-0 font-serif text-lg">{{ n.title }}</h2>
             <p class="m-0 whitespace-pre-line text-[15px] leading-relaxed">{{ n.body }}</p>
             @if (canManage()) {
               <div class="flex items-center gap-2 mt-auto pt-2 border-t border-line">
@@ -36,7 +38,7 @@
   @case ('events') {
     @if (events()) {
       @for (g of byMonth(); track g.m) {
-        <h3 class="text-base font-semibold text-mut mt-1 mb-2">{{ g.label | digits }}</h3>
+        <h2 class="text-base font-semibold text-mut mt-1 mb-2">{{ g.label | digits }}</h2>
         <m-card [padded]="false" class="mb-4 block">
           <ul class="m-0 p-0 list-none">
             @for (e of g.list; track e.id) {

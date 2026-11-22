@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { errorMessage } from '../../core/api';
 import { DatePipe, DigitsPipe, MoneyPipe, NumPipe, toEnDigits } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
-import { Badge, Button, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
+import { Badge, Button, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Book, BookInput, BookLanguage, Borrower, Issue, LANG_LABEL, LibrarySummary } from '../office/office.models';
@@ -14,7 +14,7 @@ const blank = (): BookInput => ({ title: '', titleAr: null, author: null, langua
 @Component({
   selector: 'app-library-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, CellDef, Chips, DataTable, FormField, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
+  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
   templateUrl: './library-page.html',
 })
 export class LibraryPage {
@@ -71,18 +71,22 @@ export class LibraryPage {
   protected retFine = signal('0');
   protected returning = signal(false);
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.loadSummary(); this.loadTab(this.tab(), this.lang(), this.category()); }
+
   constructor() {
     this.loadSummary();
     effect(() => { const t = this.tab(), l = this.lang(), c = this.category(); untracked(() => this.loadTab(t, l, c)); });
     let timer: ReturnType<typeof setTimeout> | undefined;
     effect(() => { const q = this.bq(); clearTimeout(timer); timer = setTimeout(() => untracked(() => this.findBorrowers(q)), 250); });
   }
-  private loadSummary() { this.api.library().then((s) => this.summary.set(s)).catch((e) => this.toast.error(errorMessage(e))); }
+  private loadSummary() { this.api.library().then((s) => this.summary.set(s)).catch((e) => this.failed(e)); }
   private async loadTab(t: Tab, l: string, c: string) {
     try {
       if (t === 'books') { this.books.set(null); this.books.set(await this.api.books('', l, c)); }
       else { this.issues.set(null); this.issues.set(await this.api.issues(t)); }
-    } catch (e) { this.toast.error(errorMessage(e)); }
+    } catch (e) { this.failed(e); }
   }
   private refresh() { this.loadSummary(); this.loadTab(this.tab(), this.lang(), this.category()); }
   private async findBorrowers(q: string) {

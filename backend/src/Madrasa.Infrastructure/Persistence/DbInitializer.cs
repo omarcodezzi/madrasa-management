@@ -55,9 +55,11 @@ public static class DbInitializer
             await users.AddToRoleAsync(admin, Roles.SuperAdmin);
         }
 
-        if (env.IsDevelopment() && !await db.Students.AnyAsync()) await SeedSampleAsync(db, s);
-        if (env.IsDevelopment() && !await db.Subjects.AnyAsync() && await db.Students.AnyAsync()) await SeedAcademicSampleAsync(db, s);
-        if (env.IsDevelopment() && !await db.Books.AnyAsync() && await db.Staff.AnyAsync()) await SeedOfficeSampleAsync(db, s);
+        // Demo data in development only; Seed:Samples=false starts with an empty madrasa
+        var samples = env.IsDevelopment() && !string.Equals(cfg["Seed:Samples"], "false", StringComparison.OrdinalIgnoreCase);
+        if (samples && !await db.Students.AnyAsync()) await SeedSampleAsync(db, s);
+        if (samples && !await db.Subjects.AnyAsync() && await db.Students.AnyAsync()) await SeedAcademicSampleAsync(db, s);
+        if (samples && !await db.Books.AnyAsync() && await db.Staff.AnyAsync()) await SeedOfficeSampleAsync(db, s);
     }
 
     private static async Task SeedSampleAsync(AppDbContext db, IServiceProvider sp)

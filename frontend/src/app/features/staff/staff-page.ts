@@ -4,7 +4,7 @@ import { AttendanceStatus, errorMessage, fileUrl } from '../../core/api';
 import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, toEnDigits, todayIso } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
-import { Avatar, Badge, BadgeTone, Button, Card, CellDef, Column, ConfirmService, DataTable, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton, resizePhoto } from '../../shared/ui';
+import { Avatar, Badge, BadgeTone, Button, Card, CellDef, Column, ConfirmService, DataTable, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton, resizePhoto } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { FundBalance, SalaryRow, StaffDayRow, StaffDetail, StaffInput, StaffRow } from '../office/office.models';
@@ -19,7 +19,7 @@ const blank = (): StaffInput => ({ name: '', designation: '', phone: null, email
 @Component({
   selector: 'app-staff-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, Avatar, Badge, Button, Card, CellDef, DataTable, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton],
+  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, Avatar, Badge, Button, Card, CellDef, DataTable, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './staff-page.html',
 })
 export class StaffPage {
@@ -81,24 +81,28 @@ export class StaffPage {
   protected payErrs = signal<Record<string, string>>({});
   protected paying = signal(false);
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.load(); if (this.tab() === 'attendance') this.loadDay(this.date()); if (this.tab() === 'salary') this.loadSheet(this.month()); }
+
   constructor() {
     this.load();
     effect(() => { const t = this.tab(), d = this.date(); if (t === 'attendance') untracked(() => this.loadDay(d)); });
     effect(() => { const t = this.tab(), m = this.month(); if (t === 'salary') untracked(() => this.loadSheet(m)); });
   }
 
-  private async load() { try { this.rows.set(await this.api.staff()); } catch (e) { this.toast.error(errorMessage(e)); } }
+  private async load() { try { this.rows.set(await this.api.staff()); } catch (e) { this.failed(e); } }
   private async loadDay(d: string) {
     this.day.set(null);
     try { const r = await this.api.staffDay(d); this.day.set(r); this.marks.set(Object.fromEntries(r.map((x) => [x.staffId, x.status]))); }
-    catch (e) { this.toast.error(errorMessage(e)); }
+    catch (e) { this.failed(e); }
   }
   private async loadSheet(m: string) {
     this.sheet.set(null);
     try {
       const [s, sum] = await Promise.all([this.api.salary(m), this.api.summary(m).catch(() => null)]);
       this.sheet.set(s); if (sum) this.funds.set(sum.funds);
-    } catch (e) { this.toast.error(errorMessage(e)); }
+    } catch (e) { this.failed(e); }
   }
 
   protected create() { this.editId.set(null); this.detail.set(null); this.form.set(blank()); this.preview.set(null); this.errs.set({}); this.open.set(true); }

@@ -245,9 +245,14 @@ textarea.ctl { min-height: 110px; resize: vertical; }
 .child-tab[aria-selected='true'] { border-color: var(--g2); background: light-dark(#e6f2ea, #12241a); font-weight: 600; }
 
 /* Public website */
-.pub a { color: inherit; }
+.pub a:not([mbutton]) { color: inherit; }
 .pub-hero { background: linear-gradient(160deg, #0b5d33, #0e7a43 60%, #12703f); color: #fff; }
 .pub-hero nav a { text-decoration: none; opacity: .9; }
 .pub-hero nav a:hover { opacity: 1; text-decoration: underline; }
 .pub-foot { background: #0b3d24; color: #e9f3ec; }
 .pub section[id] { scroll-margin-top: 16px; }
+.scroll-region:focus-visible { outline: 2px solid var(--g2); outline-offset: 2px; }
+/* A page that failed to load shows its banner instead of endless skeletons */
+m-load-error ~ m-skeleton, m-load-error ~ * m-skeleton { display: none; }
+/* Text on attendance status colours: white on the deep light-theme fills, near-black on the brighter dark-theme fills */
+.cal-on { color: light-dark(#fff, #0b1a12); }

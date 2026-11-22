@@ -37,9 +37,9 @@
     @if (loading() && !table()) { <div class="p-4 grid gap-2"><m-skeleton height="28px" /><m-skeleton height="200px" /></div> }
     @else if (error()) { <m-empty-state title="রিপোর্ট তৈরি করা যায়নি" [description]="error()!" icon="alert" /> }
     @else if (table(); as t) {
-      <div class="px-4 pt-3 pb-2" [class.opacity-60]="loading()"><h3 class="m-0 font-serif">{{ t.title }}</h3><p class="m-0 text-sm text-mut">{{ t.subtitle }}</p></div>
+      <div class="px-4 pt-3 pb-2" [class.opacity-60]="loading()"><h2 class="m-0 font-serif text-[17px]">{{ t.title }}</h2><p class="m-0 text-sm text-mut">{{ t.subtitle }}</p></div>
       @if (t.rows.length) {
-        <div class="overflow-x-auto" [class.opacity-60]="loading()">
+        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" [attr.aria-label]="table()?.title ?? 'রিপোর্ট'" [class.opacity-60]="loading()">
           <table class="w-full text-sm">
             <thead><tr class="border-b border-line text-mut">@for (c of t.columns; track c.key) { <th scope="col" class="px-4 py-2 font-semibold whitespace-nowrap" [class.text-right]="isNum(c.kind)" [class.text-left]="!isNum(c.kind)">{{ c.label }}</th> }</tr></thead>
             <tbody>

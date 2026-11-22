@@ -5,7 +5,7 @@ import { errorMessage, fileUrl, Gender } from '../../core/api';
 import { DatePipe, DigitsPipe, NumPipe, toEnDigits } from '../../core/format';
 import { LookupsService } from '../../core/lookups.service';
 import { ToastService } from '../../core/toast.service';
-import { Avatar, Badge, BadgeTone, Button, Card, Chips, EmptyState, FormField, Icon, Modal, PageHeader, Skeleton } from '../../shared/ui';
+import { Avatar, Badge, BadgeTone, Button, Card, Chips, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Application, ApplyInput, Stage, STAGE_LABEL } from '../office/office.models';
@@ -17,7 +17,7 @@ export const blankApply = (): ApplyInput => ({ classId: 0, applicantName: '', ge
 @Component({
   selector: 'app-admissions-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, Chips, EmptyState, FormField, Icon, Modal, PageHeader, Skeleton],
+  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, Chips, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
   templateUrl: './admissions-page.html',
 })
 export class AdmissionsPage {
@@ -55,12 +55,16 @@ export class AdmissionsPage {
   protected form = signal<ApplyInput>(blankApply());
   protected errs = signal<Record<string, string>>({});
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.refresh(); }
+
   constructor() {
     this.loadCounts();
     effect(() => { const s = this.stage(); untracked(() => this.load(s)); });
   }
   private loadCounts() { this.api.pipeline().then((p) => this.counts.set(Object.fromEntries(p.map((x) => [x.stage, x.count])))).catch(() => {}); }
-  private async load(s: '' | Stage) { this.rows.set(null); try { this.rows.set(await this.api.applications(s)); } catch (e) { this.toast.error(errorMessage(e)); } }
+  private async load(s: '' | Stage) { this.rows.set(null); try { this.rows.set(await this.api.applications(s)); } catch (e) { this.failed(e); } }
   private refresh() { this.loadCounts(); this.load(this.stage()); }
 
   protected review(a: Application) { this.app.set(a); this.marks.set(a.testMarks === null ? '' : String(a.testMarks)); this.remarks.set(a.remarks ?? ''); this.open.set(true); }

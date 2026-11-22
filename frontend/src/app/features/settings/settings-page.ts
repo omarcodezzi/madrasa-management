@@ -6,7 +6,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { DatePipe, DigitsPipe, MoneyPipe, NumPipe, toEnDigits, todayIso } from '../../core/format';
 import { SessionService } from '../../core/session.service';
 import { ToastService } from '../../core/toast.service';
-import { Badge, Button, Card, ConfirmService, EmptyState, FormField, Icon, IconName, Modal, PageHeader, Skeleton, resizePhoto } from '../../shared/ui';
+import { Badge, Button, Card, ConfirmService, EmptyState, FormField, Icon, LoadError, IconName, Modal, PageHeader, Skeleton, resizePhoto } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { FeeFrequency, FeeHeadRow, FREQ_LABEL, GeneralSettings, GradeRow, Holiday, Profile, RoleRow, Session, UserInput, UserRow } from '../office/office.models';
@@ -35,7 +35,7 @@ const DAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবা
 @Component({
   selector: 'app-settings-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, Modal, PageHeader, Skeleton],
+  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
   templateUrl: './settings-page.html',
 })
 export class SettingsPage {
@@ -71,6 +71,10 @@ export class SettingsPage {
   protected general = signal<GeneralSettings | null>(null);
   protected me = computed(() => this.auth.user()?.id);
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.load(this.section()); }
+
   constructor() {
     effect(() => { const s = this.section(); untracked(() => this.load(s)); });
     effect(() => { const y = this.year(); if (this.section() === 'holidays') untracked(() => this.api.holidays(y).then((h) => this.holidays.set(h)).catch(() => {})); });
@@ -88,7 +92,7 @@ export class SettingsPage {
         case 'holidays': this.holidays.set(await this.api.holidays(this.year())); break;
         case 'general': this.general.set(await this.api.general()); break;
       }
-    } catch (e) { this.toast.error(errorMessage(e)); }
+    } catch (e) { this.failed(e); }
   }
   private async run(fn: () => Promise<unknown>, ok: string) {
     this.saving.set(true); this.errs.set({});

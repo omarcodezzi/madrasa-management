@@ -5,7 +5,7 @@ import { DayMark, StudentMonth } from './student.models';
 
 const DOW = ['শনি', 'রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র'];
 const CELL: Record<string, string> = {
-  Present: 'bg-g2 text-white', Late: 'bg-[var(--warn)] text-white', Absent: 'bg-red text-white', Leave: 'bg-[var(--info)] text-white',
+  Present: 'bg-g2 cal-on', Late: 'bg-[var(--warn)] cal-on', Absent: 'bg-red cal-on', Leave: 'bg-[var(--info)] cal-on',
 };
 const LABEL: Record<string, string> = { Present: 'উপস্থিত', Late: 'দেরি', Absent: 'অনুপস্থিত', Leave: 'ছুটি' };
 
@@ -20,11 +20,11 @@ const LABEL: Record<string, string> = { Present: 'উপস্থিত', Late: 
       <b class="font-serif text-lg">{{ data().month | month }}</b>
       <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft cursor-pointer disabled:opacity-30" [disabled]="isCurrent()" (click)="move.emit(1)" aria-label="পরের মাস"><m-icon name="chevronRight" /></button>
     </div>
-    <div class="grid grid-cols-7 gap-1.5 text-center" role="grid" [attr.aria-label]="'হাজিরা'">
-      @for (d of dow; track d) { <div class="text-xs text-mut font-semibold pb-1" role="columnheader">{{ d }}</div> }
-      @for (b of blanks(); track $index) { <div></div> }
+    <div class="grid grid-cols-7 gap-1.5 text-center" role="list" [attr.aria-label]="'হাজিরা, ' + (data().month | month)">
+      @for (d of dow; track d) { <div class="text-xs text-mut font-semibold pb-1" aria-hidden="true">{{ d }}</div> }
+      @for (b of blanks(); track $index) { <div aria-hidden="true"></div> }
       @for (d of data().days; track d.date) {
-        <div role="gridcell" class="aspect-square rounded-lg grid place-items-center text-sm font-semibold tabular"
+        <div role="listitem" class="aspect-square rounded-lg grid place-items-center text-sm font-semibold tabular"
           [class]="cls(d)" [title]="title(d)" [attr.aria-label]="title(d)">{{ +d.date.slice(8) | num }}</div>
       }
     </div>
@@ -50,7 +50,7 @@ export class AttendanceCalendar {
   protected isCurrent = computed(() => this.data().month >= this.today().slice(0, 7));
   protected cls(d: DayMark) {
     if (d.status) return CELL[d.status];
-    if (!d.isWorkDay) return 'bg-soft text-mut/60';
+    if (!d.isWorkDay) return 'bg-soft text-mut';
     if (d.date > this.today()) return 'border border-line text-mut';
     if (d.date === this.today()) return 'border-2 border-gold text-ink';
     return 'bg-redbg text-red';   // a passed school day without a mark counts as absent

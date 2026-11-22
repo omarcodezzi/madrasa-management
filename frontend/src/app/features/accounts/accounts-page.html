@@ -3,6 +3,8 @@
   <button mButton variant="outline" (click)="openEntry('expense')"><m-icon name="plus" [size]="18" /> খরচ লিখুন</button>
   <button mButton variant="gold" (click)="openEntry('donation')"><m-icon name="coins" [size]="18" /> দান গ্রহণ</button>
 </m-page-header>
+@if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
+
 
 <!-- Fund balances: Zakat, Lillah etc. are kept apart and can never be overspent -->
 <section aria-label="ফান্ডের জের" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { errorMessage, fileUrl, Gender } from '../../core/api';
 import { DatePipe, DigitsPipe, NumPipe, toBnDigits, toEnDigits, todayIso } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
-import { Avatar, Badge, Button, Card, ConfirmService, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
+import { Avatar, Badge, Button, Card, ConfirmService, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { HostelSummary, LeaveRow, Occupant, Resident, Room } from '../office/office.models';
@@ -15,7 +15,7 @@ interface RoomForm { building: string; roomNo: string; seats: string; forGender:
 @Component({
   selector: 'app-hostel-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, FormField, Icon, Modal, PageHeader, Segmented, Skeleton],
+  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './hostel-page.html',
 })
 export class HostelPage {
@@ -66,14 +66,18 @@ export class HostelPage {
   protected savingLeave = signal(false);
   protected today = todayIso();
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.load(); if (this.tab() === 'leaves') this.loadLeaves(this.openOnly()); }
+
   constructor() {
     this.load();
     effect(() => { const t = this.tab(), o = this.openOnly(); if (t === 'leaves') untracked(() => this.loadLeaves(o)); });
     let timer: ReturnType<typeof setTimeout> | undefined;
     effect(() => { const q = this.q(); if (!this.allocOpen()) return; clearTimeout(timer); timer = setTimeout(() => untracked(() => this.search(q)), 250); });
   }
-  private async load() { try { this.data.set(await this.api.hostel()); } catch (e) { this.toast.error(errorMessage(e)); } }
-  private async loadLeaves(open: boolean) { this.leaves.set(null); try { this.leaves.set(await this.api.leaves(open)); } catch (e) { this.toast.error(errorMessage(e)); } }
+  private async load() { try { this.data.set(await this.api.hostel()); } catch (e) { this.failed(e); } }
+  private async loadLeaves(open: boolean) { this.leaves.set(null); try { this.leaves.set(await this.api.leaves(open)); } catch (e) { this.failed(e); } }
   private async search(q: string) { try { this.candidates.set(await this.api.candidates(toEnDigits(q.trim()))); } catch { this.candidates.set([]); } }
 
   protected newRoom() { this.roomId.set(null); this.roomForm.set({ building: '', roomNo: '', seats: '4', forGender: 'Male' }); this.roomErrs.set({}); this.roomOpen.set(true); }

@@ -4,7 +4,7 @@ import { errorMessage } from '../../core/api';
 import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayIso } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
-import { Badge, Button, Card, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
+import { Badge, Button, Card, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { AccountsSummary, Category, CategoryTotal, Direction, Donor, LedgerPage, LedgerRow } from '../office/office.models';
@@ -16,7 +16,7 @@ interface EntryForm { date: string; fundId: number; categoryId: number; amount: 
 @Component({
   selector: 'app-accounts-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Badge, Button, Card, CellDef, Chips, DataTable, FormField, Icon, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
+  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Badge, Button, Card, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
   templateUrl: './accounts-page.html',
 })
 export class AccountsPage {
@@ -67,6 +67,10 @@ export class AccountsPage {
   });
   protected selectedFund = computed(() => this.summary()?.funds.find((f) => f.id === +this.form().fundId) ?? null);
 
+  protected loadError = signal<string | null>(null);
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  protected retry() { this.loadError.set(null); this.reload(); }
+
   constructor() {
     this.api.categories().then((c) => this.categories.set(c)).catch(() => {});
     this.api.donors().then((d) => this.donors.set(d)).catch(() => {});
@@ -79,11 +83,11 @@ export class AccountsPage {
     const last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
     return { from: `${m}-01`, to: `${m}-${String(last).padStart(2, '0')}` };
   }
-  private async loadSummary(m: string) { try { this.summary.set(await this.api.summary(m)); } catch (e) { this.toast.error(errorMessage(e)); } }
+  private async loadSummary(m: string) { try { this.summary.set(await this.api.summary(m)); } catch (e) { this.failed(e); } }
   private async loadLedger(m: string, fundId: number, d: '' | Direction) {
     this.ledger.set(null);
     try { this.ledger.set(await this.api.ledger({ ...this.range(m), fundId, direction: d || undefined, pageSize: 500 })); }
-    catch (e) { this.toast.error(errorMessage(e)); }
+    catch (e) { this.failed(e); }
   }
   private reload() { this.loadSummary(this.month()); this.loadLedger(this.month(), this.fund(), this.dir()); this.api.donors().then((d) => this.donors.set(d)).catch(() => {}); }
 
