@@ -7,7 +7,7 @@ set -uo pipefail
 chown 10001:0 /backups 2>/dev/null || true
 umask 077
 SQL=/opt/mssql-tools18/bin/sqlcmd
-DB=MadrasaDb
+DB=MMS
 
 run_backup() {
   local stamp file

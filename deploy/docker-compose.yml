@@ -30,7 +30,7 @@ services:
       db: { condition: service_healthy }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__Default: Server=db,1433;Database=MadrasaDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      ConnectionStrings__Default: Server=db,1433;Database=MMS;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
       Jwt__Key: ${JWT_KEY:?run ./setup.sh first}
       Seed__AdminUser: ${ADMIN_USER:-admin}
       Seed__AdminPassword: ${ADMIN_PASSWORD:?run ./setup.sh first}
