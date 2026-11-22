@@ -16,13 +16,14 @@ import { IdCard } from '../idcards/id-card';
 import { AttendanceCalendar } from './attendance-calendar';
 import { GENDER_LABEL, STATUS_LABEL, StudentDetail, StudentMonth } from './student.models';
 import { StudentsApi } from './students.service';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'overview' | 'attendance' | 'fees' | 'guardian' | 'academic' | 'hifz' | 'hostel' | 'documents';
 
 @Component({
   selector: 'app-student-profile',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, Segmented, Skeleton, IdCard, AttendanceCalendar, JuzGrid, JuzRing],
+  imports: [TrPipe, RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, Segmented, Skeleton, IdCard, AttendanceCalendar, JuzGrid, JuzRing],
   templateUrl: './student-profile.html',
 })
 export class StudentProfilePage {
@@ -54,18 +55,18 @@ export class StudentProfilePage {
   protected photo = computed(() => fileUrl(this.s()?.photoPath));
   protected primary = computed(() => this.s()?.guardians.find((g) => g.isPrimary) ?? this.s()?.guardians[0]);
   protected tabs = computed(() => [
-    { value: 'overview' as Tab, label: 'সারসংক্ষেপ' },
-    { value: 'attendance' as Tab, label: 'হাজিরা' },
-    ...(this.canFees() ? [{ value: 'fees' as Tab, label: 'বেতন' }] : []),
-    { value: 'guardian' as Tab, label: 'অভিভাবক' },
-    { value: 'academic' as Tab, label: 'ফলাফল' },
-    { value: 'hifz' as Tab, label: 'হিফজ' },
-    { value: 'hostel' as Tab, label: 'হোস্টেল' },
-    { value: 'documents' as Tab, label: 'কাগজপত্র' },
+    { value: 'overview' as Tab, label: tr('সারসংক্ষেপ') },
+    { value: 'attendance' as Tab, label: tr('হাজিরা') },
+    ...(this.canFees() ? [{ value: 'fees' as Tab, label: tr('বেতন') }] : []),
+    { value: 'guardian' as Tab, label: tr('অভিভাবক') },
+    { value: 'academic' as Tab, label: tr('ফলাফল') },
+    { value: 'hifz' as Tab, label: tr('হিফজ') },
+    { value: 'hostel' as Tab, label: tr('হোস্টেল') },
+    { value: 'documents' as Tab, label: tr('কাগজপত্র') },
   ]);
   protected later: Partial<Record<Tab, { phase: number; text: string }>> = {
-    hostel: { phase: 6, text: 'রুম, সিট ও ছুটির রেকর্ড এখানে দেখাবে।' },
-    documents: { phase: 6, text: 'জন্ম নিবন্ধন, ছাড়পত্র ইত্যাদি কাগজ এখানে রাখা যাবে।' },
+    hostel: { phase: 6, text: tr('রুম, সিট ও ছুটির রেকর্ড এখানে দেখাবে।') },
+    documents: { phase: 6, text: tr('জন্ম নিবন্ধন, ছাড়পত্র ইত্যাদি কাগজ এখানে রাখা যাবে।') },
   };
 
   constructor() {
@@ -97,8 +98,8 @@ export class StudentProfilePage {
   protected printForm() { const s = this.s(); if (s) this.printer.print({ kind: 'admission', data: s }); }
   protected async remove() {
     const s = this.s();
-    if (!s || !(await this.confirm.ask({ message: 'শিক্ষার্থীকে তালিকা থেকে সরানো হবে। পুরনো হাজিরা ও বেতনের হিসাব রিপোর্টে থেকে যাবে।', itemName: s.name, confirmLabel: 'সরিয়ে দিন' }))) return;
-    try { await this.api.remove(s.id); this.toast.success(`${s.name} কে সরানো হয়েছে`); this.router.navigate(['/students']); }
+    if (!s || !(await this.confirm.ask({ message: tr('শিক্ষার্থীকে তালিকা থেকে সরানো হবে। পুরনো হাজিরা ও বেতনের হিসাব রিপোর্টে থেকে যাবে।'), itemName: s.name, confirmLabel: tr('সরিয়ে দিন') }))) return;
+    try { await this.api.remove(s.id); this.toast.success(tr('{name} কে সরানো হয়েছে', { name: s.name })); this.router.navigate(['/students']); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 }

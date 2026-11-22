@@ -1,4 +1,5 @@
 import { Gender, StudentStatus } from '../../core/api';
+import { tr } from '../../core/tr';
 
 export interface StudentRow {
   id: number; studentCode: string; name: string; gender: Gender; classId?: number; className?: string; roll?: number;
@@ -25,5 +26,5 @@ export interface StudentInput {
 export interface DayMark { date: string; status?: import('../../core/api').AttendanceStatus | null; checkIn?: string | null; isWorkDay: boolean; }
 export interface StudentMonth { month: string; workDays: number; present: number; late: number; absent: number; leave: number; percent: number; days: DayMark[]; }
 
-export const STATUS_LABEL: Record<StudentStatus, string> = { Active: 'সক্রিয়', Left: 'চলে গেছে', Graduated: 'পাস করেছে', Suspended: 'স্থগিত' };
-export const GENDER_LABEL: Record<Gender, string> = { Male: 'ছাত্র', Female: 'ছাত্রী' };
+export const STATUS_LABEL: Record<StudentStatus, string> = { Active: tr('সক্রিয়'), Left: tr('চলে গেছে'), Graduated: tr('পাস করেছে'), Suspended: tr('স্থগিত') };
+export const GENDER_LABEL: Record<Gender, string> = { Male: tr('ছাত্র'), Female: tr('ছাত্রী') };

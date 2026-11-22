@@ -1,40 +1,40 @@
-<m-page-header title="হাজিরা" [description]="(date() | bdate) + (date() === today ? ' · আজ' : '')">
-  <input type="date" class="ctl !w-auto" [max]="today" [ngModel]="date()" (ngModelChange)="date.set($event || today)" aria-label="তারিখ">
-  <m-segmented [options]="modes" [value]="mode()" (valueChange)="mode.set($event)" aria-label="হাজিরার ধরন" />
+<m-page-header [title]="'হাজিরা' | tr" [description]="(date() | bdate) + (date() === today ? (' · আজ' | tr) : '')">
+  <input type="date" class="ctl !w-auto" [max]="today" [ngModel]="date()" (ngModelChange)="date.set($event || today)" [attr.aria-label]="'তারিখ' | tr">
+  <m-segmented [options]="modes" [value]="mode()" (valueChange)="mode.set($event)" [attr.aria-label]="'হাজিরার ধরন' | tr" />
 </m-page-header>
 
 @if (error()) {
   <div class="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
     <m-icon name="alert" /><span class="flex-1">{{ error() }}</span>
-    <button mButton size="sm" variant="outline" (click)="load()">আবার চেষ্টা করুন</button>
+    <button mButton size="sm" variant="outline" (click)="load()">{{ 'আবার চেষ্টা করুন' | tr }}</button>
   </div>
 }
 
 @if (day(); as d) {
   @if (!d.isWorkDay) {
     <div class="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--goldbg)] text-goldink" role="status">
-      <m-icon name="calendar" /><span>আজ {{ d.holidayTitle || 'সাপ্তাহিক ছুটি' }}। চাইলে তবুও হাজিরা নেওয়া যাবে।</span>
+      <m-icon name="calendar" /><span>{{ 'আজ {h}। চাইলে তবুও হাজিরা নেওয়া যাবে।' | tr: { h: d.holidayTitle || ('সাপ্তাহিক ছুটি' | tr) } }}</span>
     </div>
   }
 
   <!-- KPIs -->
   <div class="grid grid-cols-2 sm:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-4">
-    <div class="px-5 py-4"><span class="text-sm text-mut">উপস্থিত</span><b class="block font-serif font-extrabold text-[28px] text-g2">{{ (stats().present + stats().late) | num }}<small class="text-base text-mut font-sans font-medium"> / {{ stats().total | num }}</small></b><em class="not-italic text-[13px] text-mut">{{ stats().percent | num }}%</em></div>
-    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">অনুপস্থিত</span><b class="block font-serif font-extrabold text-[28px] text-red">{{ stats().absent | num }}</b></div>
-    <div class="px-5 py-4 max-sm:border-t sm:border-l border-line"><span class="text-sm text-mut">দেরি · ছুটি</span><b class="block font-serif font-extrabold text-[28px]">{{ stats().late | num }} · {{ stats().leave | num }}</b></div>
-    <div class="px-5 py-4 border-l max-sm:border-t border-line"><span class="text-sm text-mut">বাকি</span><b class="block font-serif font-extrabold text-[28px]" [class.text-goldink]="stats().unmarked">{{ stats().unmarked | num }}</b></div>
+    <div class="px-5 py-4"><span class="text-sm text-mut">{{ 'উপস্থিত' | tr }}</span><b class="block font-serif font-extrabold text-[28px] text-g2">{{ (stats().present + stats().late) | num }}<small class="text-base text-mut font-sans font-medium"> / {{ stats().total | num }}</small></b><em class="not-italic text-[13px] text-mut">{{ stats().percent | num }}%</em></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">{{ 'অনুপস্থিত' | tr }}</span><b class="block font-serif font-extrabold text-[28px] text-red">{{ stats().absent | num }}</b></div>
+    <div class="px-5 py-4 max-sm:border-t sm:border-l border-line"><span class="text-sm text-mut">{{ 'দেরি · ছুটি' | tr }}</span><b class="block font-serif font-extrabold text-[28px]">{{ stats().late | num }} · {{ stats().leave | num }}</b></div>
+    <div class="px-5 py-4 border-l max-sm:border-t border-line"><span class="text-sm text-mut">{{ 'বাকি' | tr }}</span><b class="block font-serif font-extrabold text-[28px]" [class.text-goldink]="stats().unmarked">{{ stats().unmarked | num }}</b></div>
   </div>
 
   <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] items-start">
     <div class="min-w-0">
       @if (mode() === 'roll') {
         <div class="flex flex-wrap items-center gap-3 mb-3">
-          <m-chips [options]="classOptions()" [value]="classId()" (valueChange)="classId.set($event)" aria-label="শ্রেণি" />
-          @if (!isFuture()) { <button mButton variant="outline" size="sm" class="ml-auto" (click)="allPresent()" [disabled]="!stats().unmarked"><m-icon name="check" [size]="16" /> বাকি সবাইকে উপস্থিত দিন</button> }
+          <m-chips [options]="classOptions()" [value]="classId()" (valueChange)="classId.set($event)" [attr.aria-label]="'শ্রেণি' | tr" />
+          @if (!isFuture()) { <button mButton variant="outline" size="sm" class="ml-auto" (click)="allPresent()" [disabled]="!stats().unmarked"><m-icon name="check" [size]="16" /> {{ 'বাকি সবাইকে উপস্থিত দিন' | tr }}</button> }
         </div>
         @for (g of groups(); track g.name) {
           <m-card [padded]="false" class="mb-4 block">
-            <div class="px-4 py-3 border-b border-line flex items-center justify-between"><h2 class="!text-lg">{{ g.name }}</h2><span class="text-sm text-mut">{{ g.rows.length | num }} জন</span></div>
+            <div class="px-4 py-3 border-b border-line flex items-center justify-between"><h2 class="!text-lg">{{ g.name }}</h2><span class="text-sm text-mut">{{ '{n} জন' | tr: { n: (g.rows.length | num) } }}</span></div>
             <ul class="m-0 p-0 list-none">
               @for (r of g.rows; track r.studentId) {
                 <li class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 border-b border-line last:border-0">
@@ -42,7 +42,7 @@
                   <m-avatar [name]="r.name" [src]="photo(r.photoPath)" [size]="36" />
                   <a [routerLink]="['/students', r.studentId]" class="flex-1 min-w-[140px] no-underline text-ink leading-tight"><b class="font-semibold">{{ r.name }}</b>
                     @if (r.checkIn) { <small class="block text-mut text-[13px]">{{ r.checkIn | btime }} @if (r.method === 'Qr') { · QR }</small> }</a>
-                  <div class="flex gap-1" role="group" [attr.aria-label]="r.name + ' এর হাজিরা'">
+                  <div class="flex gap-1" role="group" [attr.aria-label]="r.name + (' এর হাজিরা' | tr)">
                     @for (st of statuses; track st) {
                       <button type="button" class="att-btn" [attr.data-s]="st" [attr.aria-pressed]="r.status === st" [disabled]="isFuture()" [title]="label[st]"
                         [attr.aria-label]="label[st]" (click)="set(r, st)">{{ short[st] }}</button>
@@ -52,13 +52,13 @@
               }
             </ul>
           </m-card>
-        } @empty { <m-card><m-empty-state title="এই শ্রেণিতে কোনো শিক্ষার্থী নেই" icon="users" /></m-card> }
+        } @empty { <m-card><m-empty-state [title]="'এই শ্রেণিতে কোনো শিক্ষার্থী নেই' | tr" icon="users" /></m-card> }
       } @else {
-        <m-card title="QR স্ক্যান" subtitle="প্রতিটি সফল স্ক্যানে শব্দ হবে, শিক্ষার্থী উপস্থিত হিসেবে গণ্য হবে">
+        <m-card [title]="'QR স্ক্যান' | tr" [subtitle]="'প্রতিটি সফল স্ক্যানে শব্দ হবে, শিক্ষার্থী উপস্থিত হিসেবে গণ্য হবে' | tr">
           <app-qr-scanner (scanned)="scan($event)" />
           <form class="flex gap-2 mt-4" (ngSubmit)="scan(code)">
-            <input class="ctl flex-1" name="code" [(ngModel)]="code" placeholder="অথবা আইডি লিখুন, যেমন RM-2026-001" aria-label="শিক্ষার্থীর আইডি" autocomplete="off">
-            <button mButton type="submit" [loading]="scanning()">হাজিরা দিন</button>
+            <input class="ctl flex-1" name="code" [(ngModel)]="code" [placeholder]="'অথবা আইডি লিখুন, যেমন RM-2026-001' | tr" [attr.aria-label]="'শিক্ষার্থীর আইডি' | tr" autocomplete="off">
+            <button mButton type="submit" [loading]="scanning()">{{ 'হাজিরা দিন' | tr }}</button>
           </form>
         </m-card>
       }
@@ -66,26 +66,26 @@
 
     <aside class="grid gap-4">
       @if (mode() === 'scan') {
-        <m-card title="আজকের স্ক্যান" [padded]="false">
+        <m-card [title]="'আজকের স্ক্যান' | tr" [padded]="false">
           <ul class="m-0 p-0 list-none max-h-[420px] overflow-y-auto" aria-live="polite">
             @for (l of log(); track l.at) {
               <li class="flex items-center gap-3 px-4 py-2.5 border-b border-line last:border-0">
                 <m-avatar [name]="l.name || '?'" [src]="photo(l.photoPath)" [size]="36" />
-                <div class="flex-1 leading-tight min-w-0"><b class="font-semibold">{{ l.name || 'অজানা কোড' }}</b><small class="block text-mut text-[13px] truncate">{{ l.message }}</small></div>
+                <div class="flex-1 leading-tight min-w-0"><b class="font-semibold">{{ l.name || ('অজানা কোড' | tr) }}</b><small class="block text-mut text-[13px] truncate">{{ l.message }}</small></div>
                 <m-badge [tone]="l.ok ? (l.alreadyMarked ? 'info' : 'success') : 'danger'">@if (l.checkIn) { {{ l.checkIn | btime }} } @else { ✕ }</m-badge>
               </li>
-            } @empty { <li class="px-4 py-6 text-center text-mut text-sm">এখনো কোনো স্ক্যান হয়নি</li> }
+            } @empty { <li class="px-4 py-6 text-center text-mut text-sm">{{ 'এখনো কোনো স্ক্যান হয়নি' | tr }}</li> }
           </ul>
         </m-card>
       }
-      <m-card title="অনুপস্থিত" [subtitle]="absentees().length ? 'অভিভাবককে ফোন করতে নম্বরে চাপুন' : ''" [padded]="false">
+      <m-card [title]="'অনুপস্থিত' | tr" [subtitle]="absentees().length ? ('অভিভাবককে ফোন করতে নম্বরে চাপুন' | tr) : ''" [padded]="false">
         <ul class="m-0 p-0 list-none max-h-[480px] overflow-y-auto">
           @for (r of absentees(); track r.studentId) {
             <li class="flex items-center gap-3 px-4 py-2.5 border-b border-line last:border-0">
-              <div class="flex-1 leading-tight min-w-0"><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.className }} · রোল {{ r.roll | num }}</small></div>
-              @if (r.phone) { <a mIconButton [href]="'tel:' + r.phone" [attr.aria-label]="r.name + ' এর অভিভাবককে ফোন'" [title]="r.phone | digits"><m-icon name="phone" [size]="18" /></a> }
+              <div class="flex-1 leading-tight min-w-0"><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.className }} · {{ 'রোল {n}' | tr: { n: (r.roll | num) } }}</small></div>
+              @if (r.phone) { <a mIconButton [href]="'tel:' + r.phone" [attr.aria-label]="r.name + (' এর অভিভাবককে ফোন' | tr)" [title]="r.phone | digits"><m-icon name="phone" [size]="18" /></a> }
             </li>
-          } @empty { <li class="px-4 py-6 text-center text-mut text-sm">কেউ অনুপস্থিত নেই</li> }
+          } @empty { <li class="px-4 py-6 text-center text-mut text-sm">{{ 'কেউ অনুপস্থিত নেই' | tr }}</li> }
         </ul>
       </m-card>
     </aside>

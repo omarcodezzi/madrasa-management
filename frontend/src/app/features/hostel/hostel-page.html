@@ -1,23 +1,23 @@
-<m-page-header title="হোস্টেল" description="রুম, সিট বরাদ্দ ও ছুটির রেজিস্টার">
-  <button mButton variant="outline" (click)="newLeave()"><m-icon name="calendar" [size]="18" /> ছুটি দিন</button>
-  <button mButton (click)="newRoom()"><m-icon name="plus" [size]="18" /> নতুন রুম</button>
+<m-page-header [title]="'হোস্টেল' | tr" [description]="'রুম, সিট বরাদ্দ ও ছুটির রেজিস্টার' | tr">
+  <button mButton variant="outline" (click)="newLeave()"><m-icon name="calendar" [size]="18" /> {{ 'ছুটি দিন' | tr }}</button>
+  <button mButton (click)="newRoom()"><m-icon name="plus" [size]="18" /> {{ 'নতুন রুম' | tr }}</button>
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
 <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
   @if (data(); as d) {
-    <div class="px-5 py-4"><span class="text-sm text-mut">রুম</span><b class="block font-serif font-extrabold text-[26px]">{{ d.rooms | num }}টি</b><em class="not-italic text-[13px] text-mut">মোট সিট {{ d.seats | num }}</em></div>
-    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">আবাসিক শিক্ষার্থী</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ d.occupied | num }} জন</b><em class="not-italic text-[13px] text-mut">খালি সিট {{ (d.seats - d.occupied) | num }}</em></div>
-    <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">এখন ছুটিতে</span><b class="block font-serif font-extrabold text-[26px]">{{ d.onLeave | num }} জন</b></div>
-    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">ছুটি শেষে ফেরেনি</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="d.overdue">{{ d.overdue | num }} জন</b></div>
+    <div class="px-5 py-4"><span class="text-sm text-mut">{{ 'রুম' | tr }}</span><b class="block font-serif font-extrabold text-[26px]">{{ '{n}টি' | tr: { n: (d.rooms | num) } }}</b><em class="not-italic text-[13px] text-mut">{{ 'মোট সিট {n}' | tr: { n: (d.seats | num) } }}</em></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">{{ 'আবাসিক শিক্ষার্থী' | tr }}</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ '{n} জন' | tr: { n: (d.occupied | num) } }}</b><em class="not-italic text-[13px] text-mut">{{ 'খালি সিট {n}' | tr: { n: ((d.seats - d.occupied) | num) } }}</em></div>
+    <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">{{ 'এখন ছুটিতে' | tr }}</span><b class="block font-serif font-extrabold text-[26px]">{{ '{n} জন' | tr: { n: (d.onLeave | num) } }}</b></div>
+    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">{{ 'ছুটি শেষে ফেরেনি' | tr }}</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="d.overdue">{{ '{n} জন' | tr: { n: (d.overdue | num) } }}</b></div>
   } @else { @for (i of [1,2,3,4]; track i) { <div class="px-5 py-4"><m-skeleton height="64px" /></div> } }
 </div>
 
 <div class="flex flex-wrap items-center gap-3 mb-4">
-  <m-segmented [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="হোস্টেল অংশ" />
-  @if (tab() === 'rooms') { <m-segmented [options]="genders" [value]="gender()" (valueChange)="gender.set($event)" aria-label="ছাত্র না ছাত্রী" /> }
-  @else { <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" [ngModel]="openOnly()" (ngModelChange)="openOnly.set($event)"> শুধু যারা এখনও ফেরেনি</label> }
+  <m-segmented [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" [attr.aria-label]="'হোস্টেল অংশ' | tr" />
+  @if (tab() === 'rooms') { <m-segmented [options]="genders" [value]="gender()" (valueChange)="gender.set($event)" [attr.aria-label]="'ছাত্র না ছাত্রী' | tr" /> }
+  @else { <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" [ngModel]="openOnly()" (ngModelChange)="openOnly.set($event)"> {{ 'শুধু যারা এখনও ফেরেনি' | tr }}</label> }
 </div>
 
 @if (tab() === 'rooms') {
@@ -28,19 +28,19 @@
         @for (r of b.rooms; track r.id) {
           <m-card>
             <div class="flex items-center gap-2 mb-3">
-              <b class="font-serif text-lg">রুম {{ r.roomNo | digits }}</b>
+              <b class="font-serif text-lg">{{ 'রুম {n}' | tr: { n: (r.roomNo | digits) } }}</b>
               <m-badge [tone]="r.forGender === 'Male' ? 'info' : 'gold'">{{ genderLabel(r.forGender) }}</m-badge>
               <span class="ml-auto text-sm text-mut tabular">{{ r.occupants.length | num }}/{{ r.seats | num }}</span>
-              <button mButton size="sm" variant="ghost" (click)="editRoom(r)" [attr.aria-label]="'রুম ' + r.roomNo + ' বদলান'"><m-icon name="edit" [size]="16" /></button>
+              <button mButton size="sm" variant="ghost" (click)="editRoom(r)" [attr.aria-label]="'রুম {n} বদলান' | tr: { n: r.roomNo }"><m-icon name="edit" [size]="16" /></button>
             </div>
             <ul class="m-0 p-0 list-none grid grid-cols-2 gap-2">
               @for (s of seats(r); track s.no) {
                 <li>
                   <button type="button" class="seat" [class.taken]="!!s.o" [class.away]="s.o?.onLeave" (click)="seatClick(r, s.no, s.o)"
-                    [attr.aria-label]="s.o ? 'সিট ' + s.no + ': ' + s.o.name + (s.o.onLeave ? ' (ছুটিতে)' : '') : 'সিট ' + s.no + ' খালি, বরাদ্দ দিন'">
+                    [attr.aria-label]="s.o ? ('সিট {n}' | tr: { n: s.no }) + ': ' + s.o.name + (s.o.onLeave ? (' (ছুটিতে)' | tr) : '') : ('সিট {n} খালি, বরাদ্দ দিন' | tr: { n: s.no })">
                     <span class="seat-no">{{ s.no | digits }}</span>
-                    @if (s.o; as o) { <span class="truncate text-left leading-tight"><b class="block text-[13px] truncate">{{ o.name }}</b><small class="text-mut text-[12px]">{{ o.onLeave ? 'ছুটিতে' : o.className }}</small></span> }
-                    @else { <span class="text-mut text-[13px]">খালি</span> }
+                    @if (s.o; as o) { <span class="truncate text-left leading-tight"><b class="block text-[13px] truncate">{{ o.name }}</b><small class="text-mut text-[12px]">{{ o.onLeave ? ('ছুটিতে' | tr) : o.className }}</small></span> }
+                    @else { <span class="text-mut text-[13px]">{{ 'খালি' | tr }}</span> }
                   </button>
                 </li>
               }
@@ -48,7 +48,7 @@
           </m-card>
         }
       </div>
-    } @empty { <m-empty-state title="কোনো রুম নেই" description="নতুন রুম যোগ করে সিট বরাদ্দ শুরু করুন।" icon="bed" /> }
+    } @empty { <m-empty-state [title]="'কোনো রুম নেই' | tr" [description]="'নতুন রুম যোগ করে সিট বরাদ্দ শুরু করুন।' | tr" icon="bed" /> }
   } @else { <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><m-skeleton height="200px" /><m-skeleton height="200px" /><m-skeleton height="200px" /></div> }
 } @else {
   <m-card [padded]="false">
@@ -58,85 +58,85 @@
           <li class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line last:border-0">
             <span class="flex-1 min-w-[12rem] leading-tight">
               <a [routerLink]="['/students', l.studentId]" class="font-semibold no-underline text-ink">{{ l.name }}</a>
-              <small class="block text-mut text-[13px]">{{ l.className }}@if (l.roomNo) { · রুম {{ l.roomNo | digits }} }@if (l.reason) { · {{ l.reason }} }@if (l.takenBy) { · নিয়ে গেছেন {{ l.takenBy }} }</small>
+              <small class="block text-mut text-[13px]">{{ l.className }}@if (l.roomNo) { · {{ 'রুম {n}' | tr: { n: (l.roomNo | digits) } }} }@if (l.reason) { · {{ l.reason }} }@if (l.takenBy) { · {{ 'নিয়ে গেছেন {name}' | tr: { name: l.takenBy } }} }</small>
             </span>
-            <span class="text-sm tabular">{{ l.fromDate | bdate }} → {{ l.toDate ? (l.toDate | bdate) : 'অনির্দিষ্ট' }}</span>
-            @if (l.returnedOn) { <m-badge tone="success">ফিরেছে {{ l.returnedOn | bdate }}</m-badge> }
+            <span class="text-sm tabular">{{ l.fromDate | bdate }} → {{ l.toDate ? (l.toDate | bdate) : ('অনির্দিষ্ট' | tr) }}</span>
+            @if (l.returnedOn) { <m-badge tone="success">{{ 'ফিরেছে {n}' | tr: { n: (l.returnedOn | bdate) } }}</m-badge> }
             @else {
-              @if (l.overdue) { <m-badge tone="danger" [dot]="true">দেরি হচ্ছে</m-badge> } @else { <m-badge tone="info">ছুটিতে</m-badge> }
-              <button mButton size="sm" variant="outline" (click)="back(l)"><m-icon name="check" [size]="16" /> ফিরেছে</button>
+              @if (l.overdue) { <m-badge tone="danger" [dot]="true">{{ 'দেরি হচ্ছে' | tr }}</m-badge> } @else { <m-badge tone="info">{{ 'ছুটিতে' | tr }}</m-badge> }
+              <button mButton size="sm" variant="outline" (click)="back(l)"><m-icon name="check" [size]="16" /> {{ 'ফিরেছে' | tr }}</button>
             }
           </li>
-        } @empty { <li><m-empty-state [title]="openOnly() ? 'এখন কেউ ছুটিতে নেই' : 'কোনো ছুটির রেকর্ড নেই'" icon="calendar" /></li> }
+        } @empty { <li><m-empty-state [title]="openOnly() ? ('এখন কেউ ছুটিতে নেই' | tr) : ('কোনো ছুটির রেকর্ড নেই' | tr)" icon="calendar" /></li> }
       </ul>
     } @else { <div class="p-4 grid gap-2"><m-skeleton height="48px" /><m-skeleton height="48px" /></div> }
   </m-card>
 }
 
-<m-modal [(open)]="roomOpen" [title]="roomId() ? 'রুম বদলান' : 'নতুন রুম'">
+<m-modal [(open)]="roomOpen" [title]="roomId() ? ('রুম বদলান' | tr) : ('নতুন রুম' | tr)">
   <form id="roomForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveRoom()">
-    <m-field label="ভবন" for="r-b" hint="যেমন: ভবন ক"><input id="r-b" class="ctl" name="building" [ngModel]="roomForm().building" (ngModelChange)="patchRoom({ building: $event })"></m-field>
-    <m-field label="রুম নম্বর" for="r-n" [required]="true" [error]="roomErrs()['roomNo']"><input id="r-n" class="ctl tabular" name="roomNo" [ngModel]="roomForm().roomNo" (ngModelChange)="patchRoom({ roomNo: $event })" [attr.aria-invalid]="!!roomErrs()['roomNo']"></m-field>
-    <m-field label="সিট সংখ্যা" for="r-s" [required]="true" [error]="roomErrs()['seats']"><input id="r-s" class="ctl tabular" inputmode="numeric" name="seats" [ngModel]="roomForm().seats" (ngModelChange)="patchRoom({ seats: $event })"></m-field>
-    <m-field label="কাদের জন্য" for="r-g" [error]="roomErrs()['forGender']">
-      <select id="r-g" class="ctl" name="forGender" [ngModel]="roomForm().forGender" (ngModelChange)="patchRoom({ forGender: $event })"><option value="Male">ছাত্র</option><option value="Female">ছাত্রী</option></select>
+    <m-field [label]="'ভবন' | tr" for="r-b" [hint]="'যেমন: ভবন ক' | tr"><input id="r-b" class="ctl" name="building" [ngModel]="roomForm().building" (ngModelChange)="patchRoom({ building: $event })"></m-field>
+    <m-field [label]="'রুম নম্বর' | tr" for="r-n" [required]="true" [error]="roomErrs()['roomNo']"><input id="r-n" class="ctl tabular" name="roomNo" [ngModel]="roomForm().roomNo" (ngModelChange)="patchRoom({ roomNo: $event })" [attr.aria-invalid]="!!roomErrs()['roomNo']"></m-field>
+    <m-field [label]="'সিট সংখ্যা' | tr" for="r-s" [required]="true" [error]="roomErrs()['seats']"><input id="r-s" class="ctl tabular" inputmode="numeric" name="seats" [ngModel]="roomForm().seats" (ngModelChange)="patchRoom({ seats: $event })"></m-field>
+    <m-field [label]="'কাদের জন্য' | tr" for="r-g" [error]="roomErrs()['forGender']">
+      <select id="r-g" class="ctl" name="forGender" [ngModel]="roomForm().forGender" (ngModelChange)="patchRoom({ forGender: $event })"><option value="Male">{{ 'ছাত্র' | tr }}</option><option value="Female">{{ 'ছাত্রী' | tr }}</option></select>
     </m-field>
   </form>
   <div modalFooter class="flex gap-2 w-full">
-    @if (roomId()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="deleteRoom()"><m-icon name="trash" [size]="16" /> মুছুন</button> }
-    <button mButton variant="ghost" (click)="roomOpen.set(false)">বাতিল</button>
-    <button mButton type="submit" form="roomForm" [loading]="savingRoom()">সংরক্ষণ</button>
+    @if (roomId()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="deleteRoom()"><m-icon name="trash" [size]="16" /> {{ 'মুছুন' | tr }}</button> }
+    <button mButton variant="ghost" (click)="roomOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton type="submit" form="roomForm" [loading]="savingRoom()">{{ 'সংরক্ষণ' | tr }}</button>
   </div>
 </m-modal>
 
-<m-modal [(open)]="allocOpen" [title]="'সিট বরাদ্দ · রুম ' + ((allocRoom()?.roomNo ?? '') | digits) + ', সিট ' + ((allocSeat() ?? '') | digits)">
+<m-modal [(open)]="allocOpen" [title]="'সিট বরাদ্দ · রুম {r}, সিট {s}' | tr: { r: ((allocRoom()?.roomNo ?? '') | digits), s: ((allocSeat() ?? '') | digits) }">
   <div class="relative mb-2">
     <m-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
-    <input class="ctl !pl-10" [ngModel]="q()" (ngModelChange)="q.set($event)" placeholder="নাম বা আইডি" aria-label="শিক্ষার্থী খুঁজুন" autocomplete="off">
+    <input class="ctl !pl-10" [ngModel]="q()" (ngModelChange)="q.set($event)" [placeholder]="'নাম বা আইডি' | tr" [attr.aria-label]="'শিক্ষার্থী খুঁজুন' | tr" autocomplete="off">
   </div>
-  <p class="m-0 mb-2 text-sm text-mut">যাদের এখনও সিট নেই এমন {{ allocRoom()?.forGender === 'Female' ? 'ছাত্রী' : 'ছাত্র' }}দের তালিকা</p>
+  <p class="m-0 mb-2 text-sm text-mut">{{ allocRoom()?.forGender === 'Female' ? ('যাদের এখনও সিট নেই এমন ছাত্রীদের তালিকা' | tr) : ('যাদের এখনও সিট নেই এমন ছাত্রদের তালিকা' | tr) }}</p>
   @if (candidates()) {
     <ul class="m-0 p-0 list-none max-h-[50vh] overflow-y-auto">
       @for (c of fitting(); track c.studentId) {
         <li><button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-soft text-left cursor-pointer bg-transparent border-0 text-ink" (click)="allocate(c)">
           <m-avatar [name]="c.name" [size]="34" /><span class="flex-1 leading-tight"><b class="font-semibold">{{ c.name }}</b><small class="block text-mut text-[13px]">{{ c.studentCode }} · {{ c.className }}</small></span>
           <m-icon name="plus" [size]="18" class="text-g2" /></button></li>
-      } @empty { <li class="px-3 py-6 text-center text-mut text-sm">কাউকে পাওয়া যায়নি</li> }
+      } @empty { <li class="px-3 py-6 text-center text-mut text-sm">{{ 'কাউকে পাওয়া যায়নি' | tr }}</li> }
     </ul>
   } @else { <m-skeleton height="120px" /> }
 </m-modal>
 
-<m-modal [(open)]="occOpen" title="আবাসিক শিক্ষার্থী">
+<m-modal [(open)]="occOpen" [title]="'আবাসিক শিক্ষার্থী' | tr">
   @if (occ(); as x) {
     <div class="flex items-center gap-3">
       <m-avatar [name]="x.o.name" [src]="photo(x.o.photoPath)" [size]="56" />
       <div class="leading-tight"><a [routerLink]="['/students', x.o.studentId]" class="font-semibold text-lg no-underline text-ink" (click)="occOpen.set(false)">{{ x.o.name }}</a>
         <small class="block text-mut">{{ x.o.studentCode }} · {{ x.o.className }}</small>
-        <small class="block text-mut">রুম {{ x.room.roomNo | digits }}, সিট {{ x.o.seatNo | digits }} · {{ x.o.fromDate | bdate }} থেকে</small></div>
+        <small class="block text-mut">{{ 'রুম {n}' | tr: { n: (x.room.roomNo | digits) } }}, {{ 'সিট {n}' | tr: { n: (x.o.seatNo | digits) } }} · {{ '{d} থেকে' | tr: { d: (x.o.fromDate | bdate) } }}</small></div>
     </div>
-    @if (x.o.onLeave) { <p class="mt-3 mb-0"><m-badge tone="info">এখন ছুটিতে আছে</m-badge></p> }
+    @if (x.o.onLeave) { <p class="mt-3 mb-0"><m-badge tone="info">{{ 'এখন ছুটিতে আছে' | tr }}</m-badge></p> }
   }
   <div modalFooter class="flex gap-2 w-full">
-    <button mButton variant="ghost" class="!text-red mr-auto" (click)="vacate()">সিট খালি করুন</button>
-    @if (!occ()?.o?.onLeave) { <button mButton variant="outline" (click)="newLeave(occ()!.o.studentId)"><m-icon name="calendar" [size]="16" /> ছুটি দিন</button> }
+    <button mButton variant="ghost" class="!text-red mr-auto" (click)="vacate()">{{ 'সিট খালি করুন' | tr }}</button>
+    @if (!occ()?.o?.onLeave) { <button mButton variant="outline" (click)="newLeave(occ()!.o.studentId)"><m-icon name="calendar" [size]="16" /> {{ 'ছুটি দিন' | tr }}</button> }
   </div>
 </m-modal>
 
-<m-modal [(open)]="leaveOpen" title="ছুটি দিন">
+<m-modal [(open)]="leaveOpen" [title]="'ছুটি দিন' | tr">
   <form id="leaveForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveLeave()">
-    <m-field label="শিক্ষার্থী" for="l-s" class="col-span-2" [required]="true" [error]="leaveErrs()['studentId']">
+    <m-field [label]="'শিক্ষার্থী' | tr" for="l-s" class="col-span-2" [required]="true" [error]="leaveErrs()['studentId']">
       <select id="l-s" class="ctl" name="studentId" [ngModel]="leaveForm().studentId" (ngModelChange)="patchLeave({ studentId: +$event })">
-        <option [ngValue]="0">বাছাই করুন</option>
-        @for (r of residents(); track r.studentId) { <option [ngValue]="r.studentId">{{ r.name }} · {{ r.className }} · রুম {{ r.roomNo | digits }}</option> }
+        <option [ngValue]="0">{{ 'বাছাই করুন' | tr }}</option>
+        @for (r of residents(); track r.studentId) { <option [ngValue]="r.studentId">{{ r.name }} · {{ r.className }} · {{ 'রুম {n}' | tr: { n: (r.roomNo | digits) } }}</option> }
       </select>
     </m-field>
-    <m-field label="যাওয়ার তারিখ" for="l-f"><input id="l-f" class="ctl" type="date" name="fromDate" [ngModel]="leaveForm().fromDate" (ngModelChange)="patchLeave({ fromDate: $event })"></m-field>
-    <m-field label="ফেরার কথা" for="l-t" [error]="leaveErrs()['toDate']"><input id="l-t" class="ctl" type="date" name="toDate" [min]="leaveForm().fromDate" [ngModel]="leaveForm().toDate" (ngModelChange)="patchLeave({ toDate: $event })"></m-field>
-    <m-field label="কারণ" for="l-r"><input id="l-r" class="ctl" name="reason" [ngModel]="leaveForm().reason" (ngModelChange)="patchLeave({ reason: $event })"></m-field>
-    <m-field label="কে নিয়ে গেছেন" for="l-k" hint="যেমন: পিতা, বড় ভাই"><input id="l-k" class="ctl" name="takenBy" [ngModel]="leaveForm().takenBy" (ngModelChange)="patchLeave({ takenBy: $event })"></m-field>
+    <m-field [label]="'যাওয়ার তারিখ' | tr" for="l-f"><input id="l-f" class="ctl" type="date" name="fromDate" [ngModel]="leaveForm().fromDate" (ngModelChange)="patchLeave({ fromDate: $event })"></m-field>
+    <m-field [label]="'ফেরার কথা' | tr" for="l-t" [error]="leaveErrs()['toDate']"><input id="l-t" class="ctl" type="date" name="toDate" [min]="leaveForm().fromDate" [ngModel]="leaveForm().toDate" (ngModelChange)="patchLeave({ toDate: $event })"></m-field>
+    <m-field [label]="'কারণ' | tr" for="l-r"><input id="l-r" class="ctl" name="reason" [ngModel]="leaveForm().reason" (ngModelChange)="patchLeave({ reason: $event })"></m-field>
+    <m-field [label]="'কে নিয়ে গেছেন' | tr" for="l-k" [hint]="'যেমন: পিতা, বড় ভাই' | tr"><input id="l-k" class="ctl" name="takenBy" [ngModel]="leaveForm().takenBy" (ngModelChange)="patchLeave({ takenBy: $event })"></m-field>
   </form>
   <div modalFooter class="flex gap-2">
-    <button mButton variant="ghost" (click)="leaveOpen.set(false)">বাতিল</button>
-    <button mButton type="submit" form="leaveForm" [loading]="savingLeave()">ছুটি লিখুন</button>
+    <button mButton variant="ghost" (click)="leaveOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton type="submit" form="leaveForm" [loading]="savingLeave()">{{ 'ছুটি লিখুন' | tr }}</button>
   </div>
 </m-modal>

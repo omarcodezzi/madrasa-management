@@ -12,30 +12,31 @@ import { OfficeApi } from '../office/office.api';
 import { FeeFrequency, FeeHeadRow, FREQ_LABEL, GeneralSettings, GradeRow, Holiday, Profile, RoleRow, Session, UserInput, UserRow } from '../office/office.models';
 import { Guardian, StudentRow } from '../students/student.models';
 import { StudentsApi } from '../students/students.service';
+import { TrPipe, tr } from '../../core/tr';
 
 type Section = 'profile' | 'sessions' | 'users' | 'roles' | 'fees' | 'grades' | 'holidays' | 'general';
 const SECTIONS: { key: Section; label: string; icon: IconName }[] = [
-  { key: 'profile', label: 'মাদরাসার তথ্য', icon: 'home' }, { key: 'sessions', label: 'শিক্ষাবর্ষ', icon: 'calendar' },
-  { key: 'users', label: 'ইউজার', icon: 'users' }, { key: 'roles', label: 'রোল ও অনুমতি', icon: 'user' },
-  { key: 'fees', label: 'ফি-এর খাত', icon: 'wallet' }, { key: 'grades', label: 'বিভাগ (গ্রেড)', icon: 'exam' },
-  { key: 'holidays', label: 'ছুটির দিন', icon: 'sun' }, { key: 'general', label: 'সাধারণ', icon: 'gear' },
+  { key: 'profile', label: tr('মাদরাসার তথ্য'), icon: 'home' }, { key: 'sessions', label: tr('শিক্ষাবর্ষ'), icon: 'calendar' },
+  { key: 'users', label: tr('ইউজার'), icon: 'users' }, { key: 'roles', label: tr('রোল ও অনুমতি'), icon: 'user' },
+  { key: 'fees', label: tr('ফি-এর খাত'), icon: 'wallet' }, { key: 'grades', label: tr('বিভাগ (গ্রেড)'), icon: 'exam' },
+  { key: 'holidays', label: tr('ছুটির দিন'), icon: 'sun' }, { key: 'general', label: tr('সাধারণ'), icon: 'gear' },
 ];
 export const PERM_LABEL: Record<string, string> = {
-  'dashboard.view': 'ড্যাশবোর্ড দেখা', 'students.view': 'শিক্ষার্থী দেখা', 'students.edit': 'শিক্ষার্থীর তথ্য বদলানো', 'admission.manage': 'ভর্তি',
-  'attendance.take': 'হাজিরা নেওয়া', 'hifz.edit': 'হিফজের সবক লেখা', 'exams.marks': 'নম্বর এন্ট্রি', 'exams.publish': 'ফলাফল প্রকাশ', 'fees.collect': 'বেতন আদায়',
-  'accounts.manage': 'হিসাব ও দান', 'staff.manage': 'স্টাফ ও বেতন', 'hostel.manage': 'হোস্টেল', 'library.manage': 'লাইব্রেরি', 'notices.manage': 'নোটিশ দেওয়া',
-  'reports.view': 'রিপোর্ট দেখা', 'settings.manage': 'সেটিংস', 'portal.view': 'অভিভাবক পোর্টাল',
+  'dashboard.view': tr('ড্যাশবোর্ড দেখা'), 'students.view': tr('শিক্ষার্থী দেখা'), 'students.edit': tr('শিক্ষার্থীর তথ্য বদলানো'), 'admission.manage': tr('ভর্তি'),
+  'attendance.take': tr('হাজিরা নেওয়া'), 'hifz.edit': tr('হিফজের সবক লেখা'), 'exams.marks': tr('নম্বর এন্ট্রি'), 'exams.publish': tr('ফলাফল প্রকাশ'), 'fees.collect': tr('বেতন আদায়'),
+  'accounts.manage': tr('হিসাব ও দান'), 'staff.manage': tr('স্টাফ ও বেতন'), 'hostel.manage': tr('হোস্টেল'), 'library.manage': tr('লাইব্রেরি'), 'notices.manage': tr('নোটিশ দেওয়া'),
+  'reports.view': tr('রিপোর্ট দেখা'), 'settings.manage': tr('সেটিংস'), 'portal.view': tr('অভিভাবক পোর্টাল'),
 };
 export const ROLE_LABEL: Record<string, string> = {
-  SuperAdmin: 'সুপার অ্যাডমিন', Muhtamim: 'মুহতামিম', Office: 'অফিস', Teacher: 'উস্তাদ', Accountant: 'হিসাবরক্ষক', HostelSupervisor: 'হোস্টেল তত্ত্বাবধায়ক',
-  Librarian: 'লাইব্রেরিয়ান', Student: 'শিক্ষার্থী', Guardian: 'অভিভাবক',
+  SuperAdmin: tr('সুপার অ্যাডমিন'), Muhtamim: tr('মুহতামিম'), Office: tr('অফিস'), Teacher: tr('উস্তাদ'), Accountant: tr('হিসাবরক্ষক'), HostelSupervisor: tr('হোস্টেল তত্ত্বাবধায়ক'),
+  Librarian: tr('লাইব্রেরিয়ান'), Student: tr('শিক্ষার্থী'), Guardian: tr('অভিভাবক'),
 };
-const DAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+const DAYS = [tr('রবিবার'), tr('সোমবার'), tr('মঙ্গলবার'), tr('বুধবার'), tr('বৃহস্পতিবার'), tr('শুক্রবার'), tr('শনিবার')];
 
 @Component({
   selector: 'app-settings-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
+  imports: [TrPipe, FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
   templateUrl: './settings-page.html',
 })
 export class SettingsPage {
@@ -72,7 +73,7 @@ export class SettingsPage {
   protected me = computed(() => this.auth.user()?.id);
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.load(this.section()); }
 
   constructor() {
@@ -113,7 +114,7 @@ export class SettingsPage {
     this.run(async () => {
       const r = await this.api.saveProfile({ ...p, establishedYear: p.establishedYear ? +toEnDigits(String(p.establishedYear)) : null, logo: this.logo() });
       this.profile.set(r); this.logo.set(null); this.session.reload();
-    }, 'মাদরাসার তথ্য সংরক্ষণ হয়েছে');
+    }, tr('মাদরাসার তথ্য সংরক্ষণ হয়েছে'));
   }
 
   // ---- sessions ----
@@ -126,10 +127,10 @@ export class SettingsPage {
   }
   protected editSession(s: Session) { this.sId.set(s.id); this.errs.set({}); this.sForm.set({ name: s.name, startDate: s.startDate, endDate: s.endDate }); this.sOpen.set(true); }
   protected patchS(p: Partial<{ name: string; startDate: string; endDate: string }>) { this.sForm.update((f) => ({ ...f, ...p })); }
-  protected async saveSession() { if (await this.run(() => this.api.saveSession(this.sId(), this.sForm()), 'শিক্ষাবর্ষ সংরক্ষণ হয়েছে')) { this.sOpen.set(false); this.load('sessions'); } }
+  protected async saveSession() { if (await this.run(() => this.api.saveSession(this.sId(), this.sForm()), tr('শিক্ষাবর্ষ সংরক্ষণ হয়েছে'))) { this.sOpen.set(false); this.load('sessions'); } }
   protected async makeCurrent(s: Session) {
-    if (!(await this.confirm.ask({ title: 'চলতি শিক্ষাবর্ষ বদলাবেন?', message: 'হাজিরা, বেতন, পরীক্ষা সব এই শিক্ষাবর্ষ ধরে চলবে। শিক্ষার্থীদের নতুন শ্রেণিতে তোলা আলাদা কাজ, এতে হবে না।', itemName: s.name, confirmLabel: 'চলতি করুন' }))) return;
-    if (await this.run(() => this.api.setCurrentSession(s.id), `${s.name} এখন চলতি শিক্ষাবর্ষ`)) { this.load('sessions'); this.session.reload(); }
+    if (!(await this.confirm.ask({ title: tr('চলতি শিক্ষাবর্ষ বদলাবেন?'), message: tr('হাজিরা, বেতন, পরীক্ষা সব এই শিক্ষাবর্ষ ধরে চলবে। শিক্ষার্থীদের নতুন শ্রেণিতে তোলা আলাদা কাজ, এতে হবে না।'), itemName: s.name, confirmLabel: tr('চলতি করুন') }))) return;
+    if (await this.run(() => this.api.setCurrentSession(s.id), tr('{name} এখন চলতি শিক্ষাবর্ষ', { name: s.name }))) { this.load('sessions'); this.session.reload(); }
   }
 
   // ---- users ----
@@ -181,12 +182,12 @@ export class SettingsPage {
   }
   protected async saveUser() {
     const f = this.uForm();
-    if (await this.run(() => this.api.saveUser(this.uId(), { ...f, password: f.password || null }), this.uId() ? 'ইউজার সংরক্ষণ হয়েছে' : `ইউজার "${f.userName}" তৈরি হয়েছে`)) { this.uOpen.set(false); this.load('users'); }
+    if (await this.run(() => this.api.saveUser(this.uId(), { ...f, password: f.password || null }), this.uId() ? tr('ইউজার সংরক্ষণ হয়েছে') : tr('ইউজার "{name}" তৈরি হয়েছে', { name: f.userName }))) { this.uOpen.set(false); this.load('users'); }
   }
   protected resetPw(u: UserRow) { this.pwUser.set(u); this.pw.set(''); this.errs.set({}); this.pwOpen.set(true); }
   protected async savePw() {
     const u = this.pwUser(); if (!u) return;
-    if (await this.run(() => this.api.resetPassword(u.id, this.pw()), `${u.fullName}-এর নতুন পাসওয়ার্ড সেট হয়েছে`)) { this.pwOpen.set(false); this.load('users'); }
+    if (await this.run(() => this.api.resetPassword(u.id, this.pw()), tr('{name}-এর নতুন পাসওয়ার্ড সেট হয়েছে', { name: u.fullName }))) { this.pwOpen.set(false); this.load('users'); }
   }
 
   // ---- roles ----
@@ -201,7 +202,7 @@ export class SettingsPage {
   protected async saveRole(r: RoleRow) {
     const perms = this.roleEdit()[r.name]; if (!perms) return;
     if (await this.run(async () => { const n = await this.api.setRole(r.name, perms); this.roles.update((l) => l?.map((x) => (x.name === n.name ? n : x)) ?? l); },
-      `${this.roleLabel(r.name)} রোলের অনুমতি সংরক্ষণ হয়েছে। ব্যবহারকারীরা আবার লগইন করলে কার্যকর হবে।`)) {
+      tr('{role} রোলের অনুমতি সংরক্ষণ হয়েছে। ব্যবহারকারীরা আবার লগইন করলে কার্যকর হবে।', { role: this.roleLabel(r.name) }))) {
       this.roleEdit.update((m) => { const n = { ...m }; delete n[r.name]; return n; });
     }
   }
@@ -215,7 +216,7 @@ export class SettingsPage {
   protected patchH(p: Partial<{ nameBn: string; frequency: FeeFrequency; defaultAmount: string; isActive: boolean }>) { this.hForm.update((f) => ({ ...f, ...p })); }
   protected async saveHead() {
     const f = this.hForm();
-    if (await this.run(() => this.api.saveFeeHead(this.hId(), { ...f, defaultAmount: +toEnDigits(f.defaultAmount) || 0 }), 'ফি-এর খাত সংরক্ষণ হয়েছে')) { this.hOpen.set(false); this.load('fees'); }
+    if (await this.run(() => this.api.saveFeeHead(this.hId(), { ...f, defaultAmount: +toEnDigits(f.defaultAmount) || 0 }), tr('ফি-এর খাত সংরক্ষণ হয়েছে'))) { this.hOpen.set(false); this.load('fees'); }
   }
 
   // ---- grades ----
@@ -227,24 +228,24 @@ export class SettingsPage {
     if (await this.run(async () => {
       const r = await this.api.saveGrades(g.map((x) => ({ nameBn: x.nameBn, nameAr: x.nameAr || null, minAverage: +toEnDigits(x.minAverage) })));
       this.grades.set(r.map((x: GradeRow) => ({ nameBn: x.nameBn, nameAr: x.nameAr ?? '', minAverage: String(x.minAverage) })));
-    }, 'বিভাগ সংরক্ষণ হয়েছে। পরের বার ফলাফল তৈরিতে নতুন নিয়ম লাগবে।')) { /* saved */ }
+    }, tr('বিভাগ সংরক্ষণ হয়েছে। পরের বার ফলাফল তৈরিতে নতুন নিয়ম লাগবে।'))) { /* saved */ }
   }
 
   // ---- holidays ----
   protected hdForm = signal({ date: todayIso(), title: '' });
   protected async addHoliday() {
     const f = this.hdForm();
-    if (await this.run(() => this.api.addHoliday(f), 'ছুটি যোগ হয়েছে')) { this.hdForm.set({ date: f.date, title: '' }); this.api.holidays(this.year()).then((h) => this.holidays.set(h)); }
+    if (await this.run(() => this.api.addHoliday(f), tr('ছুটি যোগ হয়েছে'))) { this.hdForm.set({ date: f.date, title: '' }); this.api.holidays(this.year()).then((h) => this.holidays.set(h)); }
   }
   protected async removeHoliday(h: Holiday) {
-    if (!(await this.confirm.ask({ message: 'এই দিনটি আবার কর্মদিবস হিসেবে গণ্য হবে।', itemName: h.title, confirmLabel: 'মুছে ফেলুন' }))) return;
-    if (await this.run(() => this.api.deleteHoliday(h.id), 'ছুটি মুছে ফেলা হয়েছে')) this.api.holidays(this.year()).then((x) => this.holidays.set(x));
+    if (!(await this.confirm.ask({ message: tr('এই দিনটি আবার কর্মদিবস হিসেবে গণ্য হবে।'), itemName: h.title, confirmLabel: tr('মুছে ফেলুন') }))) return;
+    if (await this.run(() => this.api.deleteHoliday(h.id), tr('ছুটি মুছে ফেলা হয়েছে'))) this.api.holidays(this.year()).then((x) => this.holidays.set(x));
   }
 
   // ---- general ----
   protected patchG(p: Partial<GeneralSettings>) { this.general.update((g) => (g ? { ...g, ...p } : g)); }
   protected saveGeneral() {
     const g = this.general(); if (!g) return;
-    this.run(async () => this.general.set(await this.api.saveGeneral({ ...g, libraryFinePerDay: +toEnDigits(String(g.libraryFinePerDay)) || 0, weeklyHoliday: +g.weeklyHoliday })), 'সংরক্ষণ হয়েছে');
+    this.run(async () => this.general.set(await this.api.saveGeneral({ ...g, libraryFinePerDay: +toEnDigits(String(g.libraryFinePerDay)) || 0, weeklyHoliday: +g.weeklyHoliday })), tr('সংরক্ষণ হয়েছে'));
   }
 }

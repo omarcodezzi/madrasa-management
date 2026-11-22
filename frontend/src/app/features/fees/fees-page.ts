@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { errorMessage, PaymentMethod } from '../../core/api';
 import { AuthService, P } from '../../core/auth/auth.service';
-import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayIso } from '../../core/format';
+import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayIso, fmtMoney } from '../../core/format';
 import { LookupsService } from '../../core/lookups.service';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
@@ -13,13 +13,14 @@ import { StudentsApi } from '../students/students.service';
 import { DueListRow, METHOD_LABEL, MonthSummary, Receipt, ReceiptSummary, StudentDues } from './fee.models';
 import { FeesApi } from './fees.service';
 import { ReceiptView } from './receipt-view';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'collect' | 'dues' | 'receipts';
 
 @Component({
   selector: 'app-fees-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, CellDef, Chips, DataTable, EmptyState, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton, ReceiptView],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Button, Card, CellDef, Chips, DataTable, EmptyState, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton, ReceiptView],
   templateUrl: './fees-page.html',
 })
 export class FeesPage {
@@ -34,7 +35,7 @@ export class FeesPage {
 
   protected month = signal(todayIso().slice(0, 7));
   protected tab = signal<Tab>('collect');
-  protected tabs = [{ value: 'collect' as Tab, label: 'আদায়' }, { value: 'dues' as Tab, label: 'বকেয়া তালিকা' }, { value: 'receipts' as Tab, label: 'রসিদ' }];
+  protected tabs = [{ value: 'collect' as Tab, label: tr('আদায়') }, { value: 'dues' as Tab, label: tr('বকেয়া তালিকা') }, { value: 'receipts' as Tab, label: tr('রসিদ') }];
   protected summary = signal<MonthSummary | null>(null);
   protected canVoid = computed(() => this.auth.can(P.accounts));
 
@@ -65,28 +66,28 @@ export class FeesPage {
   protected dueClass = signal(0);
   protected dueRows = signal<DueListRow[] | null>(null);
   protected receiptRows = signal<ReceiptSummary[] | null>(null);
-  protected classOptions = computed(() => [{ value: 0, label: 'সব শ্রেণি' }, ...this.lookups.classes().map((c) => ({ value: c.id, label: c.nameBn }))]);
+  protected classOptions = computed(() => [{ value: 0, label: tr('সব শ্রেণি') }, ...this.lookups.classes().map((c) => ({ value: c.id, label: c.nameBn }))]);
   protected dueCols: Column<DueListRow>[] = [
-    { key: 'name', label: 'শিক্ষার্থী', sortable: true },
-    { key: 'className', label: 'শ্রেণি', sortable: true },
-    { key: 'monthsDue', label: 'মাস', sortable: true, align: 'end' },
-    { key: 'oldestMonth', label: 'সবচেয়ে পুরনো', sortable: true },
-    { key: 'totalDue', label: 'বকেয়া', sortable: true, align: 'end' },
-    { key: 'phone', label: 'মোবাইল' },
+    { key: 'name', label: tr('শিক্ষার্থী'), sortable: true },
+    { key: 'className', label: tr('শ্রেণি'), sortable: true },
+    { key: 'monthsDue', label: tr('মাস'), sortable: true, align: 'end' },
+    { key: 'oldestMonth', label: tr('সবচেয়ে পুরনো'), sortable: true },
+    { key: 'totalDue', label: tr('বকেয়া'), sortable: true, align: 'end' },
+    { key: 'phone', label: tr('মোবাইল') },
   ];
   protected receiptCols: Column<ReceiptSummary>[] = [
-    { key: 'receiptNo', label: 'রসিদ নং', sortable: true },
-    { key: 'date', label: 'তারিখ', sortable: true },
-    { key: 'studentName', label: 'শিক্ষার্থী', sortable: true },
-    { key: 'months', label: 'মাস' },
-    { key: 'method', label: 'মাধ্যম', value: (r) => METHOD_LABEL[r.method] },
-    { key: 'totalPaid', label: 'টাকা', sortable: true, align: 'end' },
+    { key: 'receiptNo', label: tr('রসিদ নং'), sortable: true },
+    { key: 'date', label: tr('তারিখ'), sortable: true },
+    { key: 'studentName', label: tr('শিক্ষার্থী'), sortable: true },
+    { key: 'months', label: tr('মাস') },
+    { key: 'method', label: tr('মাধ্যম'), value: (r) => METHOD_LABEL[r.method] },
+    { key: 'totalPaid', label: tr('টাকা'), sortable: true, align: 'end' },
   ];
   protected mLabel = (m: string) => (METHOD_LABEL as Record<string, string>)[m] ?? m;
   protected dueTrack = (r: DueListRow) => r.studentId;
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.refresh(this.month()); this.loadList(this.tab(), this.month(), this.dueClass()); }
 
   constructor() {
@@ -128,12 +129,12 @@ export class FeesPage {
   protected async collect() {
     const d = this.dues(); if (!d) return;
     const lines = Object.entries(this.picked()).filter(([, a]) => a > 0).map(([id, amount]) => ({ invoiceId: +id, amount }));
-    if (!lines.length) { this.toast.error('অন্তত একটি খাত বাছাই করুন'); return; }
-    if (this.method() !== 'Cash' && !this.reference().trim()) { this.refError.set('বিকাশ/নগদ/ব্যাংকের ক্ষেত্রে ট্রানজেকশন নম্বর দিন'); return; }
+    if (!lines.length) { this.toast.error(tr('অন্তত একটি খাত বাছাই করুন')); return; }
+    if (this.method() !== 'Cash' && !this.reference().trim()) { this.refError.set(tr('বিকাশ/নগদ/ব্যাংকের ক্ষেত্রে ট্রানজেকশন নম্বর দিন')); return; }
     this.refError.set(null); this.collecting.set(true);
     try {
       const r = await this.api.collect({ studentId: d.studentId, lines, method: this.method(), reference: this.reference().trim() || null });
-      this.toast.success(`${r.studentName} এর ${r.totalPaid.toLocaleString('bn-BD')} টাকা জমা হয়েছে`);
+      this.toast.success(tr('{name} এর {amt} জমা হয়েছে', { name: r.studentName, amt: fmtMoney(r.totalPaid) }));
       this.showReceipt(r);
       this.reference.set(''); this.method.set('Cash');
       this.pick(d.studentId); this.refresh(this.month());
@@ -146,10 +147,10 @@ export class FeesPage {
   protected print(mode: 'a4' | 'pos') { const r = this.receipt(); if (r) this.printer.print({ kind: 'receipt', data: r }, mode); }
   protected async voidReceipt() {
     const r = this.receipt(); if (!r) return;
-    if (!(await this.confirm.ask({ message: 'রসিদটি বাতিল হলে টাকা আবার বকেয়া হিসেবে দেখাবে এবং হিসাবে উল্টো এন্ট্রি হবে।', itemName: `রসিদ ${r.receiptNo}`, confirmLabel: 'রসিদ বাতিল করুন' }))) return;
+    if (!(await this.confirm.ask({ message: tr('রসিদটি বাতিল হলে টাকা আবার বকেয়া হিসেবে দেখাবে এবং হিসাবে উল্টো এন্ট্রি হবে।'), itemName: tr('রসিদ {no}', { no: r.receiptNo }), confirmLabel: tr('রসিদ বাতিল করুন') }))) return;
     try {
       this.receipt.set(await this.api.void(r.receiptNo));
-      this.toast.success('রসিদ বাতিল হয়েছে');
+      this.toast.success(tr('রসিদ বাতিল হয়েছে'));
       this.refresh(this.month()); this.loadList(this.tab(), this.month(), this.dueClass());
       if (this.dues()?.studentId === r.studentId) this.pick(r.studentId);
     } catch (e) { this.toast.error(errorMessage(e)); }

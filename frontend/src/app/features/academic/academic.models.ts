@@ -1,3 +1,4 @@
+import { tr } from '../../core/tr';
 export interface SectionDto { id: number; name: string; capacity?: number | null; studentCount: number; }
 export interface ClassOverview { id: number; nameBn: string; nameAr?: string | null; departmentId: number; monthlyFee?: number | null; sortOrder: number; studentCount: number; subjectCount: number; sections: SectionDto[]; }
 export interface DepartmentOverview { id: number; nameBn: string; nameAr?: string | null; kind: 'Nurani' | 'Nazera' | 'Hifz' | 'Kitab'; classes: ClassOverview[]; }
@@ -11,4 +12,4 @@ export interface Slot { day: number; periodNo: number; classSubjectId: number; s
 export interface Routine { classId: number; className: string; days: number[]; periods: Period[]; slots: Slot[]; }
 
 /** 0 = Sunday … 6 = Saturday, as .NET DayOfWeek */
-export const DAY_NAME = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+export const DAY_NAME = [tr('রবিবার'), tr('সোমবার'), tr('মঙ্গলবার'), tr('বুধবার'), tr('বৃহস্পতিবার'), tr('শুক্রবার'), tr('শনিবার')];

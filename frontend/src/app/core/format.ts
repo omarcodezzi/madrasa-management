@@ -22,6 +22,16 @@ export function formatNumber(v: number | string | null | undefined, digits: 'bn'
   return digits === 'bn' ? toBnDigits(s) : s;
 }
 
+/** Digit style for numbers built in code (toasts, tab counts); kept in step by PreferencesService. */
+let codeDigits: 'bn' | 'en' = 'bn';
+export function setCodeDigits(d: 'bn' | 'en') { codeDigits = d; }
+/** Digits in a string, in the chosen style. */
+export function fmtDigits(s: string): string { return codeDigits === 'bn' ? toBnDigits(s) : toEnDigits(s); }
+/** A number for text built in code: `tr('{n} জন', { n: fmt(5) })`. */
+export function fmt(v: number | null | undefined): string { return formatNumber(v ?? 0, codeDigits); }
+/** Money for text built in code: `৳ 1,200`. */
+export function fmtMoney(v: number | null | undefined): string { return formatMoney(v ?? 0, codeDigits); }
+
 /** `৳ ১২,৫০০` (spec 8.5) — follows the digit setting. */
 export function formatMoney(v: number | null | undefined, digits: 'bn' | 'en'): string {
   if (v === null || v === undefined) return '';

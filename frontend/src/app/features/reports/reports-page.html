@@ -1,7 +1,7 @@
-<m-page-header title="রিপোর্ট" description="হাজিরা, আদায়, বকেয়া, ফলাফল ও হিসাবের রিপোর্ট। প্রিন্ট বা এক্সেলে (CSV) নামান।" />
+<m-page-header [title]="'রিপোর্ট' | tr" [description]="'হাজিরা, আদায়, বকেয়া, ফলাফল ও হিসাবের রিপোর্ট। প্রিন্ট বা এক্সেলে (CSV) নামান।' | tr" />
 
 <div class="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)] items-start">
-  <nav aria-label="রিপোর্টের ধরন" class="grid gap-2 max-lg:grid-cols-2 max-sm:grid-cols-1">
+  <nav [attr.aria-label]="'রিপোর্টের ধরন' | tr" class="grid gap-2 max-lg:grid-cols-2 max-sm:grid-cols-1">
     @for (d of defs; track d.key) {
       <button type="button" class="rep-pick" [attr.aria-current]="key() === d.key ? 'true' : null" (click)="key.set(d.key)">
         <m-icon [name]="d.icon" [size]="20" /><span class="leading-tight"><b class="block">{{ d.title }}</b><small class="text-mut text-[13px]">{{ d.desc }}</small></span>
@@ -11,35 +11,35 @@
 
   <m-card [padded]="false">
     <div class="flex flex-wrap items-end gap-3 px-4 py-3 border-b border-line">
-      @if (has('month')) { <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">মাস</span><input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="$event && month.set($event)"></label> }
+      @if (has('month')) { <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'মাস' | tr }}</span><input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="$event && month.set($event)"></label> }
       @if (has('range')) {
-        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">থেকে</span><input type="date" class="ctl !w-auto" [max]="to()" [ngModel]="from()" (ngModelChange)="$event && from.set($event)"></label>
-        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">পর্যন্ত</span><input type="date" class="ctl !w-auto" [min]="from()" [ngModel]="to()" (ngModelChange)="$event && to.set($event)"></label>
+        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'থেকে' | tr }}</span><input type="date" class="ctl !w-auto" [max]="to()" [ngModel]="from()" (ngModelChange)="$event && from.set($event)"></label>
+        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'পর্যন্ত' | tr }}</span><input type="date" class="ctl !w-auto" [min]="from()" [ngModel]="to()" (ngModelChange)="$event && to.set($event)"></label>
       }
       @if (has('class')) {
-        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">শ্রেণি</span><select class="ctl !w-auto" [ngModel]="classId()" (ngModelChange)="classId.set(+$event)">
-          <option [ngValue]="0">সব শ্রেণি</option>@for (c of lookups.classes(); track c.id) { <option [ngValue]="c.id">{{ c.nameBn }}</option> }</select></label>
+        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'শ্রেণি' | tr }}</span><select class="ctl !w-auto" [ngModel]="classId()" (ngModelChange)="classId.set(+$event)">
+          <option [ngValue]="0">{{ 'সব শ্রেণি' | tr }}</option>@for (c of lookups.classes(); track c.id) { <option [ngValue]="c.id">{{ c.nameBn }}</option> }</select></label>
       }
       @if (has('fund')) {
-        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">ফান্ড</span><select class="ctl !w-auto" [ngModel]="fundId()" (ngModelChange)="fundId.set(+$event)">
-          <option [ngValue]="0">সব ফান্ড</option>@for (f of funds(); track f.id) { <option [ngValue]="f.id">{{ f.nameBn }}</option> }</select></label>
+        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'ফান্ড' | tr }}</span><select class="ctl !w-auto" [ngModel]="fundId()" (ngModelChange)="fundId.set(+$event)">
+          <option [ngValue]="0">{{ 'সব ফান্ড' | tr }}</option>@for (f of funds(); track f.id) { <option [ngValue]="f.id">{{ f.nameBn }}</option> }</select></label>
       }
       @if (has('exam')) {
-        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">পরীক্ষা</span><select class="ctl !w-auto" [ngModel]="examId()" (ngModelChange)="examId.set(+$event)">
-          <option [ngValue]="0">সর্বশেষ প্রকাশিত</option>@for (e of examList(); track e.id) { <option [ngValue]="e.id">{{ e.name }}</option> }</select></label>
+        <label class="grid gap-1 text-sm"><span class="text-mut font-semibold">{{ 'পরীক্ষা' | tr }}</span><select class="ctl !w-auto" [ngModel]="examId()" (ngModelChange)="examId.set(+$event)">
+          <option [ngValue]="0">{{ 'সর্বশেষ প্রকাশিত' | tr }}</option>@for (e of examList(); track e.id) { <option [ngValue]="e.id">{{ e.name }}</option> }</select></label>
       }
       <div class="flex gap-2 ml-auto">
         <button mButton variant="outline" [disabled]="!table()?.rows?.length" (click)="csv()"><m-icon name="dl" [size]="18" /> CSV</button>
-        <button mButton [disabled]="!table()?.rows?.length" (click)="print()"><m-icon name="print" [size]="18" /> প্রিন্ট</button>
+        <button mButton [disabled]="!table()?.rows?.length" (click)="print()"><m-icon name="print" [size]="18" /> {{ 'প্রিন্ট' | tr }}</button>
       </div>
     </div>
 
     @if (loading() && !table()) { <div class="p-4 grid gap-2"><m-skeleton height="28px" /><m-skeleton height="200px" /></div> }
-    @else if (error()) { <m-empty-state title="রিপোর্ট তৈরি করা যায়নি" [description]="error()!" icon="alert" /> }
+    @else if (error()) { <m-empty-state [title]="'রিপোর্ট তৈরি করা যায়নি' | tr" [description]="error()!" icon="alert" /> }
     @else if (table(); as t) {
       <div class="px-4 pt-3 pb-2" [class.opacity-60]="loading()"><h2 class="m-0 font-serif text-[17px]">{{ t.title }}</h2><p class="m-0 text-sm text-mut">{{ t.subtitle }}</p></div>
       @if (t.rows.length) {
-        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" [attr.aria-label]="table()?.title ?? 'রিপোর্ট'" [class.opacity-60]="loading()">
+        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" [attr.aria-label]="table()?.title ?? ('রিপোর্ট' | tr)" [class.opacity-60]="loading()">
           <table class="w-full text-sm">
             <thead><tr class="border-b border-line text-mut">@for (c of t.columns; track c.key) { <th scope="col" class="px-4 py-2 font-semibold whitespace-nowrap" [class.text-right]="isNum(c.kind)" [class.text-left]="!isNum(c.kind)">{{ c.label }}</th> }</tr></thead>
             <tbody>
@@ -52,7 +52,7 @@
             }
           </table>
         </div>
-      } @else { <m-empty-state title="এই সময়ে কোনো তথ্য নেই" description="ফিল্টার বদলে দেখুন।" icon="chart" /> }
+      } @else { <m-empty-state [title]="'এই সময়ে কোনো তথ্য নেই' | tr" [description]="'ফিল্টার বদলে দেখুন।' | tr" icon="chart" /> }
     }
   </m-card>
 </div>

@@ -1,5 +1,5 @@
-<m-page-header title="বেতন ও ফি" [description]="(month() | month) + ' মাসের হিসাব'">
-  <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" aria-label="মাস">
+<m-page-header [title]="'বেতন ও ফি' | tr" [description]="(month() | month) + (' মাসের হিসাব' | tr)">
+  <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" [attr.aria-label]="'মাস' | tr">
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
@@ -8,38 +8,38 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 bg-card border border-line rounded-[var(--radius-card)] mb-5">
   @if (summary(); as s) {
     <div class="px-5 py-4">
-      <span class="text-sm text-mut">এ মাসের বেতন আদায়</span>
+      <span class="text-sm text-mut">{{ 'এ মাসের বেতন আদায়' | tr }}</span>
       <b class="block font-serif font-extrabold text-[26px]">{{ s.collectedForMonth | money }}</b>
-      <div class="h-1.5 rounded-full bg-soft overflow-hidden mt-1.5" role="progressbar" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100" aria-label="আদায়ের হার"><i class="block h-full bg-g2 rounded-full" [style.width.%]="percent()"></i></div>
-      <em class="not-italic text-[13px] text-mut">মোট পাওনা {{ s.expected | money }} এর {{ percent() | num }}%</em>
+      <div class="h-1.5 rounded-full bg-soft overflow-hidden mt-1.5" role="progressbar" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'আদায়ের হার' | tr"><i class="block h-full bg-g2 rounded-full" [style.width.%]="percent()"></i></div>
+      <em class="not-italic text-[13px] text-mut">{{ 'মোট পাওনা {m} এর {n}%' | tr: { m: (s.expected | money), n: (percent() | num) } }}</em>
     </div>
-    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">এ মাসে মোট জমা</span><b class="block font-serif font-extrabold text-[26px]">{{ s.collectedInMonth | money }}</b><em class="not-italic text-[13px] text-mut">আগের মাসের বকেয়াসহ</em></div>
-    <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">পরিশোধ করেছে</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ s.paidStudents | num }} জন</b></div>
-    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">বাকি আছে</span><b class="block font-serif font-extrabold text-[26px] text-red">{{ s.dueStudents | num }} জন</b></div>
+    <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">{{ 'এ মাসে মোট জমা' | tr }}</span><b class="block font-serif font-extrabold text-[26px]">{{ s.collectedInMonth | money }}</b><em class="not-italic text-[13px] text-mut">{{ 'আগের মাসের বকেয়াসহ' | tr }}</em></div>
+    <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">{{ 'পরিশোধ করেছে' | tr }}</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ '{n} জন' | tr: { n: (s.paidStudents | num) } }}</b></div>
+    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">{{ 'বাকি আছে' | tr }}</span><b class="block font-serif font-extrabold text-[26px] text-red">{{ '{n} জন' | tr: { n: (s.dueStudents | num) } }}</b></div>
   } @else { @for (i of [1,2,3,4]; track i) { <div class="px-5 py-4"><m-skeleton height="64px" /></div> } }
 </div>
 
-<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="ফি অংশ" />
+<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" [attr.aria-label]="'ফি অংশ' | tr" />
 
 @switch (tab()) {
   @case ('collect') {
     <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] items-start">
-      <m-card title="বেতন আদায়" subtitle="শিক্ষার্থী খুঁজুন, খাত বাছাই করুন, জমা নিন">
+      <m-card [title]="'বেতন আদায়' | tr" [subtitle]="'শিক্ষার্থী খুঁজুন, খাত বাছাই করুন, জমা নিন' | tr">
         @if (!dues() && !loadingDues()) {
           <div class="relative">
             <m-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
-            <input class="ctl !pl-10" [ngModel]="q()" (ngModelChange)="q.set($event)" placeholder="নাম, আইডি, রোল বা মোবাইল" aria-label="শিক্ষার্থী খুঁজুন" autocomplete="off">
+            <input class="ctl !pl-10" [ngModel]="q()" (ngModelChange)="q.set($event)" [placeholder]="'নাম, আইডি, রোল বা মোবাইল' | tr" [attr.aria-label]="'শিক্ষার্থী খুঁজুন' | tr" autocomplete="off">
           </div>
           <ul class="m-0 mt-2 p-0 list-none">
             @for (s of matches(); track s.id) {
               <li><button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-soft text-left cursor-pointer bg-transparent border-0 text-ink" (click)="pick(s.id)">
                 <m-avatar [name]="s.name" [size]="36" />
-                <span class="flex-1 leading-tight"><b class="font-semibold">{{ s.name }}</b><small class="block text-mut text-[13px]">{{ s.studentCode }} · {{ s.className }} · রোল {{ s.roll | num }}</small></span>
+                <span class="flex-1 leading-tight"><b class="font-semibold">{{ s.name }}</b><small class="block text-mut text-[13px]">{{ s.studentCode }} · {{ s.className }} · {{ 'রোল {n}' | tr: { n: (s.roll | num) } }}</small></span>
                 <m-icon name="chevronRight" [size]="18" class="text-mut" />
               </button></li>
             } @empty {
-              @if (q()) { <li class="px-3 py-6 text-center text-mut">"{{ q() }}" নামে কাউকে পাওয়া যায়নি</li> }
-              @else { <li class="px-3 py-8 text-center text-mut text-sm">শিক্ষার্থীর নাম বা আইডি লিখলে এখানে দেখাবে। বকেয়া তালিকা থেকেও সরাসরি আদায় করা যায়।</li> }
+              @if (q()) { <li class="px-3 py-6 text-center text-mut">{{ '"{q}" নামে কাউকে পাওয়া যায়নি' | tr: { q: q() } }}</li> }
+              @else { <li class="px-3 py-8 text-center text-mut text-sm">{{ 'শিক্ষার্থীর নাম বা আইডি লিখলে এখানে দেখাবে। বকেয়া তালিকা থেকেও সরাসরি আদায় করা যায়।' | tr }}</li> }
             }
           </ul>
         } @else if (loadingDues()) {
@@ -48,70 +48,70 @@
           @let d = dues()!;
           <div class="flex items-center gap-3 p-3 rounded-xl bg-soft mb-4">
             <m-avatar [name]="d.name" [size]="44" />
-            <div class="flex-1 leading-tight"><a [routerLink]="['/students', d.studentId]" class="font-semibold no-underline text-ink">{{ d.name }}</a><small class="block text-mut">{{ d.studentCode }} · {{ d.className }} · রোল {{ d.roll | num }}</small></div>
-            <button mButton variant="ghost" size="sm" (click)="clear()"><m-icon name="x" [size]="16" /> অন্য শিক্ষার্থী</button>
+            <div class="flex-1 leading-tight"><a [routerLink]="['/students', d.studentId]" class="font-semibold no-underline text-ink">{{ d.name }}</a><small class="block text-mut">{{ d.studentCode }} · {{ d.className }} · {{ 'রোল {n}' | tr: { n: (d.roll | num) } }}</small></div>
+            <button mButton variant="ghost" size="sm" (click)="clear()"><m-icon name="x" [size]="16" /> {{ 'অন্য শিক্ষার্থী' | tr }}</button>
           </div>
           @if (!d.items.length) {
-            <m-empty-state title="কোনো বকেয়া নেই" description="এই শিক্ষার্থীর সব বেতন পরিশোধ করা আছে।" icon="check" />
+            <m-empty-state [title]="'কোনো বকেয়া নেই' | tr" [description]="'এই শিক্ষার্থীর সব বেতন পরিশোধ করা আছে।' | tr" icon="check" />
           } @else {
             <fieldset class="border-0 p-0 m-0">
-              <legend class="font-semibold mb-2">বকেয়া খাত</legend>
+              <legend class="font-semibold mb-2">{{ 'বকেয়া খাত' | tr }}</legend>
               @for (i of d.items; track i.invoiceId) {
                 @let on = picked()[i.invoiceId] !== undefined;
                 <div class="flex items-center gap-3 py-2 border-b border-line last:border-0">
                   <input type="checkbox" class="size-5 accent-[var(--g2)]" [id]="'inv' + i.invoiceId" [checked]="on" (change)="toggle(i.invoiceId, i.due)">
                   <label [for]="'inv' + i.invoiceId" class="flex-1 cursor-pointer">{{ i.feeHead }} @if (i.month) { <span class="text-mut text-sm">· {{ i.month | month }}</span> }
-                    @if (i.paid || i.discount) { <small class="block text-mut text-[13px]">@if (i.discount) { ছাড় {{ i.discount | money }} } @if (i.paid) { · আগে জমা {{ i.paid | money }} }</small> }</label>
-                  @if (on) { <input class="ctl !w-28 text-right tabular" inputmode="numeric" [value]="picked()[i.invoiceId]" (change)="setAmount(i.invoiceId, $any($event.target).value, i.due)" [attr.aria-label]="i.feeHead + ' টাকার পরিমাণ'"> }
+                    @if (i.paid || i.discount) { <small class="block text-mut text-[13px]">@if (i.discount) { {{ 'ছাড় {m}' | tr: { m: (i.discount | money) } }} } @if (i.paid) { · {{ 'আগে জমা {m}' | tr: { m: (i.paid | money) } }} }</small> }</label>
+                  @if (on) { <input class="ctl !w-28 text-right tabular" inputmode="numeric" [value]="picked()[i.invoiceId]" (change)="setAmount(i.invoiceId, $any($event.target).value, i.due)" [attr.aria-label]="i.feeHead + (' টাকার পরিমাণ' | tr)"> }
                   @else { <span class="w-28 text-right tabular text-mut">{{ i.due | money }}</span> }
                 </div>
               }
             </fieldset>
             <div class="mt-4 grid gap-3">
-              <div><span class="block text-sm font-medium mb-1.5">পরিশোধের মাধ্যম</span><m-segmented [options]="methods" [value]="method()" (valueChange)="method.set($event); refError.set(null)" aria-label="পরিশোধের মাধ্যম" /></div>
+              <div><span class="block text-sm font-medium mb-1.5">{{ 'পরিশোধের মাধ্যম' | tr }}</span><m-segmented [options]="methods" [value]="method()" (valueChange)="method.set($event); refError.set(null)" [attr.aria-label]="'পরিশোধের মাধ্যম' | tr" /></div>
               @if (method() !== 'Cash') {
-                <div><label for="ref" class="block text-sm font-medium mb-1.5">ট্রানজেকশন নম্বর</label>
-                  <input id="ref" class="ctl" [ngModel]="reference()" (ngModelChange)="reference.set($event)" placeholder="যেমন 9JK2L1XQ" [attr.aria-invalid]="!!refError()">
+                <div><label for="ref" class="block text-sm font-medium mb-1.5">{{ 'ট্রানজেকশন নম্বর' | tr }}</label>
+                  <input id="ref" class="ctl" [ngModel]="reference()" (ngModelChange)="reference.set($event)" [placeholder]="'যেমন 9JK2L1XQ' | tr" [attr.aria-invalid]="!!refError()">
                   @if (refError()) { <small class="text-red text-[13px]" role="alert">{{ refError() }}</small> }</div>
               }
             </div>
             <div class="flex flex-wrap items-center gap-3 mt-5 pt-4 border-t border-line">
-              <div class="flex-1"><small class="text-mut">মোট জমা নেওয়া হবে</small><b class="block font-serif text-[28px] font-extrabold">{{ total() | money }}</b></div>
-              <button mButton variant="gold" size="lg" [loading]="collecting()" [disabled]="!total()" (click)="collect()"><m-icon name="check" /> জমা নিন ও রসিদ</button>
+              <div class="flex-1"><small class="text-mut">{{ 'মোট জমা নেওয়া হবে' | tr }}</small><b class="block font-serif text-[28px] font-extrabold">{{ total() | money }}</b></div>
+              <button mButton variant="gold" size="lg" [loading]="collecting()" [disabled]="!total()" (click)="collect()"><m-icon name="check" /> {{ 'জমা নিন ও রসিদ' | tr }}</button>
             </div>
           }
         }
       </m-card>
 
-      <m-card title="সাম্প্রতিক রসিদ" [padded]="false">
+      <m-card [title]="'সাম্প্রতিক রসিদ' | tr" [padded]="false">
         @if (dues()?.recentReceipts?.length) {
           <ul class="m-0 p-0 list-none">
             @for (r of dues()!.recentReceipts; track r.id) {
               <li><button type="button" class="w-full flex justify-between gap-3 px-4 py-3 border-0 border-b border-line bg-transparent text-left cursor-pointer hover:bg-soft text-ink" [class.opacity-50]="r.isVoided" (click)="openReceipt(r.receiptNo)">
-                <span>রসিদ {{ r.receiptNo | digits }}<small class="block text-mut text-[13px]">{{ r.date | bdate }} · {{ (r.months | month) || '—' }}</small></span>
+                <span>{{ 'রসিদ {n}' | tr: { n: (r.receiptNo | digits) } }}<small class="block text-mut text-[13px]">{{ r.date | bdate }} · {{ (r.months | month) || '—' }}</small></span>
                 <b class="tabular">{{ r.totalPaid | money }}</b></button></li>
             }
           </ul>
-        } @else { <p class="m-0 px-4 py-6 text-center text-mut text-sm">শিক্ষার্থী বাছাই করলে তার আগের রসিদ এখানে দেখাবে</p> }
+        } @else { <p class="m-0 px-4 py-6 text-center text-mut text-sm">{{ 'শিক্ষার্থী বাছাই করলে তার আগের রসিদ এখানে দেখাবে' | tr }}</p> }
       </m-card>
     </div>
   }
   @case ('dues') {
-    <m-chips class="mb-3 block" [options]="classOptions()" [value]="dueClass()" (valueChange)="dueClass.set($event)" aria-label="শ্রেণি" />
+    <m-chips class="mb-3 block" [options]="classOptions()" [value]="dueClass()" (valueChange)="dueClass.set($event)" [attr.aria-label]="'শ্রেণি' | tr" />
     <m-data-table [rows]="dueRows() ?? []" [columns]="dueCols" [loading]="!dueRows()" [trackBy]="dueTrack" exportName="dues"
-      searchPlaceholder="নাম বা আইডি দিয়ে খুঁজুন" emptyTitle="কোনো বকেয়া নেই" emptyText="এই মাস পর্যন্ত সবার বেতন পরিশোধ হয়েছে।">
-      <ng-template mCell="name" let-r><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.studentCode }} · রোল {{ r.roll | num }}</small></ng-template>
+      [searchPlaceholder]="'নাম বা আইডি দিয়ে খুঁজুন' | tr" [emptyTitle]="'কোনো বকেয়া নেই' | tr" [emptyText]="'এই মাস পর্যন্ত সবার বেতন পরিশোধ হয়েছে।' | tr">
+      <ng-template mCell="name" let-r><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.studentCode }} · {{ 'রোল {n}' | tr: { n: (r.roll | num) } }}</small></ng-template>
       <ng-template mCell="monthsDue" let-r>{{ r.monthsDue | num }}</ng-template>
       <ng-template mCell="oldestMonth" let-r>{{ r.oldestMonth | month }}</ng-template>
       <ng-template mCell="totalDue" let-r><b class="text-red tabular">{{ r.totalDue | money }}</b></ng-template>
       <ng-template mCell="phone" let-r>@if (r.phone) { <a [href]="'tel:' + r.phone" class="tabular no-underline">{{ r.phone | digits }}</a> }</ng-template>
-      <ng-template mRowActions let-r><button mButton size="sm" variant="outline" (click)="pick(r.studentId)">আদায়</button></ng-template>
+      <ng-template mRowActions let-r><button mButton size="sm" variant="outline" (click)="pick(r.studentId)">{{ 'আদায়' | tr }}</button></ng-template>
     </m-data-table>
   }
   @case ('receipts') {
     <m-data-table [rows]="receiptRows() ?? []" [columns]="receiptCols" [loading]="!receiptRows()" exportName="receipts"
-      searchPlaceholder="নাম বা রসিদ নং" emptyTitle="এ মাসে কোনো রসিদ নেই" (rowClick)="openReceipt($event.receiptNo)">
-      <ng-template mCell="receiptNo" let-r><span class="tabular" [class.line-through]="r.isVoided">{{ r.receiptNo | digits }}</span> @if (r.isVoided) { <m-badge tone="danger">বাতিল</m-badge> }</ng-template>
+      [searchPlaceholder]="'নাম বা রসিদ নং' | tr" [emptyTitle]="'এ মাসে কোনো রসিদ নেই' | tr" (rowClick)="openReceipt($event.receiptNo)">
+      <ng-template mCell="receiptNo" let-r><span class="tabular" [class.line-through]="r.isVoided">{{ r.receiptNo | digits }}</span> @if (r.isVoided) { <m-badge tone="danger">{{ 'বাতিল' | tr }}</m-badge> }</ng-template>
       <ng-template mCell="date" let-r>{{ r.date | bdate }}</ng-template>
       <ng-template mCell="months" let-r>{{ r.months | month }}</ng-template>
       <ng-template mCell="studentName" let-r><b class="font-semibold">{{ r.studentName }}</b><small class="block text-mut text-[13px]">{{ r.className }}</small></ng-template>
@@ -121,11 +121,11 @@
   }
 }
 
-<m-modal [(open)]="receiptOpen" title="বেতন রসিদ" width="min(480px, calc(100vw - 24px))">
+<m-modal [(open)]="receiptOpen" [title]="'বেতন রসিদ' | tr" width="min(480px, calc(100vw - 24px))">
   @if (receipt(); as r) { <app-receipt-view [receipt]="r" /> }
   <div modalFooter class="flex flex-wrap gap-2 w-full">
-    @if (canVoid() && receipt() && !receipt()!.isVoided) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="voidReceipt()">বাতিল</button> }
+    @if (canVoid() && receipt() && !receipt()!.isVoided) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="voidReceipt()">{{ 'বাতিল' | tr }}</button> }
     <button mButton variant="outline" (click)="print('pos')"><m-icon name="print" [size]="18" /> POS</button>
-    <button mButton (click)="print('a4')"><m-icon name="print" [size]="18" /> A4 প্রিন্ট</button>
+    <button mButton (click)="print('a4')"><m-icon name="print" [size]="18" /> {{ 'A4 প্রিন্ট' | tr }}</button>
   </div>
 </m-modal>

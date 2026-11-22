@@ -1,9 +1,9 @@
-<m-page-header title="সেটিংস" description="মাদরাসার তথ্য, শিক্ষাবর্ষ, ইউজার, অনুমতি, ফি ও গ্রেড" />
+<m-page-header [title]="'সেটিংস' | tr" [description]="'মাদরাসার তথ্য, শিক্ষাবর্ষ, ইউজার, অনুমতি, ফি ও গ্রেড' | tr" />
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
 <div class="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] items-start">
-  <nav aria-label="সেটিংসের অংশ" class="flex lg:flex-col gap-1 overflow-x-auto max-lg:pb-1">
+  <nav [attr.aria-label]="'সেটিংসের অংশ' | tr" class="flex lg:flex-col gap-1 overflow-x-auto max-lg:pb-1">
     @for (s of sections; track s.key) {
       <button type="button" class="set-nav" [attr.aria-current]="section() === s.key ? 'page' : null" (click)="go(s.key)"><m-icon [name]="s.icon" [size]="18" /> {{ s.label }}</button>
     }
@@ -12,39 +12,39 @@
   <div>
   @switch (section()) {
     @case ('profile') {
-      <m-card title="মাদরাসার তথ্য" subtitle="রসিদ, আইডি কার্ড, মার্কশিট ও ওয়েবসাইটে এই তথ্য ছাপা হয়">
+      <m-card [title]="'মাদরাসার তথ্য' | tr" [subtitle]="'রসিদ, আইডি কার্ড, মার্কশিট ও ওয়েবসাইটে এই তথ্য ছাপা হয়' | tr">
         @if (profile(); as p) {
           <form class="grid gap-3 sm:grid-cols-2" (ngSubmit)="saveProfile()">
             <div class="sm:col-span-2 flex items-center gap-4">
-              <img [src]="logoUrl()" alt="লোগো" class="size-20 object-contain rounded-xl border border-line bg-white p-1">
-              <label class="cursor-pointer"><span class="text-sm font-semibold text-g2 underline">লোগো বদলান</span><input type="file" accept="image/*" class="sr-only" (change)="pickLogo($event)"></label>
+              <img [src]="logoUrl()" [alt]="'লোগো' | tr" class="size-20 object-contain rounded-xl border border-line bg-white p-1">
+              <label class="cursor-pointer"><span class="text-sm font-semibold text-g2 underline">{{ 'লোগো বদলান' | tr }}</span><input type="file" accept="image/*" class="sr-only" (change)="pickLogo($event)"></label>
               @if (errs()['photo']) { <small class="text-red" role="alert">{{ errs()['photo'] }}</small> }
             </div>
-            <m-field label="নাম (বাংলা)" for="p-bn" class="sm:col-span-2" [required]="true" [error]="errs()['nameBn']"><input id="p-bn" class="ctl" name="nameBn" [ngModel]="p.nameBn" (ngModelChange)="patchProfile({ nameBn: $event })"></m-field>
-            <m-field label="নাম (আরবি)" for="p-ar"><input id="p-ar" class="ctl ar" dir="rtl" lang="ar" name="nameAr" [ngModel]="p.nameAr" (ngModelChange)="patchProfile({ nameAr: $event })"></m-field>
-            <m-field label="নাম (ইংরেজি)" for="p-en"><input id="p-en" class="ctl" name="nameEn" [ngModel]="p.nameEn" (ngModelChange)="patchProfile({ nameEn: $event })"></m-field>
-            <m-field label="ঠিকানা" for="p-ad" class="sm:col-span-2"><input id="p-ad" class="ctl" name="address" [ngModel]="p.address" (ngModelChange)="patchProfile({ address: $event })"></m-field>
-            <m-field label="ফোন" for="p-ph" [error]="errs()['phone']"><input id="p-ph" class="ctl tabular" name="phone" [ngModel]="p.phone" (ngModelChange)="patchProfile({ phone: $event })"></m-field>
-            <m-field label="ইমেইল" for="p-em"><input id="p-em" class="ctl" type="email" name="email" [ngModel]="p.email" (ngModelChange)="patchProfile({ email: $event })"></m-field>
-            <m-field label="প্রতিষ্ঠার সাল" for="p-y" [error]="errs()['establishedYear']"><input id="p-y" class="ctl tabular" inputmode="numeric" name="establishedYear" [ngModel]="p.establishedYear" (ngModelChange)="patchProfile({ establishedYear: $event })"></m-field>
-            <m-field label="শিক্ষার্থী আইডির শুরু" for="p-pre" [error]="errs()['studentIdPrefix']" hint="যেমন RM দিলে আইডি হবে RM-2026-001"><input id="p-pre" class="ctl tabular uppercase" name="prefix" [ngModel]="p.studentIdPrefix" (ngModelChange)="patchProfile({ studentIdPrefix: $event })"></m-field>
-            <div class="sm:col-span-2 flex justify-end"><button mButton type="submit" [loading]="saving()">সংরক্ষণ</button></div>
+            <m-field [label]="'নাম (বাংলা)' | tr" for="p-bn" class="sm:col-span-2" [required]="true" [error]="errs()['nameBn']"><input id="p-bn" class="ctl" name="nameBn" [ngModel]="p.nameBn" (ngModelChange)="patchProfile({ nameBn: $event })"></m-field>
+            <m-field [label]="'নাম (আরবি)' | tr" for="p-ar"><input id="p-ar" class="ctl ar" dir="rtl" lang="ar" name="nameAr" [ngModel]="p.nameAr" (ngModelChange)="patchProfile({ nameAr: $event })"></m-field>
+            <m-field [label]="'নাম (ইংরেজি)' | tr" for="p-en"><input id="p-en" class="ctl" name="nameEn" [ngModel]="p.nameEn" (ngModelChange)="patchProfile({ nameEn: $event })"></m-field>
+            <m-field [label]="'ঠিকানা' | tr" for="p-ad" class="sm:col-span-2"><input id="p-ad" class="ctl" name="address" [ngModel]="p.address" (ngModelChange)="patchProfile({ address: $event })"></m-field>
+            <m-field [label]="'ফোন' | tr" for="p-ph" [error]="errs()['phone']"><input id="p-ph" class="ctl tabular" name="phone" [ngModel]="p.phone" (ngModelChange)="patchProfile({ phone: $event })"></m-field>
+            <m-field [label]="'ইমেইল' | tr" for="p-em"><input id="p-em" class="ctl" type="email" name="email" [ngModel]="p.email" (ngModelChange)="patchProfile({ email: $event })"></m-field>
+            <m-field [label]="'প্রতিষ্ঠার সাল' | tr" for="p-y" [error]="errs()['establishedYear']"><input id="p-y" class="ctl tabular" inputmode="numeric" name="establishedYear" [ngModel]="p.establishedYear" (ngModelChange)="patchProfile({ establishedYear: $event })"></m-field>
+            <m-field [label]="'শিক্ষার্থী আইডির শুরু' | tr" for="p-pre" [error]="errs()['studentIdPrefix']" [hint]="'যেমন RM দিলে আইডি হবে RM-2026-001' | tr"><input id="p-pre" class="ctl tabular uppercase" name="prefix" [ngModel]="p.studentIdPrefix" (ngModelChange)="patchProfile({ studentIdPrefix: $event })"></m-field>
+            <div class="sm:col-span-2 flex justify-end"><button mButton type="submit" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button></div>
           </form>
         } @else { <m-skeleton height="300px" /> }
       </m-card>
     }
 
     @case ('sessions') {
-      <m-card title="শিক্ষাবর্ষ" subtitle="একটিমাত্র শিক্ষাবর্ষ চলতি থাকে" [padded]="false">
-        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newSession()"><m-icon name="plus" [size]="16" /> নতুন শিক্ষাবর্ষ</button></div>
+      <m-card [title]="'শিক্ষাবর্ষ' | tr" [subtitle]="'একটিমাত্র শিক্ষাবর্ষ চলতি থাকে' | tr" [padded]="false">
+        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newSession()"><m-icon name="plus" [size]="16" /> {{ 'নতুন শিক্ষাবর্ষ' | tr }}</button></div>
         @if (sessions(); as ss) {
           <ul class="m-0 p-0 list-none">
             @for (s of ss; track s.id) {
               <li class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line last:border-0">
-                <span class="flex-1 leading-tight"><b class="font-semibold tabular">{{ s.name | digits }}</b> @if (s.isCurrent) { <m-badge tone="success" [dot]="true">চলতি</m-badge> }
-                  <small class="block text-mut text-[13px] tabular">{{ s.startDate | bdate }} থেকে {{ s.endDate | bdate }} · {{ s.students | num }} জন শিক্ষার্থী</small></span>
-                <button mButton size="sm" variant="ghost" (click)="editSession(s)"><m-icon name="edit" [size]="16" /> বদলান</button>
-                @if (!s.isCurrent) { <button mButton size="sm" variant="outline" (click)="makeCurrent(s)">চলতি করুন</button> }
+                <span class="flex-1 leading-tight"><b class="font-semibold tabular">{{ s.name | digits }}</b> @if (s.isCurrent) { <m-badge tone="success" [dot]="true">{{ 'চলতি' | tr }}</m-badge> }
+                  <small class="block text-mut text-[13px] tabular">{{ '{a} থেকে {b} · {n} জন শিক্ষার্থী' | tr: { a: (s.startDate | bdate), b: (s.endDate | bdate), n: (s.students | num) } }}</small></span>
+                <button mButton size="sm" variant="ghost" (click)="editSession(s)"><m-icon name="edit" [size]="16" /> {{ 'বদলান' | tr }}</button>
+                @if (!s.isCurrent) { <button mButton size="sm" variant="outline" (click)="makeCurrent(s)">{{ 'চলতি করুন' | tr }}</button> }
               </li>
             }
           </ul>
@@ -53,19 +53,19 @@
     }
 
     @case ('users') {
-      <m-card title="ইউজার" subtitle="কে লগইন করতে পারবে এবং কী কী করতে পারবে" [padded]="false">
-        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newUser()"><m-icon name="plus" [size]="16" /> নতুন ইউজার</button></div>
+      <m-card [title]="'ইউজার' | tr" [subtitle]="'কে লগইন করতে পারবে এবং কী কী করতে পারবে' | tr" [padded]="false">
+        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newUser()"><m-icon name="plus" [size]="16" /> {{ 'নতুন ইউজার' | tr }}</button></div>
         @if (users(); as us) {
           <ul class="m-0 p-0 list-none">
             @for (u of us; track u.id) {
               <li class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line last:border-0" [class.opacity-60]="!u.isActive">
                 <span class="flex-1 min-w-[12rem] leading-tight"><b class="font-semibold">{{ u.fullName }}</b> <span class="text-mut text-sm">{{ u.userName }}</span>
                   <small class="block text-mut text-[13px]">@for (r of u.roles; track r; let last = $last) { {{ roleLabel(r) }}{{ last ? '' : ', ' }} }@if (u.linkedName) { · {{ u.linkedName }} }</small></span>
-                @if (!u.isActive) { <m-badge>বন্ধ</m-badge> }
-                @if (u.lockedOut) { <m-badge tone="danger">লক হয়ে আছে</m-badge> }
-                @if (u.id === me()) { <m-badge tone="info">আপনি</m-badge> }
-                <button mButton size="sm" variant="ghost" (click)="resetPw(u)">পাসওয়ার্ড</button>
-                <button mButton size="sm" variant="ghost" (click)="editUser(u)"><m-icon name="edit" [size]="16" /> বদলান</button>
+                @if (!u.isActive) { <m-badge>{{ 'বন্ধ' | tr }}</m-badge> }
+                @if (u.lockedOut) { <m-badge tone="danger">{{ 'লক হয়ে আছে' | tr }}</m-badge> }
+                @if (u.id === me()) { <m-badge tone="info">{{ 'আপনি' | tr }}</m-badge> }
+                <button mButton size="sm" variant="ghost" (click)="resetPw(u)">{{ 'পাসওয়ার্ড' | tr }}</button>
+                <button mButton size="sm" variant="ghost" (click)="editUser(u)"><m-icon name="edit" [size]="16" /> {{ 'বদলান' | tr }}</button>
               </li>
             }
           </ul>
@@ -74,12 +74,12 @@
     }
 
     @case ('roles') {
-      <p class="mt-0 text-sm text-mut">কোন রোল কোন পাতা দেখতে ও কাজ করতে পারবে। পরিবর্তন সংরক্ষণের পর ব্যবহারকারী আবার লগইন করলে কার্যকর হবে।</p>
+      <p class="mt-0 text-sm text-mut">{{ 'কোন রোল কোন পাতা দেখতে ও কাজ করতে পারবে। পরিবর্তন সংরক্ষণের পর ব্যবহারকারী আবার লগইন করলে কার্যকর হবে।' | tr }}</p>
       @if (roles(); as rs) {
         <div class="grid gap-4 xl:grid-cols-2">
           @for (r of rs; track r.name) {
-            <m-card [title]="roleLabel(r.name)" [subtitle]="(r.users | num) + ' জন ইউজার'">
-              @if (r.locked) { <p class="m-0 text-sm text-mut">সুপার অ্যাডমিন সব কিছু করতে পারেন। এটি বদলানো যায় না।</p> }
+            <m-card [title]="roleLabel(r.name)" [subtitle]="(r.users | num) + (' জন ইউজার' | tr)">
+              @if (r.locked) { <p class="m-0 text-sm text-mut">{{ 'সুপার অ্যাডমিন সব কিছু করতে পারেন। এটি বদলানো যায় না।' | tr }}</p> }
               @else {
                 <div class="grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
                   @for (p of allPerms; track p) {
@@ -88,7 +88,7 @@
                     }
                   }
                 </div>
-                @if (roleDirty(r)) { <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-line"><button mButton size="sm" [loading]="saving()" (click)="saveRole(r)">সংরক্ষণ</button></div> }
+                @if (roleDirty(r)) { <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-line"><button mButton size="sm" [loading]="saving()" (click)="saveRole(r)">{{ 'সংরক্ষণ' | tr }}</button></div> }
               }
             </m-card>
           }
@@ -97,74 +97,74 @@
     }
 
     @case ('fees') {
-      <m-card title="ফি-এর খাত" subtitle="ভর্তি ফি, মাসিক বেতন, পরীক্ষার ফি ইত্যাদি" [padded]="false">
-        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newHead()"><m-icon name="plus" [size]="16" /> নতুন খাত</button></div>
+      <m-card [title]="'ফি-এর খাত' | tr" [subtitle]="'ভর্তি ফি, মাসিক বেতন, পরীক্ষার ফি ইত্যাদি' | tr" [padded]="false">
+        <div class="px-4 py-3 border-b border-line flex justify-end"><button mButton size="sm" (click)="newHead()"><m-icon name="plus" [size]="16" /> {{ 'নতুন খাত' | tr }}</button></div>
         @if (heads(); as hs) {
           <ul class="m-0 p-0 list-none">
             @for (h of hs; track h.id) {
               <li class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line last:border-0" [class.opacity-60]="!h.isActive">
-                <span class="flex-1 leading-tight"><b class="font-semibold">{{ h.nameBn }}</b><small class="block text-mut text-[13px]">{{ fLabel(h.frequency) }} · ডিফল্ট {{ h.defaultAmount | money }}</small></span>
-                @if (!h.isActive) { <m-badge>বন্ধ</m-badge> }
-                <button mButton size="sm" variant="ghost" (click)="editHead(h)"><m-icon name="edit" [size]="16" /> বদলান</button>
+                <span class="flex-1 leading-tight"><b class="font-semibold">{{ h.nameBn }}</b><small class="block text-mut text-[13px]">{{ fLabel(h.frequency) }} · {{ 'ডিফল্ট {m}' | tr: { m: (h.defaultAmount | money) } }}</small></span>
+                @if (!h.isActive) { <m-badge>{{ 'বন্ধ' | tr }}</m-badge> }
+                <button mButton size="sm" variant="ghost" (click)="editHead(h)"><m-icon name="edit" [size]="16" /> {{ 'বদলান' | tr }}</button>
               </li>
             }
           </ul>
         } @else { <div class="p-4"><m-skeleton height="120px" /></div> }
       </m-card>
-      <p class="text-sm text-mut">শ্রেণিভিত্তিক মাসিক বেতন "শ্রেণি ও কিতাব" পাতা থেকে ঠিক করুন।</p>
+      <p class="text-sm text-mut">{{ 'শ্রেণিভিত্তিক মাসিক বেতন "শ্রেণি ও কিতাব" পাতা থেকে ঠিক করুন।' | tr }}</p>
     }
 
     @case ('grades') {
-      <m-card title="বিভাগ (গ্রেড)" subtitle="গড় নম্বর অনুযায়ী বিভাগ। সব কিতাবে পাস না করলে কোনো বিভাগ হয় না।">
+      <m-card [title]="'বিভাগ (গ্রেড)' | tr" [subtitle]="'গড় নম্বর অনুযায়ী বিভাগ। সব কিতাবে পাস না করলে কোনো বিভাগ হয় না।' | tr">
         @if (grades(); as gs) {
           <div class="grid gap-2">
-            <div class="grid grid-cols-[1fr_1fr_8rem_2.75rem] gap-2 text-sm font-semibold text-mut"><span>নাম</span><span>আরবি</span><span>সর্বনিম্ন গড়</span><span></span></div>
+            <div class="grid grid-cols-[1fr_1fr_8rem_2.75rem] gap-2 text-sm font-semibold text-mut"><span>{{ 'নাম' | tr }}</span><span>{{ 'আরবি' | tr }}</span><span>{{ 'সর্বনিম্ন গড়' | tr }}</span><span></span></div>
             @for (g of gs; track $index; let i = $index) {
               <div class="grid grid-cols-[1fr_1fr_8rem_2.75rem] gap-2 items-center">
-                <input class="ctl" [ngModel]="g.nameBn" (ngModelChange)="patchGrade(i, { nameBn: $event })" [attr.aria-label]="'বিভাগ ' + (i + 1) + ' নাম'" [attr.aria-invalid]="!!errs()['grades[' + i + '].nameBn']">
-                <input class="ctl ar" dir="rtl" lang="ar" [ngModel]="g.nameAr" (ngModelChange)="patchGrade(i, { nameAr: $event })" [attr.aria-label]="'বিভাগ ' + (i + 1) + ' আরবি নাম'">
-                <input class="ctl tabular" inputmode="decimal" [ngModel]="g.minAverage" (ngModelChange)="patchGrade(i, { minAverage: $event })" [attr.aria-label]="'বিভাগ ' + (i + 1) + ' সর্বনিম্ন গড়'" [attr.aria-invalid]="!!errs()['grades[' + i + '].minAverage']">
-                <button mButton size="sm" variant="ghost" class="!text-red" (click)="removeGrade(i)" [attr.aria-label]="'বিভাগ ' + (i + 1) + ' মুছুন'"><m-icon name="trash" [size]="16" /></button>
+                <input class="ctl" [ngModel]="g.nameBn" (ngModelChange)="patchGrade(i, { nameBn: $event })" [attr.aria-label]="('বিভাগ ' | tr) + (i + 1) + (' নাম' | tr)" [attr.aria-invalid]="!!errs()['grades[' + i + '].nameBn']">
+                <input class="ctl ar" dir="rtl" lang="ar" [ngModel]="g.nameAr" (ngModelChange)="patchGrade(i, { nameAr: $event })" [attr.aria-label]="('বিভাগ ' | tr) + (i + 1) + (' আরবি নাম' | tr)">
+                <input class="ctl tabular" inputmode="decimal" [ngModel]="g.minAverage" (ngModelChange)="patchGrade(i, { minAverage: $event })" [attr.aria-label]="('বিভাগ ' | tr) + (i + 1) + (' সর্বনিম্ন গড়' | tr)" [attr.aria-invalid]="!!errs()['grades[' + i + '].minAverage']">
+                <button mButton size="sm" variant="ghost" class="!text-red" (click)="removeGrade(i)" [attr.aria-label]="('বিভাগ ' | tr) + (i + 1) + (' মুছুন' | tr)"><m-icon name="trash" [size]="16" /></button>
               </div>
             }
             @if (errs()['grades']) { <p class="m-0 text-red text-sm" role="alert">{{ errs()['grades'] }}</p> }
-            <div class="flex justify-between gap-2 mt-2"><button mButton size="sm" variant="outline" (click)="addGrade()"><m-icon name="plus" [size]="16" /> বিভাগ যোগ</button>
-              <button mButton [loading]="saving()" (click)="saveGrades()">সংরক্ষণ</button></div>
+            <div class="flex justify-between gap-2 mt-2"><button mButton size="sm" variant="outline" (click)="addGrade()"><m-icon name="plus" [size]="16" /> {{ 'বিভাগ যোগ' | tr }}</button>
+              <button mButton [loading]="saving()" (click)="saveGrades()">{{ 'সংরক্ষণ' | tr }}</button></div>
           </div>
         } @else { <m-skeleton height="200px" /> }
       </m-card>
     }
 
     @case ('holidays') {
-      <m-card [title]="'ছুটির দিন · ' + year()" subtitle="সাপ্তাহিক ছুটির বাইরে এই দিনগুলোতে হাজিরা হয় না" [padded]="false">
+      <m-card [title]="('ছুটির দিন · ' | tr) + year()" [subtitle]="'সাপ্তাহিক ছুটির বাইরে এই দিনগুলোতে হাজিরা হয় না' | tr" [padded]="false">
         <form class="flex flex-wrap items-end gap-3 px-4 py-3 border-b border-line" (ngSubmit)="addHoliday()">
-          <m-field label="তারিখ" for="h-d" [error]="errs()['date']"><input id="h-d" type="date" class="ctl !w-auto" name="date" [ngModel]="hdForm().date" (ngModelChange)="hdForm.set({ date: $event, title: hdForm().title })"></m-field>
-          <m-field label="কারণ" for="h-t" class="flex-1 min-w-[12rem]" [error]="errs()['title']"><input id="h-t" class="ctl" name="title" placeholder="যেমন: ঈদুল আযহা" [ngModel]="hdForm().title" (ngModelChange)="hdForm.set({ date: hdForm().date, title: $event })"></m-field>
-          <button mButton type="submit" [loading]="saving()"><m-icon name="plus" [size]="16" /> যোগ</button>
-          <div class="flex gap-1 ml-auto"><button type="button" mButton size="sm" variant="ghost" (click)="year.set(year() - 1)" aria-label="আগের বছর"><m-icon name="chevronLeft" [size]="16" /></button>
-            <button type="button" mButton size="sm" variant="ghost" (click)="year.set(year() + 1)" aria-label="পরের বছর"><m-icon name="chevronRight" [size]="16" /></button></div>
+          <m-field [label]="'তারিখ' | tr" for="h-d" [error]="errs()['date']"><input id="h-d" type="date" class="ctl !w-auto" name="date" [ngModel]="hdForm().date" (ngModelChange)="hdForm.set({ date: $event, title: hdForm().title })"></m-field>
+          <m-field [label]="'কারণ' | tr" for="h-t" class="flex-1 min-w-[12rem]" [error]="errs()['title']"><input id="h-t" class="ctl" name="title" [placeholder]="'যেমন: ঈদুল আযহা' | tr" [ngModel]="hdForm().title" (ngModelChange)="hdForm.set({ date: hdForm().date, title: $event })"></m-field>
+          <button mButton type="submit" [loading]="saving()"><m-icon name="plus" [size]="16" /> {{ 'যোগ' | tr }}</button>
+          <div class="flex gap-1 ml-auto"><button type="button" mButton size="sm" variant="ghost" (click)="year.set(year() - 1)" [attr.aria-label]="'আগের বছর' | tr"><m-icon name="chevronLeft" [size]="16" /></button>
+            <button type="button" mButton size="sm" variant="ghost" (click)="year.set(year() + 1)" [attr.aria-label]="'পরের বছর' | tr"><m-icon name="chevronRight" [size]="16" /></button></div>
         </form>
         @if (holidays(); as hs) {
           <ul class="m-0 p-0 list-none">
             @for (h of hs; track h.id) {
               <li class="flex items-center gap-3 px-4 py-2.5 border-b border-line last:border-0"><span class="tabular w-36">{{ h.date | bdate }}</span><span class="flex-1">{{ h.title }}</span>
-                <button mButton size="sm" variant="ghost" class="!text-red" (click)="removeHoliday(h)" [attr.aria-label]="h.title + ' মুছুন'"><m-icon name="trash" [size]="16" /></button></li>
-            } @empty { <li><m-empty-state title="এই বছরে কোনো ছুটি যোগ করা হয়নি" icon="sun" /></li> }
+                <button mButton size="sm" variant="ghost" class="!text-red" (click)="removeHoliday(h)" [attr.aria-label]="h.title + (' মুছুন' | tr)"><m-icon name="trash" [size]="16" /></button></li>
+            } @empty { <li><m-empty-state [title]="'এই বছরে কোনো ছুটি যোগ করা হয়নি' | tr" icon="sun" /></li> }
           </ul>
         } @else { <div class="p-4"><m-skeleton height="80px" /></div> }
       </m-card>
     }
 
     @case ('general') {
-      <m-card title="সাধারণ">
+      <m-card [title]="'সাধারণ' | tr">
         @if (general(); as g) {
           <form class="grid gap-4 max-w-md" (ngSubmit)="saveGeneral()">
-            <m-field label="সাপ্তাহিক ছুটি" for="g-w" [error]="errs()['weeklyHoliday']"><select id="g-w" class="ctl" name="weeklyHoliday" [ngModel]="g.weeklyHoliday" (ngModelChange)="patchG({ weeklyHoliday: +$event })">
+            <m-field [label]="'সাপ্তাহিক ছুটি' | tr" for="g-w" [error]="errs()['weeklyHoliday']"><select id="g-w" class="ctl" name="weeklyHoliday" [ngModel]="g.weeklyHoliday" (ngModelChange)="patchG({ weeklyHoliday: +$event })">
               @for (d of days; track d.value) { <option [ngValue]="d.value">{{ d.label }}</option> }</select></m-field>
-            <m-field label="লাইব্রেরির জরিমানা (প্রতিদিন, টাকা)" for="g-f" [error]="errs()['libraryFinePerDay']"><input id="g-f" class="ctl tabular" inputmode="decimal" name="fine" [ngModel]="g.libraryFinePerDay" (ngModelChange)="patchG({ libraryFinePerDay: $event })"></m-field>
+            <m-field [label]="'লাইব্রেরির জরিমানা (প্রতিদিন, টাকা)' | tr" for="g-f" [error]="errs()['libraryFinePerDay']"><input id="g-f" class="ctl tabular" inputmode="decimal" name="fine" [ngModel]="g.libraryFinePerDay" (ngModelChange)="patchG({ libraryFinePerDay: $event })"></m-field>
             <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="size-5 mt-0.5 accent-[var(--g2)]" name="online" [ngModel]="g.onlineAdmission" (ngModelChange)="patchG({ onlineAdmission: $event })">
-              <span>ওয়েবসাইটে অনলাইন ভর্তির আবেদন চালু<small class="block text-mut text-[13px]">বন্ধ করলে ওয়েবসাইটের আবেদন ফর্ম লুকানো থাকবে।</small></span></label>
-            <div><button mButton type="submit" [loading]="saving()">সংরক্ষণ</button></div>
+              <span>{{ 'ওয়েবসাইটে অনলাইন ভর্তির আবেদন চালু' | tr }}<small class="block text-mut text-[13px]">{{ 'বন্ধ করলে ওয়েবসাইটের আবেদন ফর্ম লুকানো থাকবে।' | tr }}</small></span></label>
+            <div><button mButton type="submit" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button></div>
           </form>
         } @else { <m-skeleton height="160px" /> }
       </m-card>
@@ -173,23 +173,23 @@
   </div>
 </div>
 
-<m-modal [(open)]="sOpen" [title]="sId() ? 'শিক্ষাবর্ষ বদলান' : 'নতুন শিক্ষাবর্ষ'">
+<m-modal [(open)]="sOpen" [title]="sId() ? ('শিক্ষাবর্ষ বদলান' | tr) : ('নতুন শিক্ষাবর্ষ' | tr)">
   <form id="sForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveSession()">
-    <m-field label="নাম" for="ss-n" class="col-span-2" [required]="true" [error]="errs()['name']"><input id="ss-n" class="ctl tabular" name="name" [ngModel]="sForm().name" (ngModelChange)="patchS({ name: $event })"></m-field>
-    <m-field label="শুরু" for="ss-s"><input id="ss-s" type="date" class="ctl" name="startDate" [ngModel]="sForm().startDate" (ngModelChange)="patchS({ startDate: $event })"></m-field>
-    <m-field label="শেষ" for="ss-e" [error]="errs()['endDate']"><input id="ss-e" type="date" class="ctl" name="endDate" [ngModel]="sForm().endDate" (ngModelChange)="patchS({ endDate: $event })"></m-field>
+    <m-field [label]="'নাম' | tr" for="ss-n" class="col-span-2" [required]="true" [error]="errs()['name']"><input id="ss-n" class="ctl tabular" name="name" [ngModel]="sForm().name" (ngModelChange)="patchS({ name: $event })"></m-field>
+    <m-field [label]="'শুরু' | tr" for="ss-s"><input id="ss-s" type="date" class="ctl" name="startDate" [ngModel]="sForm().startDate" (ngModelChange)="patchS({ startDate: $event })"></m-field>
+    <m-field [label]="'শেষ' | tr" for="ss-e" [error]="errs()['endDate']"><input id="ss-e" type="date" class="ctl" name="endDate" [ngModel]="sForm().endDate" (ngModelChange)="patchS({ endDate: $event })"></m-field>
   </form>
-  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="sOpen.set(false)">বাতিল</button><button mButton type="submit" form="sForm" [loading]="saving()">সংরক্ষণ</button></div>
+  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="sOpen.set(false)">{{ 'বাতিল' | tr }}</button><button mButton type="submit" form="sForm" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button></div>
 </m-modal>
 
-<m-modal [(open)]="uOpen" [title]="uId() ? 'ইউজার বদলান' : 'নতুন ইউজার'" width="min(640px, calc(100vw - 24px))">
+<m-modal [(open)]="uOpen" [title]="uId() ? ('ইউজার বদলান' | tr) : ('নতুন ইউজার' | tr)" width="min(640px, calc(100vw - 24px))">
   <form id="uForm" autocomplete="off" class="grid gap-3 sm:grid-cols-2" (ngSubmit)="saveUser()">
-    <m-field label="পুরো নাম" for="u-f" [required]="true" [error]="errs()['fullName']"><input id="u-f" class="ctl" name="fullName" [ngModel]="uForm().fullName" (ngModelChange)="patchU({ fullName: $event })"></m-field>
-    <m-field label="ইউজারনেম" for="u-n" [required]="true" [error]="errs()['userName']" hint="ইংরেজি অক্ষর, যেমন hafez.karim"><input id="u-n" class="ctl" name="userName" autocomplete="off" autocapitalize="none" [ngModel]="uForm().userName" (ngModelChange)="patchU({ userName: $event })"></m-field>
-    @if (!uId()) { <m-field label="পাসওয়ার্ড" for="u-p" class="sm:col-span-2" [required]="true" [error]="errs()['password']" hint="অন্তত ৮ অক্ষর; বড় হাতের, ছোট হাতের অক্ষর ও সংখ্যা মিলিয়ে">
+    <m-field [label]="'পুরো নাম' | tr" for="u-f" [required]="true" [error]="errs()['fullName']"><input id="u-f" class="ctl" name="fullName" [ngModel]="uForm().fullName" (ngModelChange)="patchU({ fullName: $event })"></m-field>
+    <m-field [label]="'ইউজারনেম' | tr" for="u-n" [required]="true" [error]="errs()['userName']" [hint]="'ইংরেজি অক্ষর, যেমন hafez.karim' | tr"><input id="u-n" class="ctl" name="userName" autocomplete="off" autocapitalize="none" [ngModel]="uForm().userName" (ngModelChange)="patchU({ userName: $event })"></m-field>
+    @if (!uId()) { <m-field [label]="'পাসওয়ার্ড' | tr" for="u-p" class="sm:col-span-2" [required]="true" [error]="errs()['password']" [hint]="'অন্তত ৮ অক্ষর; বড় হাতের, ছোট হাতের অক্ষর ও সংখ্যা মিলিয়ে' | tr">
       <input id="u-p" class="ctl" type="text" name="password" autocomplete="new-password" [ngModel]="uForm().password" (ngModelChange)="patchU({ password: $event })"></m-field> }
     <fieldset class="sm:col-span-2 border border-line rounded-xl p-3 m-0">
-      <legend class="px-1 text-sm font-semibold text-mut">রোল</legend>
+      <legend class="px-1 text-sm font-semibold text-mut">{{ 'রোল' | tr }}</legend>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
         @for (r of roles() ?? []; track r.name) { <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="size-4 accent-[var(--g2)]" [checked]="uForm().roles.includes(r.name)" (change)="toggleRole(r.name)"> {{ roleLabel(r.name) }}</label> }
       </div>
@@ -197,46 +197,46 @@
     </fieldset>
     @if (portalRole()) {
       <div class="sm:col-span-2 grid gap-2">
-        <m-field [label]="uForm().roles.includes('Guardian') ? 'কোন শিক্ষার্থীর অভিভাবক' : 'কোন শিক্ষার্থী'" for="u-st" [error]="errs()['link']">
+        <m-field [label]="uForm().roles.includes('Guardian') ? ('কোন শিক্ষার্থীর অভিভাবক' | tr) : ('কোন শিক্ষার্থী' | tr)" for="u-st" [error]="errs()['link']">
           @if (linkedStudent(); as ls) {
-            <div class="flex items-center gap-2 p-2.5 rounded-xl border border-line"><b class="flex-1">{{ ls.name }}</b><button mButton type="button" size="sm" variant="ghost" (click)="linkedStudent.set(null)">বদলান</button></div>
+            <div class="flex items-center gap-2 p-2.5 rounded-xl border border-line"><b class="flex-1">{{ ls.name }}</b><button mButton type="button" size="sm" variant="ghost" (click)="linkedStudent.set(null)">{{ 'বদলান' | tr }}</button></div>
           } @else {
-            <input id="u-st" class="ctl" autocomplete="off" placeholder="শিক্ষার্থীর নাম বা আইডি" [ngModel]="studentQ()" (ngModelChange)="searchStudents($event)" [ngModelOptions]="{ standalone: true }">
-            @if (uId() && (uForm().guardianId || uForm().studentId)) { <small class="text-mut text-[13px]">এখন যুক্ত আছেন। বদলাতে শিক্ষার্থী খুঁজুন।</small> }
+            <input id="u-st" class="ctl" autocomplete="off" [placeholder]="'শিক্ষার্থীর নাম বা আইডি' | tr" [ngModel]="studentQ()" (ngModelChange)="searchStudents($event)" [ngModelOptions]="{ standalone: true }">
+            @if (uId() && (uForm().guardianId || uForm().studentId)) { <small class="text-mut text-[13px]">{{ 'এখন যুক্ত আছেন। বদলাতে শিক্ষার্থী খুঁজুন।' | tr }}</small> }
           }
         </m-field>
         @for (s of studentHits(); track s.id) {
           <button type="button" class="text-left px-3 py-2 rounded-xl hover:bg-soft bg-transparent border border-line text-ink cursor-pointer" (click)="linkStudent(s)">{{ s.name }} <small class="text-mut">{{ s.studentCode }} · {{ s.className }}</small></button>
         }
         @if (linkedStudent() && uForm().roles.includes('Guardian')) {
-          <m-field label="অভিভাবক" for="u-g"><select id="u-g" class="ctl" name="guardianId" [ngModel]="uForm().guardianId" (ngModelChange)="patchU({ guardianId: +$event })">
+          <m-field [label]="'অভিভাবক' | tr" for="u-g"><select id="u-g" class="ctl" name="guardianId" [ngModel]="uForm().guardianId" (ngModelChange)="patchU({ guardianId: +$event })">
             @for (g of linkedStudent()!.guardians; track g.id) { <option [ngValue]="g.id">{{ g.name }} ({{ g.relation }}) · {{ g.phone | digits }}</option> }</select></m-field>
         }
       </div>
     } @else {
-      <m-field label="স্টাফের সাথে যুক্ত (ঐচ্ছিক)" for="u-s" class="sm:col-span-2" [error]="errs()['link']"><select id="u-s" class="ctl" name="staffId" [ngModel]="uForm().staffId" (ngModelChange)="patchU({ staffId: $event ? +$event : null })">
-        <option [ngValue]="null">যুক্ত নয়</option>@for (s of staffList(); track s.id) { <option [ngValue]="s.id">{{ s.name }} · {{ s.designation }}</option> }</select></m-field>
+      <m-field [label]="'স্টাফের সাথে যুক্ত (ঐচ্ছিক)' | tr" for="u-s" class="sm:col-span-2" [error]="errs()['link']"><select id="u-s" class="ctl" name="staffId" [ngModel]="uForm().staffId" (ngModelChange)="patchU({ staffId: $event ? +$event : null })">
+        <option [ngValue]="null">{{ 'যুক্ত নয়' | tr }}</option>@for (s of staffList(); track s.id) { <option [ngValue]="s.id">{{ s.name }} · {{ s.designation }}</option> }</select></m-field>
     }
-    <label class="flex items-center gap-2 sm:col-span-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="uForm().isActive" (ngModelChange)="patchU({ isActive: $event })"> লগইন করতে পারবেন</label>
+    <label class="flex items-center gap-2 sm:col-span-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="uForm().isActive" (ngModelChange)="patchU({ isActive: $event })"> {{ 'লগইন করতে পারবেন' | tr }}</label>
     @if (errs()['isActive']) { <p class="sm:col-span-2 m-0 text-red text-sm" role="alert">{{ errs()['isActive'] }}</p> }
   </form>
-  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="uOpen.set(false)">বাতিল</button><button mButton type="submit" form="uForm" [loading]="saving()">সংরক্ষণ</button></div>
+  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="uOpen.set(false)">{{ 'বাতিল' | tr }}</button><button mButton type="submit" form="uForm" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button></div>
 </m-modal>
 
-<m-modal [(open)]="pwOpen" title="নতুন পাসওয়ার্ড">
-  <p class="mt-0 text-sm">{{ pwUser()?.fullName }} ({{ pwUser()?.userName }})-এর জন্য নতুন পাসওয়ার্ড দিন। লক হয়ে থাকলে খুলে যাবে।</p>
-  <form id="pwForm" (ngSubmit)="savePw()"><m-field label="নতুন পাসওয়ার্ড" for="pw" [error]="errs()['password']"><input id="pw" class="ctl" name="pw" autocomplete="new-password" [ngModel]="pw()" (ngModelChange)="pw.set($event)"></m-field></form>
-  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="pwOpen.set(false)">বাতিল</button><button mButton type="submit" form="pwForm" [loading]="saving()">সেট করুন</button></div>
+<m-modal [(open)]="pwOpen" [title]="'নতুন পাসওয়ার্ড' | tr">
+  <p class="mt-0 text-sm">{{ '{name} ({user})-এর জন্য নতুন পাসওয়ার্ড দিন। লক হয়ে থাকলে খুলে যাবে।' | tr: { name: pwUser()?.fullName, user: pwUser()?.userName } }}</p>
+  <form id="pwForm" (ngSubmit)="savePw()"><m-field [label]="'নতুন পাসওয়ার্ড' | tr" for="pw" [error]="errs()['password']"><input id="pw" class="ctl" name="pw" autocomplete="new-password" [ngModel]="pw()" (ngModelChange)="pw.set($event)"></m-field></form>
+  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="pwOpen.set(false)">{{ 'বাতিল' | tr }}</button><button mButton type="submit" form="pwForm" [loading]="saving()">{{ 'সেট করুন' | tr }}</button></div>
 </m-modal>
 
-<m-modal [(open)]="hOpen" [title]="hId() ? 'ফি-এর খাত বদলান' : 'নতুন খাত'">
+<m-modal [(open)]="hOpen" [title]="hId() ? ('ফি-এর খাত বদলান' | tr) : ('নতুন খাত' | tr)">
   <form id="hForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveHead()">
-    <m-field label="নাম" for="fh-n" class="col-span-2" [required]="true" [error]="errs()['nameBn']"><input id="fh-n" class="ctl" name="nameBn" [ngModel]="hForm().nameBn" (ngModelChange)="patchH({ nameBn: $event })"></m-field>
-    <m-field label="কতবার" for="fh-f" [error]="errs()['frequency']"><select id="fh-f" class="ctl" name="frequency" [ngModel]="hForm().frequency" (ngModelChange)="patchH({ frequency: $event })">
+    <m-field [label]="'নাম' | tr" for="fh-n" class="col-span-2" [required]="true" [error]="errs()['nameBn']"><input id="fh-n" class="ctl" name="nameBn" [ngModel]="hForm().nameBn" (ngModelChange)="patchH({ nameBn: $event })"></m-field>
+    <m-field [label]="'কতবার' | tr" for="fh-f" [error]="errs()['frequency']"><select id="fh-f" class="ctl" name="frequency" [ngModel]="hForm().frequency" (ngModelChange)="patchH({ frequency: $event })">
       @for (f of freqs; track f.value) { <option [value]="f.value">{{ f.label }}</option> }</select></m-field>
-    <m-field label="ডিফল্ট টাকা" for="fh-a" [error]="errs()['defaultAmount']"><input id="fh-a" class="ctl tabular" inputmode="numeric" name="amount" [ngModel]="hForm().defaultAmount" (ngModelChange)="patchH({ defaultAmount: $event })"></m-field>
-    <label class="col-span-2 flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="hForm().isActive" (ngModelChange)="patchH({ isActive: $event })"> চালু আছে</label>
+    <m-field [label]="'ডিফল্ট টাকা' | tr" for="fh-a" [error]="errs()['defaultAmount']"><input id="fh-a" class="ctl tabular" inputmode="numeric" name="amount" [ngModel]="hForm().defaultAmount" (ngModelChange)="patchH({ defaultAmount: $event })"></m-field>
+    <label class="col-span-2 flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="hForm().isActive" (ngModelChange)="patchH({ isActive: $event })"> {{ 'চালু আছে' | tr }}</label>
     @if (errs()['isActive']) { <p class="col-span-2 m-0 text-red text-sm" role="alert">{{ errs()['isActive'] }}</p> }
   </form>
-  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="hOpen.set(false)">বাতিল</button><button mButton type="submit" form="hForm" [loading]="saving()">সংরক্ষণ</button></div>
+  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="hOpen.set(false)">{{ 'বাতিল' | tr }}</button><button mButton type="submit" form="hForm" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button></div>
 </m-modal>

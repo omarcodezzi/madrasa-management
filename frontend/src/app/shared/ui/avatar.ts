@@ -16,7 +16,7 @@ export class Avatar {
   readonly size = input(40);
   protected initial = computed(() => {
     // Skip honorific prefixes so "মোঃ রফিক" shows র, not ম
-    const parts = this.name().replace(/^(মোঃ|মো\.|মুহাম্মাদ|মাওলানা)\s+/, '').trim();
+    const parts = this.name().replace(/^(মোঃ|মো\.|মুহাম্মাদ|মাওলানা)\s+/, '').trim(); // i18n-ignore
     return Array.from(parts)[0] ?? '?';
   });
 }

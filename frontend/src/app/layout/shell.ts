@@ -13,11 +13,12 @@ import { ToastService } from '../core/toast.service';
 import { Avatar, Button, FormField, Icon, IconButton, Modal } from '../shared/ui';
 import { CommandPalette } from './command-palette';
 import { ALL_NAV, BOTTOM_NAV, NAV } from './nav';
+import { TrPipe } from '../core/tr';
 
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, TranslocoPipe, DigitsPipe, Icon, IconButton, Avatar, Button, Modal, FormField, CommandPalette],
+  imports: [TrPipe, RouterOutlet, RouterLink, RouterLinkActive, FormsModule, TranslocoPipe, DigitsPipe, Icon, IconButton, Avatar, Button, Modal, FormField, CommandPalette],
   host: {
     class: 'block min-h-dvh',
     '(document:keydown)': 'onKey($event)',

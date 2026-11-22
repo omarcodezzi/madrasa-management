@@ -9,30 +9,31 @@ import { Button, Card, Chips, EmptyState, Icon, PageHeader, Segmented, Skeleton 
 import { StudentDetail, StudentRow } from '../students/student.models';
 import { StudentsApi } from '../students/students.service';
 import { IdCard } from './id-card';
+import { TrPipe, tr } from '../../core/tr';
 
 /** Pick a class (or arrive with ?ids= from the student list), preview, print 4 cards per A4 sheet. */
 @Component({
   selector: 'app-idcards-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NumPipe, Button, Card, Chips, EmptyState, Icon, PageHeader, Segmented, Skeleton, IdCard],
+  imports: [TrPipe, NumPipe, Button, Card, Chips, EmptyState, Icon, PageHeader, Segmented, Skeleton, IdCard],
   template: `
-    <m-page-header title="আইডি কার্ড" description="কার্ডের QR কোড স্ক্যান করে হাজিরা নেওয়া যায়। এক A4 পাতায় ৪টি কার্ড ছাপা হয়।">
-      <button mButton [disabled]="!picked().length" (click)="print()"><m-icon name="print" /> {{ picked().length | num }}টি কার্ড প্রিন্ট</button>
+    <m-page-header [title]="'আইডি কার্ড' | tr" [description]="'কার্ডের QR কোড স্ক্যান করে হাজিরা নেওয়া যায়। এক A4 পাতায় ৪টি কার্ড ছাপা হয়।' | tr">
+      <button mButton [disabled]="!picked().length" (click)="print()"><m-icon name="print" /> {{ '{n}টি কার্ড প্রিন্ট' | tr: { n: (picked().length | num) } }}</button>
     </m-page-header>
 
     <div class="flex flex-wrap items-center gap-3 mb-4">
-      <m-chips [options]="classOptions()" [value]="classId()" (valueChange)="pickClass($event)" aria-label="শ্রেণি" />
-      <m-segmented class="ml-auto" [options]="sides" [value]="side()" (valueChange)="side.set($event)" aria-label="কার্ডের দিক" />
+      <m-chips [options]="classOptions()" [value]="classId()" (valueChange)="pickClass($event)" [attr.aria-label]="'শ্রেণি' | tr" />
+      <m-segmented class="ml-auto" [options]="sides" [value]="side()" (valueChange)="side.set($event)" [attr.aria-label]="'কার্ডের দিক' | tr" />
     </div>
 
     @if (loading()) {
       <div class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(330px,1fr))]">@for (i of [1,2,3]; track i) { <m-skeleton height="210px" /> }</div>
     } @else if (!students().length) {
-      <m-card><m-empty-state title="কোনো শিক্ষার্থী বাছাই করা হয়নি" description="উপরে থেকে একটি শ্রেণি বেছে নিন, অথবা শিক্ষার্থী তালিকা থেকে কয়েকজনকে বাছাই করে 'আইডি কার্ড' চাপুন।" icon="card" /></m-card>
+      <m-card><m-empty-state [title]="'কোনো শিক্ষার্থী বাছাই করা হয়নি' | tr" [description]="'উপরে থেকে একটি শ্রেণি বেছে নিন, অথবা শিক্ষার্থী তালিকা থেকে কয়েকজনকে বাছাই করে ‘আইডি কার্ড’ চাপুন।' | tr" icon="card" /></m-card>
     } @else {
       <div class="flex items-center gap-3 mb-3 text-sm">
-        <label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-4 accent-[var(--g2)]" [checked]="picked().length === students().length" (change)="toggleAll()"> সবাই</label>
-        <span class="text-mut">{{ picked().length | num }} / {{ students().length | num }} জন বাছাই</span>
+        <label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-4 accent-[var(--g2)]" [checked]="picked().length === students().length" (change)="toggleAll()"> {{ 'সবাই' | tr }}</label>
+        <span class="text-mut">{{ '{a} / {b} জন বাছাই' | tr: { a: (picked().length | num), b: (students().length | num) } }}</span>
       </div>
       <div class="grid gap-5 grid-cols-[repeat(auto-fill,minmax(330px,1fr))]">
         @for (s of students(); track s.id) {
@@ -53,12 +54,12 @@ export class IdCardsPage {
 
   protected classId = signal<number | 0>(0);
   protected side = signal<'front' | 'back'>('front');
-  protected sides = [{ value: 'front' as const, label: 'সামনে' }, { value: 'back' as const, label: 'পেছনে' }];
+  protected sides = [{ value: 'front' as const, label: tr('সামনে') }, { value: 'back' as const, label: tr('পেছনে') }];
   protected students = signal<StudentDetail[]>([]);
   protected sel = signal(new Set<number>());
   protected loading = signal(false);
   protected picked = computed(() => this.students().filter((s) => this.sel().has(s.id)));
-  protected classOptions = computed(() => [{ value: 0, label: 'বাছাই করা' }, ...this.lookups.classes().map((c) => ({ value: c.id, label: c.nameBn }))]);
+  protected classOptions = computed(() => [{ value: 0, label: tr('বাছাই করা') }, ...this.lookups.classes().map((c) => ({ value: c.id, label: c.nameBn }))]);
 
   constructor() {
     const ids = (inject(ActivatedRoute).snapshot.queryParamMap.get('ids') ?? '').split(',').map(Number).filter(Boolean);

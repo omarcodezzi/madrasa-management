@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { DatePipe, MoneyPipe, MonthPipe, NumPipe } from '../../core/format';
+import { TrPipe, tr } from '../../core/tr';
 
 /**
  * Daily attendance %, one series: thin bars, 4px rounded tops anchored to the baseline,
@@ -8,7 +9,7 @@ import { DatePipe, MoneyPipe, MonthPipe, NumPipe } from '../../core/format';
 @Component({
   selector: 'app-trend-bars',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, NumPipe],
+  imports: [TrPipe, DatePipe, NumPipe],
   template: `
     <div class="relative" (mouseleave)="hover.set(null)">
       <div class="relative h-[150px] mt-4 flex items-end gap-[2px] pl-8" aria-hidden="true">
@@ -27,7 +28,7 @@ import { DatePipe, MoneyPipe, MonthPipe, NumPipe } from '../../core/format';
         }
       </div>
       <div class="flex justify-between pl-8 mt-1.5 text-[12px] text-mut" aria-hidden="true">
-        <span>{{ points()[0]?.date | bdate }}</span><span>আজ</span>
+        <span>{{ points()[0]?.date | bdate }}</span><span>{{ 'আজ' | tr }}</span>
       </div>
       @if (hover() !== null) {
         @let p = points()[hover()!];
@@ -35,7 +36,7 @@ import { DatePipe, MoneyPipe, MonthPipe, NumPipe } from '../../core/format';
           [style.left]="'calc(2rem + (100% - 2rem) * ' + (hover()! + .5) / points().length + ')'">
           {{ p.date | bdate }} · <b>{{ p.percent | num }}%</b></div>
       }
-      <table class="sr-only"><caption>দৈনিক উপস্থিতির হার</caption><tr><th>তারিখ</th><th>হার</th></tr>
+      <table class="sr-only"><caption>{{ 'দৈনিক উপস্থিতির হার' | tr }}</caption><tr><th>{{ 'তারিখ' | tr }}</th><th>{{ 'হার' | tr }}</th></tr>
         @for (p of points(); track p.date) { <tr><td>{{ p.date | bdate }}</td><td>{{ p.percent | num }}%</td></tr> }</table>
     </div>
   `,
@@ -53,11 +54,11 @@ export class TrendBars {
 @Component({
   selector: 'app-money-bars',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MoneyPipe, MonthPipe],
+  imports: [TrPipe, MoneyPipe, MonthPipe],
   template: `
     <div class="flex gap-4 text-[13px] text-mut mb-3" aria-hidden="true">
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded-[3px] bg-[var(--chart-1)]"></i> আয়</span>
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded-[3px] bg-[var(--chart-2)]"></i> ব্যয়</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded-[3px] bg-[var(--chart-1)]"></i> {{ 'আয়' | tr }}</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded-[3px] bg-[var(--chart-2)]"></i> {{ 'ব্যয়' | tr }}</span>
     </div>
     <div class="relative" (mouseleave)="hover.set(null)">
       <div class="relative h-[170px] flex items-end gap-3" aria-hidden="true">
@@ -79,10 +80,10 @@ export class TrendBars {
         <div class="absolute top-0 px-3 py-2 rounded-lg bg-ink text-card text-[13px] shadow-lg pointer-events-none whitespace-nowrap -translate-x-1/2 -translate-y-[60%] z-10"
           [style.left.%]="((hover()! + .5) / data().length) * 100">
           <b class="block mb-0.5">{{ p.month | month }}</b>
-          আয় {{ p.income | money }}<br>ব্যয় {{ p.expense | money }}<br>
-          <span class="opacity-80">উদ্বৃত্ত {{ (p.income - p.expense) | money }}</span></div>
+          {{ 'আয় {m}' | tr: { m: (p.income | money) } }}<br>{{ 'ব্যয় {m}' | tr: { m: (p.expense | money) } }}<br>
+          <span class="opacity-80">{{ 'উদ্বৃত্ত {m}' | tr: { m: ((p.income - p.expense) | money) } }}</span></div>
       }
-      <table class="sr-only"><caption>মাসিক আয় ও ব্যয়</caption><tr><th>মাস</th><th>আয়</th><th>ব্যয়</th></tr>
+      <table class="sr-only"><caption>{{ 'মাসিক আয় ও ব্যয়' | tr }}</caption><tr><th>{{ 'মাস' | tr }}</th><th>{{ 'আয়' | tr }}</th><th>{{ 'ব্যয়' | tr }}</th></tr>
         @for (p of data(); track p.month) { <tr><td>{{ p.month | month }}</td><td>{{ p.income | money }}</td><td>{{ p.expense | money }}</td></tr> }</table>
     </div>
   `,
@@ -91,6 +92,6 @@ export class MoneyBars {
   readonly data = input.required<{ month: string; income: number; expense: number }[]>();
   protected hover = signal<number | null>(null);
   protected max = computed(() => Math.max(1, ...this.data().flatMap((d) => [d.income, d.expense])) * 1.05);
-  private names = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রি', 'মে', 'জুন', 'জুলা', 'আগ', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+  private names = [tr('জানু'), tr('ফেব্রু'), tr('মার্চ'), tr('এপ্রি'), tr('মে'), tr('জুন'), tr('জুলা'), tr('আগ'), tr('সেপ্টে'), tr('অক্টো'), tr('নভে'), tr('ডিসে')];
   protected short = (ym: string) => this.names[+ym.slice(5, 7) - 1];
 }

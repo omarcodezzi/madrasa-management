@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { errorMessage } from '../../core/api';
-import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayIso } from '../../core/format';
+import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, toEnDigits, todayIso, fmtMoney } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
 import { Badge, Button, Card, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { AccountsSummary, Category, CategoryTotal, Direction, Donor, LedgerPage, LedgerRow } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'ledger' | 'donors';
 type Kind = 'donation' | 'expense';
@@ -16,7 +17,7 @@ interface EntryForm { date: string; fundId: number; categoryId: number; amount: 
 @Component({
   selector: 'app-accounts-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Badge, Button, Card, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
+  imports: [TrPipe, FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Badge, Button, Card, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
   templateUrl: './accounts-page.html',
 })
 export class AccountsPage {
@@ -29,34 +30,34 @@ export class AccountsPage {
   protected summary = signal<AccountsSummary | null>(null);
   protected categories = signal<Category[]>([]);
   protected tab = signal<Tab>('ledger');
-  protected tabs = [{ value: 'ledger' as Tab, label: 'আয়-ব্যয় খাতা' }, { value: 'donors' as Tab, label: 'দাতা' }];
+  protected tabs = [{ value: 'ledger' as Tab, label: tr('আয়-ব্যয় খাতা') }, { value: 'donors' as Tab, label: tr('দাতা') }];
 
   // ledger filters
   protected fund = signal(0);
   protected dir = signal<'' | Direction>('');
   protected ledger = signal<LedgerPage | null>(null);
   protected donors = signal<Donor[] | null>(null);
-  protected fundOptions = computed(() => [{ value: 0, label: 'সব ফান্ড' }, ...(this.summary()?.funds ?? []).map((f) => ({ value: f.id, label: f.nameBn }))]);
-  protected dirOptions = [{ value: '' as '' | Direction, label: 'সব' }, { value: 'In' as '' | Direction, label: 'আয়' }, { value: 'Out' as '' | Direction, label: 'ব্যয়' }];
+  protected fundOptions = computed(() => [{ value: 0, label: tr('সব ফান্ড') }, ...(this.summary()?.funds ?? []).map((f) => ({ value: f.id, label: f.nameBn }))]);
+  protected dirOptions = [{ value: '' as '' | Direction, label: tr('সব') }, { value: 'In' as '' | Direction, label: tr('আয়') }, { value: 'Out' as '' | Direction, label: tr('ব্যয়') }];
   protected cols: Column<LedgerRow>[] = [
-    { key: 'date', label: 'তারিখ', sortable: true },
-    { key: 'description', label: 'বিবরণ', primary: true, value: (r) => `${r.description ?? ''} ${r.donor ?? ''} ${r.voucherNo ?? ''}` },
-    { key: 'category', label: 'খাত', sortable: true },
-    { key: 'fund', label: 'ফান্ড', sortable: true },
-    { key: 'amount', label: 'টাকা', sortable: true, align: 'end', value: (r) => (r.direction === 'In' ? r.amount : -r.amount) },
+    { key: 'date', label: tr('তারিখ'), sortable: true },
+    { key: 'description', label: tr('বিবরণ'), primary: true, value: (r) => `${r.description ?? ''} ${r.donor ?? ''} ${r.voucherNo ?? ''}` },
+    { key: 'category', label: tr('খাত'), sortable: true },
+    { key: 'fund', label: tr('ফান্ড'), sortable: true },
+    { key: 'amount', label: tr('টাকা'), sortable: true, align: 'end', value: (r) => (r.direction === 'In' ? r.amount : -r.amount) },
   ];
   protected donorCols: Column<Donor>[] = [
-    { key: 'name', label: 'দাতা', sortable: true, primary: true },
-    { key: 'phone', label: 'মোবাইল' },
-    { key: 'count', label: 'দান', sortable: true, align: 'end' },
-    { key: 'last', label: 'সর্বশেষ', sortable: true },
-    { key: 'total', label: 'মোট', sortable: true, align: 'end' },
+    { key: 'name', label: tr('দাতা'), sortable: true, primary: true },
+    { key: 'phone', label: tr('মোবাইল') },
+    { key: 'count', label: tr('দান'), sortable: true, align: 'end' },
+    { key: 'last', label: tr('সর্বশেষ'), sortable: true },
+    { key: 'total', label: tr('মোট'), sortable: true, align: 'end' },
   ];
 
   // entry modal
   protected entryOpen = signal(false);
   protected kind = signal<Kind>('donation');
-  protected kinds = [{ value: 'donation' as Kind, label: 'দান / আয়' }, { value: 'expense' as Kind, label: 'খরচ' }];
+  protected kinds = [{ value: 'donation' as Kind, label: tr('দান / আয়') }, { value: 'expense' as Kind, label: tr('খরচ') }];
   protected form = signal<EntryForm>({ date: todayIso(), fundId: 1, categoryId: 2, amount: '', description: '', donorName: '', donorPhone: '', donorAddress: '' });
   protected errs = signal<Record<string, string>>({});
   protected saving = signal(false);
@@ -68,7 +69,7 @@ export class AccountsPage {
   protected selectedFund = computed(() => this.summary()?.funds.find((f) => f.id === +this.form().fundId) ?? null);
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.reload(); }
 
   constructor() {
@@ -110,8 +111,8 @@ export class AccountsPage {
     const f = this.form();
     const amount = +toEnDigits(String(f.amount)).replace(/,/g, '');
     const e: Record<string, string> = {};
-    if (!amount || amount <= 0) e['amount'] = 'টাকার পরিমাণ লিখুন';
-    if (this.kind() === 'expense' && !f.description.trim()) e['description'] = 'খরচের বিবরণ লিখুন';
+    if (!amount || amount <= 0) e['amount'] = tr('টাকার পরিমাণ লিখুন');
+    if (this.kind() === 'expense' && !f.description.trim()) e['description'] = tr('খরচের বিবরণ লিখুন');
     if (Object.keys(e).length) { this.errs.set(e); return; }
     this.saving.set(true); this.errs.set({});
     try {
@@ -119,7 +120,7 @@ export class AccountsPage {
         donorName: this.kind() === 'donation' ? f.donorName.trim() || null : null, donorPhone: this.kind() === 'donation' ? toEnDigits(f.donorPhone).trim() || null : null,
         donorAddress: this.kind() === 'donation' ? f.donorAddress.trim() || null : null });
       this.entryOpen.set(false);
-      this.toast.success(r.direction === 'In' ? `${r.amount.toLocaleString('bn-BD')} টাকা জমা হয়েছে (${r.voucherNo})` : `খরচ লেখা হয়েছে (${r.voucherNo})`);
+      this.toast.success(r.direction === 'In' ? tr('{amt} জমা হয়েছে ({no})', { amt: fmtMoney(r.amount), no: r.voucherNo }) : tr('খরচ লেখা হয়েছে ({no})', { no: r.voucherNo }));
       if (r.direction === 'In' && r.donor) this.printVoucher(r);
       this.reload();
     } catch (err) { this.errs.set(fieldErrors(err)); if (!Object.keys(fieldErrors(err)).length) this.toast.error(errorMessage(err)); }
@@ -128,10 +129,10 @@ export class AccountsPage {
 
   protected printVoucher(r: LedgerRow) { this.printer.print({ kind: 'voucher', data: r }, 'a4'); }
   protected async remove(r: LedgerRow) {
-    if (!(await this.confirm.ask({ message: 'এন্ট্রিটি মুছে গেলে ফান্ডের জের বদলে যাবে।', itemName: `${r.voucherNo} · ${r.amount.toLocaleString('bn-BD')} টাকা`, confirmLabel: 'মুছে ফেলুন' }))) return;
-    try { await this.api.deleteEntry(r.id); this.toast.success('এন্ট্রি মুছে ফেলা হয়েছে'); this.reload(); }
+    if (!(await this.confirm.ask({ message: tr('এন্ট্রিটি মুছে গেলে ফান্ডের জের বদলে যাবে।'), itemName: `${r.voucherNo} · ${fmtMoney(r.amount)}`, confirmLabel: tr('মুছে ফেলুন') }))) return;
+    try { await this.api.deleteEntry(r.id); this.toast.success(tr('এন্ট্রি মুছে ফেলা হয়েছে')); this.reload(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
   protected monthInput(v: string) { if (v) this.month.set(v); }
-  protected sourceLabel = (s: string) => (s === 'Fee' ? 'রসিদ' : s === 'Salary' ? 'বেতন' : s === 'Library' ? 'লাইব্রেরি' : '');
+  protected sourceLabel = (s: string) => (s === 'Fee' ? tr('রসিদ') : s === 'Salary' ? tr('বেতন') : s === 'Library' ? tr('লাইব্রেরি') : '');
 }

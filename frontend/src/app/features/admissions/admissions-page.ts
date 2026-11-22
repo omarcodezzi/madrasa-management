@@ -2,13 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { errorMessage, fileUrl, Gender } from '../../core/api';
-import { DatePipe, DigitsPipe, NumPipe, toEnDigits } from '../../core/format';
+import { DatePipe, DigitsPipe, NumPipe, fmt, toEnDigits } from '../../core/format';
 import { LookupsService } from '../../core/lookups.service';
 import { ToastService } from '../../core/toast.service';
 import { Avatar, Badge, BadgeTone, Button, Card, Chips, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Application, ApplyInput, Stage, STAGE_LABEL } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 const TONE: Record<Stage, BadgeTone> = { Applied: 'info', Test: 'warning', Approved: 'gold', Admitted: 'success', Rejected: 'danger' };
 export const blankApply = (): ApplyInput => ({ classId: 0, applicantName: '', gender: 'Male', dateOfBirth: null, fatherName: null, guardianPhone: '', address: null, previousInstitution: null, photo: null });
@@ -17,7 +18,7 @@ export const blankApply = (): ApplyInput => ({ classId: 0, applicantName: '', ge
 @Component({
   selector: 'app-admissions-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, Chips, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, Chips, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Skeleton],
   templateUrl: './admissions-page.html',
 })
 export class AdmissionsPage {
@@ -29,8 +30,8 @@ export class AdmissionsPage {
   protected stage = signal<'' | Stage>('Applied');
   protected counts = signal<Record<string, number>>({});
   protected options = computed(() => [
-    ...(['Applied', 'Test', 'Approved', 'Admitted', 'Rejected'] as Stage[]).map((s) => ({ value: s as '' | Stage, label: `${STAGE_LABEL[s]} (${(this.counts()[s] ?? 0).toLocaleString('bn-BD')})` })),
-    { value: '' as '' | Stage, label: 'সব' },
+    ...(['Applied', 'Test', 'Approved', 'Admitted', 'Rejected'] as Stage[]).map((s) => ({ value: s as '' | Stage, label: `${STAGE_LABEL[s]} (${fmt(this.counts()[s])})` })),
+    { value: '' as '' | Stage, label: tr('সব') },
   ]);
   protected rows = signal<Application[] | null>(null);
   protected q = signal('');
@@ -41,7 +42,7 @@ export class AdmissionsPage {
   protected sLabel = (s: string) => (STAGE_LABEL as Record<string, string>)[s] ?? s;
   protected sTone = (s: string) => (TONE as Record<string, BadgeTone>)[s] ?? 'neutral';
   protected photo = (p: string | null) => fileUrl(p);
-  protected gLabel = (g: Gender) => (g === 'Male' ? 'ছাত্র' : 'ছাত্রী');
+  protected gLabel = (g: Gender) => (g === 'Male' ? tr('ছাত্র') : tr('ছাত্রী'));
 
   // review modal
   protected open = signal(false);
@@ -56,7 +57,7 @@ export class AdmissionsPage {
   protected errs = signal<Record<string, string>>({});
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.refresh(); }
 
   constructor() {
@@ -87,7 +88,7 @@ export class AdmissionsPage {
     try {
       const f = this.form();
       const a = await this.api.createApplication({ ...f, guardianPhone: toEnDigits(f.guardianPhone), dateOfBirth: f.dateOfBirth || null });
-      this.toast.success(`আবেদন নেওয়া হয়েছে (${a.applicationNo})`); this.newOpen.set(false); this.stage.set('Applied'); this.refresh();
+      this.toast.success(tr('আবেদন নেওয়া হয়েছে ({no})', { no: a.applicationNo })); this.newOpen.set(false); this.stage.set('Applied'); this.refresh();
     } catch (e) { const fe = fieldErrors(e); this.errs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.busy.set(false); }
   }

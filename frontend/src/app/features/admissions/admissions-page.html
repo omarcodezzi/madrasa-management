@@ -1,15 +1,15 @@
-<m-page-header title="ভর্তি" description="অনলাইন ও অফিসের আবেদন: ভর্তি পরীক্ষা, অনুমোদন, তারপর ভর্তি">
-  <button mButton variant="outline" (click)="newApplication()"><m-icon name="form" [size]="18" /> আবেদন নিন</button>
-  <a mButton routerLink="/admission/new"><m-icon name="plus" [size]="18" /> সরাসরি ভর্তি</a>
+<m-page-header [title]="'ভর্তি' | tr" [description]="'অনলাইন ও অফিসের আবেদন: ভর্তি পরীক্ষা, অনুমোদন, তারপর ভর্তি' | tr">
+  <button mButton variant="outline" (click)="newApplication()"><m-icon name="form" [size]="18" /> {{ 'আবেদন নিন' | tr }}</button>
+  <a mButton routerLink="/admission/new"><m-icon name="plus" [size]="18" /> {{ 'সরাসরি ভর্তি' | tr }}</a>
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
 <div class="flex flex-wrap items-center gap-3 mb-4">
-  <m-chips [options]="options()" [value]="stage()" (valueChange)="stage.set($event)" aria-label="ধাপ" />
+  <m-chips [options]="options()" [value]="stage()" (valueChange)="stage.set($event)" [attr.aria-label]="'ধাপ' | tr" />
   <div class="relative ml-auto">
     <m-icon name="search" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
-    <input class="ctl !pl-10 !w-64" [ngModel]="q()" (ngModelChange)="q.set($event)" placeholder="নাম, আবেদন নং বা মোবাইল" aria-label="আবেদন খুঁজুন">
+    <input class="ctl !pl-10 !w-64" [ngModel]="q()" (ngModelChange)="q.set($event)" [placeholder]="'নাম, আবেদন নং বা মোবাইল' | tr" [attr.aria-label]="'আবেদন খুঁজুন' | tr">
   </div>
 </div>
 
@@ -22,63 +22,63 @@
           <span class="flex-1 min-w-[12rem] leading-tight"><b class="font-semibold">{{ a.applicantName }}</b>
             <small class="block text-mut text-[13px]">{{ a.applicationNo | digits }} · {{ a.className }} · {{ gLabel(a.gender) }} · {{ a.guardianPhone | digits }}</small></span>
           <span class="text-sm text-mut tabular">{{ a.appliedAt.slice(0, 10) | bdate }}</span>
-          @if (a.source === 'Online') { <m-badge>অনলাইন</m-badge> }
-          @if (a.testMarks !== null) { <span class="text-sm tabular">নম্বর {{ a.testMarks | num }}</span> }
+          @if (a.source === 'Online') { <m-badge>{{ 'অনলাইন' | tr }}</m-badge> }
+          @if (a.testMarks !== null) { <span class="text-sm tabular">{{ 'নম্বর {n}' | tr: { n: (a.testMarks | num) } }}</span> }
           <m-badge [tone]="sTone(a.stage)" [dot]="true">{{ sLabel(a.stage) }}</m-badge>
         </button></li>
-      } @empty { <li><m-empty-state title="এই ধাপে কোনো আবেদন নেই" description="ওয়েবসাইট থেকে অনলাইনে আবেদন এলে বা অফিসে আবেদন নিলে এখানে দেখাবে।" icon="form" /></li> }
+      } @empty { <li><m-empty-state [title]="'এই ধাপে কোনো আবেদন নেই' | tr" [description]="'ওয়েবসাইট থেকে অনলাইনে আবেদন এলে বা অফিসে আবেদন নিলে এখানে দেখাবে।' | tr" icon="form" /></li> }
     </ul>
   } @else { <div class="p-4 grid gap-2"><m-skeleton height="56px" /><m-skeleton height="56px" /></div> }
 </m-card>
 
-<m-modal [(open)]="open" title="আবেদন" width="min(600px, calc(100vw - 24px))">
+<m-modal [(open)]="open" [title]="'আবেদন' | tr" width="min(600px, calc(100vw - 24px))">
   @if (app(); as a) {
     <div class="flex items-start gap-4 mb-4">
       <m-avatar [name]="a.applicantName" [src]="photo(a.photoPath)" [size]="72" />
       <div class="flex-1 leading-relaxed">
         <b class="font-serif text-lg">{{ a.applicantName }}</b> <m-badge [tone]="sTone(a.stage)">{{ sLabel(a.stage) }}</m-badge>
         <dl class="m-0 mt-1 grid grid-cols-[8rem_1fr] gap-x-3 text-sm">
-          <dt class="text-mut">আবেদন নং</dt><dd class="m-0 tabular">{{ a.applicationNo | digits }}</dd>
-          <dt class="text-mut">শ্রেণি</dt><dd class="m-0">{{ a.className }}</dd>
-          <dt class="text-mut">জন্মতারিখ</dt><dd class="m-0">{{ a.dateOfBirth | bdate }}</dd>
-          <dt class="text-mut">পিতার নাম</dt><dd class="m-0">{{ a.fatherName || '—' }}</dd>
-          <dt class="text-mut">মোবাইল</dt><dd class="m-0"><a [href]="'tel:' + a.guardianPhone" class="tabular">{{ a.guardianPhone | digits }}</a></dd>
-          <dt class="text-mut">ঠিকানা</dt><dd class="m-0">{{ a.address || '—' }}</dd>
-          <dt class="text-mut">আগের প্রতিষ্ঠান</dt><dd class="m-0">{{ a.previousInstitution || '—' }}</dd>
+          <dt class="text-mut">{{ 'আবেদন নং' | tr }}</dt><dd class="m-0 tabular">{{ a.applicationNo | digits }}</dd>
+          <dt class="text-mut">{{ 'শ্রেণি' | tr }}</dt><dd class="m-0">{{ a.className }}</dd>
+          <dt class="text-mut">{{ 'জন্মতারিখ' | tr }}</dt><dd class="m-0">{{ a.dateOfBirth | bdate }}</dd>
+          <dt class="text-mut">{{ 'পিতার নাম' | tr }}</dt><dd class="m-0">{{ a.fatherName || '—' }}</dd>
+          <dt class="text-mut">{{ 'মোবাইল' | tr }}</dt><dd class="m-0"><a [href]="'tel:' + a.guardianPhone" class="tabular">{{ a.guardianPhone | digits }}</a></dd>
+          <dt class="text-mut">{{ 'ঠিকানা' | tr }}</dt><dd class="m-0">{{ a.address || '—' }}</dd>
+          <dt class="text-mut">{{ 'আগের প্রতিষ্ঠান' | tr }}</dt><dd class="m-0">{{ a.previousInstitution || '—' }}</dd>
         </dl>
       </div>
     </div>
     @if (a.stage !== 'Admitted') {
       <div class="grid grid-cols-[8rem_1fr] gap-3">
-        <m-field label="ভর্তি পরীক্ষার নম্বর" for="a-m"><input id="a-m" class="ctl tabular" inputmode="decimal" [ngModel]="marks()" (ngModelChange)="marks.set($event)"></m-field>
-        <m-field label="মন্তব্য" for="a-r"><input id="a-r" class="ctl" [ngModel]="remarks()" (ngModelChange)="remarks.set($event)"></m-field>
+        <m-field [label]="'ভর্তি পরীক্ষার নম্বর' | tr" for="a-m"><input id="a-m" class="ctl tabular" inputmode="decimal" [ngModel]="marks()" (ngModelChange)="marks.set($event)"></m-field>
+        <m-field [label]="'মন্তব্য' | tr" for="a-r"><input id="a-r" class="ctl" [ngModel]="remarks()" (ngModelChange)="remarks.set($event)"></m-field>
       </div>
     } @else if (a.studentId) {
-      <a mButton variant="outline" [routerLink]="['/students', a.studentId]" (click)="open.set(false)">শিক্ষার্থীর প্রোফাইল দেখুন</a>
+      <a mButton variant="outline" [routerLink]="['/students', a.studentId]" (click)="open.set(false)">{{ 'শিক্ষার্থীর প্রোফাইল দেখুন' | tr }}</a>
     }
   }
   <div modalFooter class="flex flex-wrap gap-2 w-full">
     @if (app(); as a) {
-      @if (a.stage !== 'Admitted' && a.stage !== 'Rejected') { <button mButton variant="ghost" class="!text-red mr-auto" [disabled]="busy()" (click)="move('Rejected')">বাতিল করুন</button> }
-      @if (a.stage === 'Applied') { <button mButton variant="outline" [loading]="busy()" (click)="move('Test')">ভর্তি পরীক্ষায় ডাকুন</button> }
-      @if (a.stage === 'Applied' || a.stage === 'Test') { <button mButton [loading]="busy()" (click)="move('Approved')"><m-icon name="check" [size]="18" /> অনুমোদন</button> }
-      @if (a.stage === 'Approved') { <button mButton variant="gold" (click)="admit(a)"><m-icon name="plus" [size]="18" /> ভর্তি করুন</button> }
-      @if (a.stage === 'Rejected') { <button mButton variant="outline" [loading]="busy()" (click)="move('Applied')">আবার বিবেচনা</button> }
+      @if (a.stage !== 'Admitted' && a.stage !== 'Rejected') { <button mButton variant="ghost" class="!text-red mr-auto" [disabled]="busy()" (click)="move('Rejected')">{{ 'বাতিল করুন' | tr }}</button> }
+      @if (a.stage === 'Applied') { <button mButton variant="outline" [loading]="busy()" (click)="move('Test')">{{ 'ভর্তি পরীক্ষায় ডাকুন' | tr }}</button> }
+      @if (a.stage === 'Applied' || a.stage === 'Test') { <button mButton [loading]="busy()" (click)="move('Approved')"><m-icon name="check" [size]="18" /> {{ 'অনুমোদন' | tr }}</button> }
+      @if (a.stage === 'Approved') { <button mButton variant="gold" (click)="admit(a)"><m-icon name="plus" [size]="18" /> {{ 'ভর্তি করুন' | tr }}</button> }
+      @if (a.stage === 'Rejected') { <button mButton variant="outline" [loading]="busy()" (click)="move('Applied')">{{ 'আবার বিবেচনা' | tr }}</button> }
     }
   </div>
 </m-modal>
 
-<m-modal [(open)]="newOpen" title="অফিসে আবেদন নিন">
+<m-modal [(open)]="newOpen" [title]="'অফিসে আবেদন নিন' | tr">
   <form id="appForm" autocomplete="off" class="grid grid-cols-2 gap-3" (ngSubmit)="saveApplication()">
-    <m-field label="শিক্ষার্থীর নাম" for="n-n" class="col-span-2" [required]="true" [error]="errs()['applicantName']"><input id="n-n" class="ctl" name="name" [ngModel]="form().applicantName" (ngModelChange)="patch({ applicantName: $event })"></m-field>
-    <m-field label="ছাত্র/ছাত্রী" for="n-g"><select id="n-g" class="ctl" name="gender" [ngModel]="form().gender" (ngModelChange)="patch({ gender: $event })"><option value="Male">ছাত্র</option><option value="Female">ছাত্রী</option></select></m-field>
-    <m-field label="শ্রেণি" for="n-c" [required]="true" [error]="errs()['classId']"><select id="n-c" class="ctl" name="classId" [ngModel]="form().classId" (ngModelChange)="patch({ classId: +$event })">
+    <m-field [label]="'শিক্ষার্থীর নাম' | tr" for="n-n" class="col-span-2" [required]="true" [error]="errs()['applicantName']"><input id="n-n" class="ctl" name="name" [ngModel]="form().applicantName" (ngModelChange)="patch({ applicantName: $event })"></m-field>
+    <m-field [label]="'ছাত্র/ছাত্রী' | tr" for="n-g"><select id="n-g" class="ctl" name="gender" [ngModel]="form().gender" (ngModelChange)="patch({ gender: $event })"><option value="Male">{{ 'ছাত্র' | tr }}</option><option value="Female">{{ 'ছাত্রী' | tr }}</option></select></m-field>
+    <m-field [label]="'শ্রেণি' | tr" for="n-c" [required]="true" [error]="errs()['classId']"><select id="n-c" class="ctl" name="classId" [ngModel]="form().classId" (ngModelChange)="patch({ classId: +$event })">
       @for (c of lookups.classes(); track c.id) { <option [ngValue]="c.id">{{ c.nameBn }}</option> }</select></m-field>
-    <m-field label="পিতার নাম" for="n-f"><input id="n-f" class="ctl" name="father" [ngModel]="form().fatherName" (ngModelChange)="patch({ fatherName: $event })"></m-field>
-    <m-field label="অভিভাবকের মোবাইল" for="n-p" [required]="true" [error]="errs()['guardianPhone']"><input id="n-p" class="ctl tabular" inputmode="tel" name="phone" [ngModel]="form().guardianPhone" (ngModelChange)="patch({ guardianPhone: $event })"></m-field>
-    <m-field label="জন্মতারিখ" for="n-d" [error]="errs()['dateOfBirth']"><input id="n-d" type="date" class="ctl" name="dob" [ngModel]="form().dateOfBirth" (ngModelChange)="patch({ dateOfBirth: $event })"></m-field>
-    <m-field label="আগের প্রতিষ্ঠান" for="n-i"><input id="n-i" class="ctl" name="inst" [ngModel]="form().previousInstitution" (ngModelChange)="patch({ previousInstitution: $event })"></m-field>
-    <m-field label="ঠিকানা" for="n-a" class="col-span-2"><input id="n-a" class="ctl" name="address" [ngModel]="form().address" (ngModelChange)="patch({ address: $event })"></m-field>
+    <m-field [label]="'পিতার নাম' | tr" for="n-f"><input id="n-f" class="ctl" name="father" [ngModel]="form().fatherName" (ngModelChange)="patch({ fatherName: $event })"></m-field>
+    <m-field [label]="'অভিভাবকের মোবাইল' | tr" for="n-p" [required]="true" [error]="errs()['guardianPhone']"><input id="n-p" class="ctl tabular" inputmode="tel" name="phone" [ngModel]="form().guardianPhone" (ngModelChange)="patch({ guardianPhone: $event })"></m-field>
+    <m-field [label]="'জন্মতারিখ' | tr" for="n-d" [error]="errs()['dateOfBirth']"><input id="n-d" type="date" class="ctl" name="dob" [ngModel]="form().dateOfBirth" (ngModelChange)="patch({ dateOfBirth: $event })"></m-field>
+    <m-field [label]="'আগের প্রতিষ্ঠান' | tr" for="n-i"><input id="n-i" class="ctl" name="inst" [ngModel]="form().previousInstitution" (ngModelChange)="patch({ previousInstitution: $event })"></m-field>
+    <m-field [label]="'ঠিকানা' | tr" for="n-a" class="col-span-2"><input id="n-a" class="ctl" name="address" [ngModel]="form().address" (ngModelChange)="patch({ address: $event })"></m-field>
   </form>
-  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="newOpen.set(false)">বাতিল</button><button mButton type="submit" form="appForm" [loading]="busy()">আবেদন জমা</button></div>
+  <div modalFooter class="flex gap-2"><button mButton variant="ghost" (click)="newOpen.set(false)">{{ 'বাতিল' | tr }}</button><button mButton type="submit" form="appForm" [loading]="busy()">{{ 'আবেদন জমা' | tr }}</button></div>
 </m-modal>

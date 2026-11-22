@@ -91,7 +91,7 @@ public class FeeService(IAppDbContext db, IClock clock, ICurrentUser user)
             {
                 if (!open.TryGetValue(iid, out var inv) || inv.Due <= 0) throw new AppException("এই বকেয়াটি আগেই পরিশোধ হয়েছে। পাতাটি আবার খুলুন।", 409);
                 if (await db.FeeInvoices.Where(i => i.Id == iid).Select(i => i.StudentId).FirstAsync(ct) != req.StudentId) throw new AppException("ভুল শিক্ষার্থীর বকেয়া", 400);
-                if (l.Amount > inv.Due) throw new AppException($"{inv.FeeHead} {inv.Month}: বকেয়ার চেয়ে বেশি টাকা ({Digits.ToBangla(inv.Due.ToString("0"))}) দেওয়া যায় না");
+                if (l.Amount > inv.Due) throw new AppException($"{inv.FeeHead} {inv.Month}: বকেয়ার চেয়ে বেশি টাকা ({Digits.Money(inv.Due)}) দেওয়া যায় না");
                 receipt.Lines.Add(new FeeReceiptLine { InvoiceId = iid, FeeHeadId = inv.FeeHeadId, Month = inv.Month, Amount = l.Amount });
             }
             else

@@ -213,7 +213,7 @@ public class AcademicService(IAppDbContext db)
     {
         var id = await db.Sections.Where(s => s.ClassId == classId).OrderBy(s => s.Id).Select(s => (int?)s.Id).FirstOrDefaultAsync(ct);
         if (id is int x) return x;
-        var s = new Section { ClassId = classId, Name = "ক" };
+        var s = new Section { ClassId = classId, Name = "ক" }; // i18n-ignore (stored section name)
         db.Sections.Add(s);
         await db.SaveChangesAsync(ct);
         return s.Id;

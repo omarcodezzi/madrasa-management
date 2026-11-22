@@ -5,7 +5,7 @@ Angular + .NET 8 + Microsoft SQL Server. Built from [`docs/UI_SPEC.md`](docs/UI_
 | Folder | What |
 |---|---|
 | `backend/` | .NET 8 Web API, clean architecture: `Domain` → `Application` → `Infrastructure` (EF Core, SQL Server, Identity) → `Api` |
-| `frontend/` | Angular 22 app: Tailwind CSS tokens from the prototype, Bangla/English (Transloco), shared UI library |
+| `frontend/` | Angular 22 app: Tailwind CSS tokens from the prototype, Bangla/English (see *Languages* below), shared UI library |
 | `database/` | `MMS.sql` — full script for the **MMS** database (tables, seed data, views, stored procedures); see [`docs/DATABASE.md`](docs/DATABASE.md) |
 | `docs/` | Spec, prototype, Phase 1 plan (table → screen map), screenshots |
 
@@ -41,6 +41,14 @@ cd deploy && ./setup.sh && docker compose up -d --build
 cd backend && dotnet test          # grading (Befaq division) rules
 cd frontend && npm test            # number / money formatting
 ```
+
+## Languages
+The app is written in Bangla. English comes from `frontend/public/i18n/en-text.json`, which maps each Bangla text to English.
+- In templates write `{{ 'নতুন যোগ করুন' | tr }}`. In code write `tr('{n} জন', { n: fmt(count) })`.
+- API messages are translated in the browser with `trApi()`. A built message such as `$"{name} পাওয়া যায়নি"` matches the entry `{0} পাওয়া যায়নি`.
+- Values from the database, such as names, class names and notes, are never translated.
+- Switching the language reloads the page. Digits follow the language, and the user can still change them in Settings.
+- `npm run i18n:check` lists Bangla text that is not wrapped in `tr` and text that has no English entry. CI runs this check. A line ending in `i18n-ignore` holds stored data, not screen text.
 
 ## Database changes
 ```bash

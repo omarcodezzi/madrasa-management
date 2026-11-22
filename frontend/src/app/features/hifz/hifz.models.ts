@@ -1,3 +1,4 @@
+import { tr } from '../../core/tr';
 export interface HifzStudentRow {
   studentId: number; studentCode: string; name: string; photoPath?: string | null; className: string; roll: number;
   completedJuz: number; currentJuz?: number | null; loggedToday: boolean; lastDate?: string | null;
@@ -18,4 +19,4 @@ export interface HifzStudentDetail {
 export type HifzLogInput = Omit<HifzLog, 'id' | 'date'> & { date?: string | null };
 
 export const PAGES_PER_JUZ = 20;
-export const QUALITY_LABEL: Record<number, string> = { 5: 'চমৎকার', 4: 'ভালো', 3: 'মোটামুটি', 2: 'দুর্বল', 1: 'আবার পড়বে' };
+export const QUALITY_LABEL: Record<number, string> = { 5: tr('চমৎকার'), 4: tr('ভালো'), 3: tr('মোটামুটি'), 2: tr('দুর্বল'), 1: tr('আবার পড়বে') };

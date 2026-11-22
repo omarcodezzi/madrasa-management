@@ -1,4 +1,5 @@
 import { AttendanceStatus, Gender } from '../../core/api';
+import { tr } from '../../core/tr';
 
 // ---- accounts ----
 export type Direction = 'In' | 'Out';
@@ -36,7 +37,7 @@ export interface LeaveRow { id: number; studentId: number; studentCode: string; 
 
 // ---- library ----
 export type BookLanguage = 'Arabic' | 'Bangla' | 'Urdu' | 'English';
-export const LANG_LABEL: Record<BookLanguage, string> = { Arabic: 'আরবি', Bangla: 'বাংলা', Urdu: 'উর্দু', English: 'ইংরেজি' };
+export const LANG_LABEL: Record<BookLanguage, string> = { Arabic: tr('আরবি'), Bangla: tr('বাংলা'), Urdu: tr('উর্দু'), English: tr('ইংরেজি') };
 export interface Book { id: number; title: string; titleAr: string | null; author: string | null; language: BookLanguage; category: string | null; shelfNo: string | null; totalCopies: number; available: number; }
 export interface BookInput { title: string; titleAr: string | null; author: string | null; language: BookLanguage; category: string | null; shelfNo: string | null; totalCopies: number; }
 export interface Issue { id: number; bookId: number; title: string; titleAr: string | null; borrowerKind: 'student' | 'staff'; borrowerId: number; borrowerCode: string; borrowerName: string;
@@ -47,9 +48,9 @@ export interface LibrarySummary { titles: number; copies: number; out: number; o
 
 // ---- notices ----
 export type Audience = 'All' | 'Students' | 'Guardians' | 'Staff';
-export const AUDIENCE_LABEL: Record<Audience, string> = { All: 'সবার জন্য', Students: 'শিক্ষার্থী', Guardians: 'অভিভাবক', Staff: 'উস্তাদ ও স্টাফ' };
+export const AUDIENCE_LABEL: Record<Audience, string> = { All: tr('সবার জন্য'), Students: tr('শিক্ষার্থী'), Guardians: tr('অভিভাবক'), Staff: tr('উস্তাদ ও স্টাফ') };
 export type EventKind = 'General' | 'Exam' | 'Holiday' | 'Meeting';
-export const EVENT_LABEL: Record<EventKind, string> = { General: 'অনুষ্ঠান', Exam: 'পরীক্ষা', Holiday: 'ছুটি', Meeting: 'সভা' };
+export const EVENT_LABEL: Record<EventKind, string> = { General: tr('অনুষ্ঠান'), Exam: tr('পরীক্ষা'), Holiday: tr('ছুটি'), Meeting: tr('সভা') };
 export interface Notice { id: number; title: string; body: string; date: string; audience: Audience; isPublic: boolean; createdBy: string | null; smsQueued: number; }
 export interface NoticeInput { title: string; body: string; date: string | null; audience: Audience; isPublic: boolean; sendSms: boolean; }
 export interface SchoolEvent { id: number; title: string; startDate: string; endDate: string | null; kind: EventKind; }
@@ -62,7 +63,7 @@ export interface ReportTable { key: string; title: string; subtitle: string; col
 
 // ---- settings ----
 export type FeeFrequency = 'Once' | 'Monthly' | 'PerExam' | 'Yearly';
-export const FREQ_LABEL: Record<FeeFrequency, string> = { Once: 'একবার', Monthly: 'মাসিক', PerExam: 'প্রতি পরীক্ষায়', Yearly: 'বাৎসরিক' };
+export const FREQ_LABEL: Record<FeeFrequency, string> = { Once: tr('একবার'), Monthly: tr('মাসিক'), PerExam: tr('প্রতি পরীক্ষায়'), Yearly: tr('বাৎসরিক') };
 export interface Profile { nameBn: string; nameEn: string | null; nameAr: string | null; address: string | null; phone: string | null; email: string | null; logoPath: string | null; establishedYear: number | null; studentIdPrefix: string; }
 export interface Session { id: number; name: string; startDate: string; endDate: string; isCurrent: boolean; students: number; }
 export interface FeeHeadRow { id: number; nameBn: string; frequency: FeeFrequency; defaultAmount: number; isActive: boolean; inUse: boolean; }
@@ -75,7 +76,7 @@ export interface RoleRow { name: string; permissions: string[]; users: number; l
 
 // ---- admissions & public ----
 export type Stage = 'Applied' | 'Test' | 'Approved' | 'Admitted' | 'Rejected';
-export const STAGE_LABEL: Record<Stage, string> = { Applied: 'আবেদন', Test: 'ভর্তি পরীক্ষা', Approved: 'অনুমোদিত', Admitted: 'ভর্তি হয়েছে', Rejected: 'বাতিল' };
+export const STAGE_LABEL: Record<Stage, string> = { Applied: tr('আবেদন'), Test: tr('ভর্তি পরীক্ষা'), Approved: tr('অনুমোদিত'), Admitted: tr('ভর্তি হয়েছে'), Rejected: tr('বাতিল') };
 export interface Application { id: number; applicationNo: string; applicantName: string; gender: Gender; dateOfBirth: string | null; fatherName: string | null; guardianPhone: string;
   address: string | null; previousInstitution: string | null; photoPath: string | null; classId: number; className: string; source: 'Office' | 'Online'; stage: Stage;
   testMarks: number | null; remarks: string | null; studentId: number | null; appliedAt: string; }

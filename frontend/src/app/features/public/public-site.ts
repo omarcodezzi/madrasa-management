@@ -8,12 +8,13 @@ import { fieldErrors } from '../academic/academic.service';
 import { blankApply } from '../admissions/admissions-page';
 import { OfficeApi } from '../office/office.api';
 import { ApplicationStatus, ApplyInput, EVENT_LABEL, PublicInfo, STAGE_LABEL } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 /** The madrasa's public page: about, departments and fees, notices, events, online admission and status check. No sign-in. */
 @Component({
   selector: 'app-public-site',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, FormField, Icon, Skeleton],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, FormField, Icon, Skeleton],
   templateUrl: './public-site.html',
 })
 export class PublicSite {
@@ -54,8 +55,8 @@ export class PublicSite {
   }
   protected async apply() {
     const f = this.form(); const e: Record<string, string> = {};
-    if (!f.applicantName.trim()) e['applicantName'] = 'শিক্ষার্থীর নাম লিখুন';
-    if (!/^01\d{9}$/.test(toEnDigits(f.guardianPhone).replace(/\D/g, ''))) e['guardianPhone'] = 'সঠিক মোবাইল নম্বর দিন (০১ দিয়ে শুরু, ১১ সংখ্যা)';
+    if (!f.applicantName.trim()) e['applicantName'] = tr('শিক্ষার্থীর নাম লিখুন');
+    if (!/^01\d{9}$/.test(toEnDigits(f.guardianPhone).replace(/\D/g, ''))) e['guardianPhone'] = tr('সঠিক মোবাইল নম্বর দিন (০১ দিয়ে শুরু, ১১ সংখ্যা)');
     if (Object.keys(e).length) { this.errs.set(e); return; }
     this.sending.set(true); this.errs.set({}); this.formError.set(null);
     try {

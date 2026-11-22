@@ -1,25 +1,26 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AttendanceStatus, errorMessage, fileUrl } from '../../core/api';
-import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, toEnDigits, todayIso } from '../../core/format';
+import { DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, toEnDigits, todayIso, fmt, fmtMoney } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { PrintService } from '../../shared/print/print.service';
 import { Avatar, Badge, BadgeTone, Button, Card, CellDef, Column, ConfirmService, DataTable, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton, resizePhoto } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { FundBalance, SalaryRow, StaffDayRow, StaffDetail, StaffInput, StaffRow } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'list' | 'attendance' | 'salary';
 const STATUS: { value: AttendanceStatus; label: string; tone: BadgeTone }[] = [
-  { value: 'Present', label: 'উপস্থিত', tone: 'success' }, { value: 'Late', label: 'দেরি', tone: 'warning' },
-  { value: 'Absent', label: 'অনুপস্থিত', tone: 'danger' }, { value: 'Leave', label: 'ছুটি', tone: 'info' },
+  { value: 'Present', label: tr('উপস্থিত'), tone: 'success' }, { value: 'Late', label: tr('দেরি'), tone: 'warning' },
+  { value: 'Absent', label: tr('অনুপস্থিত'), tone: 'danger' }, { value: 'Leave', label: tr('ছুটি'), tone: 'info' },
 ];
 const blank = (): StaffInput => ({ name: '', designation: '', phone: null, email: null, nid: null, address: null, qualification: null, joinDate: null, basicSalary: null, isActive: true, photo: null });
 
 @Component({
   selector: 'app-staff-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, Avatar, Badge, Button, Card, CellDef, DataTable, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
+  imports: [TrPipe, FormsModule, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, TimePipe, Avatar, Badge, Button, Card, CellDef, DataTable, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './staff-page.html',
 })
 export class StaffPage {
@@ -29,7 +30,7 @@ export class StaffPage {
   private printer = inject(PrintService);
 
   protected tab = signal<Tab>('list');
-  protected tabs = [{ value: 'list' as Tab, label: 'উস্তাদ ও স্টাফ' }, { value: 'attendance' as Tab, label: 'হাজিরা' }, { value: 'salary' as Tab, label: 'বেতন' }];
+  protected tabs = [{ value: 'list' as Tab, label: tr('উস্তাদ ও স্টাফ') }, { value: 'attendance' as Tab, label: tr('হাজিরা') }, { value: 'salary' as Tab, label: tr('বেতন') }];
   protected status = STATUS;
   protected statusOf = (s: AttendanceStatus | null) => STATUS.find((x) => x.value === s);
   protected photo = (p: string | null) => fileUrl(p);
@@ -37,11 +38,11 @@ export class StaffPage {
   // list
   protected rows = signal<StaffRow[] | null>(null);
   protected cols: Column<StaffRow>[] = [
-    { key: 'name', label: 'নাম', sortable: true, primary: true, value: (r) => `${r.name} ${r.staffCode} ${r.designation}` },
-    { key: 'phone', label: 'মোবাইল' },
-    { key: 'subjects', label: 'কিতাব', sortable: true, align: 'end' },
-    { key: 'basicSalary', label: 'মূল বেতন', sortable: true, align: 'end' },
-    { key: 'today', label: 'আজ', value: (r) => this.statusOf(r.today)?.label ?? '' },
+    { key: 'name', label: tr('নাম'), sortable: true, primary: true, value: (r) => `${r.name} ${r.staffCode} ${r.designation}` },
+    { key: 'phone', label: tr('মোবাইল') },
+    { key: 'subjects', label: tr('কিতাব'), sortable: true, align: 'end' },
+    { key: 'basicSalary', label: tr('মূল বেতন'), sortable: true, align: 'end' },
+    { key: 'today', label: tr('আজ'), value: (r) => this.statusOf(r.today)?.label ?? '' },
   ];
 
   // detail / form
@@ -61,7 +62,7 @@ export class StaffPage {
   protected dirty = computed(() => (this.day() ?? []).some((r) => (this.marks()[r.staffId] ?? null) !== r.status));
   protected tally = computed(() => {
     const m = this.marks(); const all = this.day() ?? [];
-    return STATUS.map((s) => ({ ...s, n: all.filter((r) => m[r.staffId] === s.value).length })).concat([{ value: 'Present', label: 'বাকি', tone: 'neutral', n: all.filter((r) => !m[r.staffId]).length }]);
+    return STATUS.map((s) => ({ ...s, n: all.filter((r) => m[r.staffId] === s.value).length })).concat([{ value: 'Present', label: tr('বাকি'), tone: 'neutral', n: all.filter((r) => !m[r.staffId]).length }]);
   });
   protected marking = signal(false);
 
@@ -82,7 +83,7 @@ export class StaffPage {
   protected paying = signal(false);
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.load(); if (this.tab() === 'attendance') this.loadDay(this.date()); if (this.tab() === 'salary') this.loadSheet(this.month()); }
 
   constructor() {
@@ -126,15 +127,15 @@ export class StaffPage {
     this.saving.set(true); this.errs.set({});
     try {
       const d = await this.api.saveStaff(this.editId(), { ...f, phone: f.phone ? toEnDigits(f.phone) : null, basicSalary: salary });
-      this.toast.success(this.editId() ? 'তথ্য সংরক্ষণ হয়েছে' : `${d.name} (${d.staffCode}) যোগ হয়েছে`);
+      this.toast.success(this.editId() ? tr('তথ্য সংরক্ষণ হয়েছে') : tr('{name} ({code}) যোগ হয়েছে', { name: d.name, code: d.staffCode }));
       this.open.set(false); this.load();
     } catch (e) { const fe = fieldErrors(e); this.errs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.saving.set(false); }
   }
   protected async remove() {
     const d = this.detail(); if (!d) return;
-    if (!(await this.confirm.ask({ message: 'তালিকা থেকে সরিয়ে দেওয়া হবে। তার কিতাবগুলো উস্তাদ ছাড়া থাকবে। আগের বেতনের হিসাব থেকে যাবে।', itemName: d.name, confirmLabel: 'সরিয়ে দিন' }))) return;
-    try { await this.api.deleteStaff(d.id); this.toast.success('সরিয়ে দেওয়া হয়েছে'); this.open.set(false); this.load(); }
+    if (!(await this.confirm.ask({ message: tr('তালিকা থেকে সরিয়ে দেওয়া হবে। তার কিতাবগুলো উস্তাদ ছাড়া থাকবে। আগের বেতনের হিসাব থেকে যাবে।'), itemName: d.name, confirmLabel: tr('সরিয়ে দিন') }))) return;
+    try { await this.api.deleteStaff(d.id); this.toast.success(tr('সরিয়ে দেওয়া হয়েছে')); this.open.set(false); this.load(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 
@@ -145,7 +146,7 @@ export class StaffPage {
     try {
       const marks = (this.day() ?? []).map((r) => ({ staffId: r.staffId, status: this.marks()[r.staffId] ?? null }));
       const r = await this.api.markStaff(this.date(), marks);
-      this.toast.success(`হাজিরা সংরক্ষণ হয়েছে (${r.changed.toLocaleString('bn-BD')}টি পরিবর্তন)`);
+      this.toast.success(tr('হাজিরা সংরক্ষণ হয়েছে ({n}টি পরিবর্তন)', { n: fmt(r.changed) }));
       this.loadDay(this.date()); if (this.date() === this.today) this.load();
     } catch (e) { this.toast.error(errorMessage(e)); }
     finally { this.marking.set(false); }
@@ -163,15 +164,15 @@ export class StaffPage {
     this.paying.set(true); this.payErrs.set({});
     try {
       const paid = await this.api.pay({ staffId: r.staffId, month: r.month, allowance: +toEnDigits(p.allowance) || 0, deduction: +toEnDigits(p.deduction) || 0, fundId: +p.fundId, paidOn: p.paidOn });
-      this.toast.success(`${paid.name}-কে ${paid.netPaid.toLocaleString('bn-BD')} টাকা বেতন দেওয়া হয়েছে`);
+      this.toast.success(tr('{name}-কে {amt} বেতন দেওয়া হয়েছে', { name: paid.name, amt: fmtMoney(paid.netPaid) }));
       this.payOpen.set(false); this.printer.print({ kind: 'payslip', data: [paid] }, 'a4'); this.loadSheet(this.month());
     } catch (e) { const fe = fieldErrors(e); this.payErrs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.paying.set(false); }
   }
   protected async cancelPay(r: SalaryRow) {
     if (!r.paymentId) return;
-    if (!(await this.confirm.ask({ message: 'বেতন প্রদান বাতিল হলে হিসাব খাতা থেকেও খরচটি মুছে যাবে।', itemName: `${r.name} · ${r.netPaid.toLocaleString('bn-BD')} টাকা`, confirmLabel: 'বাতিল করুন' }))) return;
-    try { await this.api.cancelPay(r.paymentId); this.toast.success('বেতন প্রদান বাতিল হয়েছে'); this.loadSheet(this.month()); }
+    if (!(await this.confirm.ask({ message: tr('বেতন প্রদান বাতিল হলে হিসাব খাতা থেকেও খরচটি মুছে যাবে।'), itemName: `${r.name} · ${fmtMoney(r.netPaid)}`, confirmLabel: tr('বাতিল করুন') }))) return;
+    try { await this.api.cancelPay(r.paymentId); this.toast.success(tr('বেতন প্রদান বাতিল হয়েছে')); this.loadSheet(this.month()); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
   protected printSlips(rows: SalaryRow[]) { const paid = rows.filter((r) => r.paymentId); if (paid.length) this.printer.print({ kind: 'payslip', data: paid }, 'a4'); }

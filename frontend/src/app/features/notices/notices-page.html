@@ -1,13 +1,13 @@
-<m-page-header title="নোটিশ ও ইভেন্ট" description="নোটিশ বোর্ড, অনুষ্ঠান ও ছুটির ক্যালেন্ডার">
+<m-page-header [title]="'নোটিশ ও ইভেন্ট' | tr" [description]="'নোটিশ বোর্ড, অনুষ্ঠান ও ছুটির ক্যালেন্ডার' | tr">
   @if (canManage()) {
-    @if (tab() === 'events') { <button mButton (click)="newEvent()"><m-icon name="plus" [size]="18" /> নতুন ইভেন্ট</button> }
-    @else { <button mButton (click)="newNotice()"><m-icon name="mega" [size]="18" /> নতুন নোটিশ</button> }
+    @if (tab() === 'events') { <button mButton (click)="newEvent()"><m-icon name="plus" [size]="18" /> {{ 'নতুন ইভেন্ট' | tr }}</button> }
+    @else { <button mButton (click)="newNotice()"><m-icon name="mega" [size]="18" /> {{ 'নতুন নোটিশ' | tr }}</button> }
   }
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
-<m-segmented class="mb-4 inline-flex" [options]="canManage() ? tabs : tabs.slice(0, 2)" [value]="tab()" (valueChange)="tab.set($event)" aria-label="নোটিশ অংশ" />
+<m-segmented class="mb-4 inline-flex" [options]="canManage() ? tabs : tabs.slice(0, 2)" [value]="tab()" (valueChange)="tab.set($event)" [attr.aria-label]="'নোটিশ অংশ' | tr" />
 
 @switch (tab()) {
   @case ('board') {
@@ -18,20 +18,20 @@
             <div class="flex flex-wrap items-center gap-2 text-sm text-mut">
               <span class="tabular">{{ n.date | bdate }}</span>
               <m-badge>{{ aLabel(n.audience) }}</m-badge>
-              @if (n.isPublic) { <m-badge tone="success">ওয়েবসাইটে</m-badge> }
-              @if (n.smsQueued) { <m-badge tone="info">SMS {{ n.smsQueued | num }}টি তালিকায়</m-badge> }
+              @if (n.isPublic) { <m-badge tone="success">{{ 'ওয়েবসাইটে' | tr }}</m-badge> }
+              @if (n.smsQueued) { <m-badge tone="info">{{ 'SMS {n}টি তালিকায়' | tr: { n: (n.smsQueued | num) } }}</m-badge> }
             </div>
             <h2 class="m-0 font-serif text-lg">{{ n.title }}</h2>
             <p class="m-0 whitespace-pre-line text-[15px] leading-relaxed">{{ n.body }}</p>
             @if (canManage()) {
               <div class="flex items-center gap-2 mt-auto pt-2 border-t border-line">
                 @if (n.createdBy) { <small class="text-mut">{{ n.createdBy }}</small> }
-                <button mButton size="sm" variant="ghost" class="ml-auto" (click)="editNotice(n)"><m-icon name="edit" [size]="16" /> বদলান</button>
-                <button mButton size="sm" variant="ghost" class="!text-red" (click)="deleteNotice(n)" [attr.aria-label]="n.title + ' মুছুন'"><m-icon name="trash" [size]="16" /></button>
+                <button mButton size="sm" variant="ghost" class="ml-auto" (click)="editNotice(n)"><m-icon name="edit" [size]="16" /> {{ 'বদলান' | tr }}</button>
+                <button mButton size="sm" variant="ghost" class="!text-red" (click)="deleteNotice(n)" [attr.aria-label]="n.title + (' মুছুন' | tr)"><m-icon name="trash" [size]="16" /></button>
               </div>
             }
           </article>
-        } @empty { <m-empty-state class="md:col-span-2" title="কোনো নোটিশ নেই" icon="mega" /> }
+        } @empty { <m-empty-state class="md:col-span-2" [title]="'কোনো নোটিশ নেই' | tr" icon="mega" /> }
       </div>
     } @else { <div class="grid gap-4 md:grid-cols-2"><m-skeleton height="160px" /><m-skeleton height="160px" /></div> }
   }
@@ -45,19 +45,19 @@
               <li class="flex items-center gap-4 px-4 py-3 border-b border-line last:border-0" [class.opacity-60]="(e.endDate ?? e.startDate) < today">
                 <span class="grid place-items-center size-12 rounded-xl bg-soft font-serif font-bold text-lg tabular">{{ day(e.startDate) | digits }}</span>
                 <span class="flex-1 leading-tight"><b class="font-semibold">{{ e.title }}</b>
-                  <small class="block text-mut text-[13px] tabular">{{ e.startDate | bdate }}@if (e.endDate) { থেকে {{ e.endDate | bdate }} }</small></span>
+                  <small class="block text-mut text-[13px] tabular">{{ e.startDate | bdate }}@if (e.endDate) { {{ 'থেকে {d}' | tr: { d: (e.endDate | bdate) } }} }</small></span>
                 <m-badge [tone]="eTone(e.kind)">{{ eLabel(e.kind) }}</m-badge>
-                @if (canManage()) { <button mButton size="sm" variant="ghost" (click)="editEvent(e)" [attr.aria-label]="e.title + ' বদলান'"><m-icon name="edit" [size]="16" /></button> }
+                @if (canManage()) { <button mButton size="sm" variant="ghost" (click)="editEvent(e)" [attr.aria-label]="e.title + (' বদলান' | tr)"><m-icon name="edit" [size]="16" /></button> }
               </li>
             }
           </ul>
         </m-card>
-      } @empty { <m-empty-state title="সামনে কোনো ইভেন্ট নেই" icon="calendar" /> }
+      } @empty { <m-empty-state [title]="'সামনে কোনো ইভেন্ট নেই' | tr" icon="calendar" /> }
     } @else { <m-skeleton height="200px" /> }
   }
   @case ('sms') {
     <div class="rounded-xl border border-line bg-soft px-4 py-3 mb-4 text-sm flex gap-2"><m-icon name="info" [size]="18" class="text-mut shrink-0 mt-0.5" />
-      <span>এখনও কোনো SMS গেটওয়ে যুক্ত করা হয়নি, তাই বার্তাগুলো "পাঠানোর অপেক্ষায়" আছে, কারও ফোনে যায়নি। গেটওয়ে যুক্ত হলে এই তালিকা থেকেই পাঠানো হবে।</span></div>
+      <span>{{ 'এখনও কোনো SMS গেটওয়ে যুক্ত করা হয়নি, তাই বার্তাগুলো "পাঠানোর অপেক্ষায়" আছে, কারও ফোনে যায়নি। গেটওয়ে যুক্ত হলে এই তালিকা থেকেই পাঠানো হবে।' | tr }}</span></div>
     <m-card [padded]="false">
       @if (messages(); as ms) {
         <ul class="m-0 p-0 list-none">
@@ -65,45 +65,45 @@
             <li class="flex flex-wrap items-center gap-3 px-4 py-2.5 border-b border-line last:border-0 text-sm">
               <span class="tabular w-32">{{ m.toPhone | digits }}</span>
               <span class="flex-1 min-w-[12rem] truncate">{{ m.body }}</span>
-              <m-badge [tone]="m.status === 'Sent' ? 'success' : m.status === 'Failed' ? 'danger' : 'warning'">{{ m.status === 'Sent' ? 'পাঠানো হয়েছে' : m.status === 'Failed' ? 'ব্যর্থ' : 'পাঠানোর অপেক্ষায়' }}</m-badge>
+              <m-badge [tone]="m.status === 'Sent' ? 'success' : m.status === 'Failed' ? 'danger' : 'warning'">{{ m.status === 'Sent' ? ('পাঠানো হয়েছে' | tr) : m.status === 'Failed' ? ('ব্যর্থ' | tr) : ('পাঠানোর অপেক্ষায়' | tr) }}</m-badge>
             </li>
-          } @empty { <li><m-empty-state title="কোনো SMS নেই" description="নোটিশ দেওয়ার সময় SMS বাছাই করলে এখানে দেখাবে।" icon="phone" /></li> }
+          } @empty { <li><m-empty-state [title]="'কোনো SMS নেই' | tr" [description]="'নোটিশ দেওয়ার সময় SMS বাছাই করলে এখানে দেখাবে।' | tr" icon="phone" /></li> }
         </ul>
       } @else { <div class="p-4"><m-skeleton height="120px" /></div> }
     </m-card>
   }
 }
 
-<m-modal [(open)]="nOpen" [title]="nId() ? 'নোটিশ বদলান' : 'নতুন নোটিশ'" width="min(640px, calc(100vw - 24px))">
+<m-modal [(open)]="nOpen" [title]="nId() ? ('নোটিশ বদলান' | tr) : ('নতুন নোটিশ' | tr)" width="min(640px, calc(100vw - 24px))">
   <form id="nForm" class="grid gap-3" (ngSubmit)="saveNotice()">
-    <m-field label="শিরোনাম" for="n-t" [required]="true" [error]="nErrs()['title']"><input id="n-t" class="ctl" name="title" [ngModel]="nForm().title" (ngModelChange)="patchN({ title: $event })" [attr.aria-invalid]="!!nErrs()['title']"></m-field>
-    <m-field label="বিবরণ" for="n-b" [required]="true" [error]="nErrs()['body']"><textarea id="n-b" class="ctl min-h-32" name="body" [ngModel]="nForm().body" (ngModelChange)="patchN({ body: $event })" [attr.aria-invalid]="!!nErrs()['body']"></textarea></m-field>
+    <m-field [label]="'শিরোনাম' | tr" for="n-t" [required]="true" [error]="nErrs()['title']"><input id="n-t" class="ctl" name="title" [ngModel]="nForm().title" (ngModelChange)="patchN({ title: $event })" [attr.aria-invalid]="!!nErrs()['title']"></m-field>
+    <m-field [label]="'বিবরণ' | tr" for="n-b" [required]="true" [error]="nErrs()['body']"><textarea id="n-b" class="ctl min-h-32" name="body" [ngModel]="nForm().body" (ngModelChange)="patchN({ body: $event })" [attr.aria-invalid]="!!nErrs()['body']"></textarea></m-field>
     <div class="grid grid-cols-2 gap-3">
-      <m-field label="তারিখ" for="n-d"><input id="n-d" class="ctl" type="date" name="date" [ngModel]="nForm().date" (ngModelChange)="patchN({ date: $event })"></m-field>
-      <m-field label="কাদের জন্য" for="n-a"><select id="n-a" class="ctl" name="audience" [ngModel]="nForm().audience" (ngModelChange)="patchN({ audience: $event })">
+      <m-field [label]="'তারিখ' | tr" for="n-d"><input id="n-d" class="ctl" type="date" name="date" [ngModel]="nForm().date" (ngModelChange)="patchN({ date: $event })"></m-field>
+      <m-field [label]="'কাদের জন্য' | tr" for="n-a"><select id="n-a" class="ctl" name="audience" [ngModel]="nForm().audience" (ngModelChange)="patchN({ audience: $event })">
         @for (a of audiences; track a.value) { <option [value]="a.value">{{ a.label }}</option> }</select></m-field>
     </div>
-    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isPublic" [ngModel]="nForm().isPublic" (ngModelChange)="patchN({ isPublic: $event })"> মাদরাসার ওয়েবসাইটেও দেখান</label>
+    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isPublic" [ngModel]="nForm().isPublic" (ngModelChange)="patchN({ isPublic: $event })"> {{ 'মাদরাসার ওয়েবসাইটেও দেখান' | tr }}</label>
     <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" class="size-5 mt-0.5 accent-[var(--g2)]" name="sendSms" [ngModel]="nForm().sendSms" (ngModelChange)="patchN({ sendSms: $event })">
-      <span>অভিভাবক/স্টাফদের SMS তালিকায় রাখুন<small class="block text-mut text-[13px]">SMS গেটওয়ে যুক্ত না হওয়া পর্যন্ত বার্তা পাঠানো হবে না, শুধু তালিকায় থাকবে।</small></span></label>
+      <span>{{ 'অভিভাবক/স্টাফদের SMS তালিকায় রাখুন' | tr }}<small class="block text-mut text-[13px]">{{ 'SMS গেটওয়ে যুক্ত না হওয়া পর্যন্ত বার্তা পাঠানো হবে না, শুধু তালিকায় থাকবে।' | tr }}</small></span></label>
   </form>
   <div modalFooter class="flex gap-2">
-    <button mButton variant="ghost" (click)="nOpen.set(false)">বাতিল</button>
-    <button mButton type="submit" form="nForm" [loading]="saving()">{{ nId() ? 'সংরক্ষণ' : 'প্রকাশ করুন' }}</button>
+    <button mButton variant="ghost" (click)="nOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton type="submit" form="nForm" [loading]="saving()">{{ nId() ? ('সংরক্ষণ' | tr) : ('প্রকাশ করুন' | tr) }}</button>
   </div>
 </m-modal>
 
-<m-modal [(open)]="eOpen" [title]="eId() ? 'ইভেন্ট বদলান' : 'নতুন ইভেন্ট'">
+<m-modal [(open)]="eOpen" [title]="eId() ? ('ইভেন্ট বদলান' | tr) : ('নতুন ইভেন্ট' | tr)">
   <form id="eForm" class="grid grid-cols-2 gap-3" (ngSubmit)="saveEvent()">
-    <m-field label="নাম" for="e-t" class="col-span-2" [required]="true" [error]="eErrs()['title']"><input id="e-t" class="ctl" name="title" [ngModel]="eForm().title" (ngModelChange)="patchE({ title: $event })"></m-field>
-    <m-field label="শুরু" for="e-s"><input id="e-s" class="ctl" type="date" name="startDate" [ngModel]="eForm().startDate" (ngModelChange)="patchE({ startDate: $event })"></m-field>
-    <m-field label="শেষ (একদিনের হলে খালি রাখুন)" for="e-e" [error]="eErrs()['endDate']"><input id="e-e" class="ctl" type="date" name="endDate" [min]="eForm().startDate" [ngModel]="eForm().endDate" (ngModelChange)="patchE({ endDate: $event })"></m-field>
-    <m-field label="ধরন" for="e-k" class="col-span-2"><select id="e-k" class="ctl" name="kind" [ngModel]="eForm().kind" (ngModelChange)="patchE({ kind: $event })">
+    <m-field [label]="'নাম' | tr" for="e-t" class="col-span-2" [required]="true" [error]="eErrs()['title']"><input id="e-t" class="ctl" name="title" [ngModel]="eForm().title" (ngModelChange)="patchE({ title: $event })"></m-field>
+    <m-field [label]="'শুরু' | tr" for="e-s"><input id="e-s" class="ctl" type="date" name="startDate" [ngModel]="eForm().startDate" (ngModelChange)="patchE({ startDate: $event })"></m-field>
+    <m-field [label]="'শেষ (একদিনের হলে খালি রাখুন)' | tr" for="e-e" [error]="eErrs()['endDate']"><input id="e-e" class="ctl" type="date" name="endDate" [min]="eForm().startDate" [ngModel]="eForm().endDate" (ngModelChange)="patchE({ endDate: $event })"></m-field>
+    <m-field [label]="'ধরন' | tr" for="e-k" class="col-span-2"><select id="e-k" class="ctl" name="kind" [ngModel]="eForm().kind" (ngModelChange)="patchE({ kind: $event })">
       @for (k of kinds; track k.value) { <option [value]="k.value">{{ k.label }}</option> }</select></m-field>
   </form>
   <div modalFooter class="flex gap-2 w-full">
-    @if (eId()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="deleteEvent()"><m-icon name="trash" [size]="16" /> মুছুন</button> }
-    <button mButton variant="ghost" (click)="eOpen.set(false)">বাতিল</button>
-    <button mButton type="submit" form="eForm" [loading]="saving()">সংরক্ষণ</button>
+    @if (eId()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="deleteEvent()"><m-icon name="trash" [size]="16" /> {{ 'মুছুন' | tr }}</button> }
+    <button mButton variant="ghost" (click)="eOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton type="submit" form="eForm" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button>
   </div>
 </m-modal>

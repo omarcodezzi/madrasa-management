@@ -11,21 +11,22 @@ import { ExamDto } from '../exams/exam.models';
 import { ExamsApi } from '../exams/exams.service';
 import { OfficeApi } from '../office/office.api';
 import { FundBalance, ReportTable } from '../office/office.models';
+import { TrPipe, tr, trApi } from '../../core/tr';
 
 type Key = 'attendance' | 'collection' | 'dues' | 'results' | 'ledger';
 interface Def { key: Key; title: string; desc: string; icon: IconName; filters: ('month' | 'range' | 'class' | 'fund' | 'exam')[]; }
 const DEFS: Def[] = [
-  { key: 'attendance', title: 'হাজিরা', desc: 'মাসে কে কত দিন উপস্থিত', icon: 'scan', filters: ['month', 'class'] },
-  { key: 'collection', title: 'ফি আদায়', desc: 'দিনভিত্তিক আদায়, মাধ্যম অনুযায়ী', icon: 'wallet', filters: ['range'] },
-  { key: 'dues', title: 'বকেয়া', desc: 'কার কত মাসের বেতন বাকি', icon: 'alert', filters: ['month', 'class'] },
-  { key: 'results', title: 'ফলাফল', desc: 'শ্রেণিভিত্তিক পাসের হার ও প্রথম স্থান', icon: 'exam', filters: ['exam'] },
-  { key: 'ledger', title: 'আয়-ব্যয় বিবরণী', desc: 'ফান্ডভিত্তিক জেরসহ হিসাব', icon: 'coins', filters: ['range', 'fund'] },
+  { key: 'attendance', title: tr('হাজিরা'), desc: tr('মাসে কে কত দিন উপস্থিত'), icon: 'scan', filters: ['month', 'class'] },
+  { key: 'collection', title: tr('ফি আদায়'), desc: tr('দিনভিত্তিক আদায়, মাধ্যম অনুযায়ী'), icon: 'wallet', filters: ['range'] },
+  { key: 'dues', title: tr('বকেয়া'), desc: tr('কার কত মাসের বেতন বাকি'), icon: 'alert', filters: ['month', 'class'] },
+  { key: 'results', title: tr('ফলাফল'), desc: tr('শ্রেণিভিত্তিক পাসের হার ও প্রথম স্থান'), icon: 'exam', filters: ['exam'] },
+  { key: 'ledger', title: tr('আয়-ব্যয় বিবরণী'), desc: tr('ফান্ডভিত্তিক জেরসহ হিসাব'), icon: 'coins', filters: ['range', 'fund'] },
 ];
 
 @Component({
   selector: 'app-reports-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, Button, Card, EmptyState, Icon, PageHeader, Skeleton],
+  imports: [TrPipe, FormsModule, Button, Card, EmptyState, Icon, PageHeader, Skeleton],
   templateUrl: './reports-page.html',
 })
 export class ReportsPage {
@@ -69,7 +70,13 @@ export class ReportsPage {
     if (d.filters.includes('fund') && q.fundId) p['fundId'] = q.fundId;
     if (d.filters.includes('exam') && q.examId) p['examId'] = q.examId;
     this.loading.set(true); this.error.set(null);
-    try { this.table.set(await this.api.report(k, p)); }
+    try {
+      const t = await this.api.report(k, p);
+      // Headings come from the API in Bangla; table cells are database values and stay as they are.
+      const totals = t.totals && Object.fromEntries(Object.entries(t.totals).map(([c, v]) => [c, typeof v === 'string' ? trApi(v) : v]));
+      const rows = t.rows.map((r) => Object.fromEntries(Object.entries(r).map(([c, v]) => [c, v === 'প্রারম্ভিক জের' ? trApi(v) : v]))); // i18n-ignore (opening-balance row)
+      this.table.set({ ...t, title: trApi(t.title), subtitle: trApi(t.subtitle), columns: t.columns.map((c) => ({ ...c, label: trApi(c.label) })), rows, totals });
+    }
     catch (e) { this.table.set(null); this.error.set(errorMessage(e)); }
     finally { this.loading.set(false); }
   }
@@ -80,7 +87,7 @@ export class ReportsPage {
   protected csv() {
     const t = this.table(); if (!t) return;
     const esc = (s: string) => (/[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
-    const line = (r: Record<string, unknown>) => t.columns.map((c) => esc(reportCell(r[c.key], c.kind, 'en').replace(/^৳ /, ''))).join(',');
+    const line = (r: Record<string, unknown>) => t.columns.map((c) => esc(reportCell(r[c.key], c.kind, 'en').replace(/^৳ /, ''))).join(','); // i18n-ignore
     const rows = [t.columns.map((c) => esc(c.label)).join(','), ...t.rows.map(line), ...(t.totals ? [line(t.totals)] : [])];
     // BOM so Excel opens Bangla text correctly
     const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
