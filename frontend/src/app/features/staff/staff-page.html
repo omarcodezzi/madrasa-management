@@ -1,33 +1,33 @@
-<m-page-header title="উস্তাদ ও স্টাফ" description="শিক্ষক ও কর্মচারীর তথ্য, দৈনিক হাজিরা ও মাসিক বেতন">
-  @if (tab() === 'list') { <button mButton (click)="create()"><m-icon name="plus" [size]="18" /> নতুন যোগ করুন</button> }
+<m-page-header [title]="'উস্তাদ ও স্টাফ' | tr" [description]="'শিক্ষক ও কর্মচারীর তথ্য, দৈনিক হাজিরা ও মাসিক বেতন' | tr">
+  @if (tab() === 'list') { <button mButton (click)="create()"><m-icon name="plus" [size]="18" /> {{ 'নতুন যোগ করুন' | tr }}</button> }
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
-<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="স্টাফ অংশ" />
+<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" [attr.aria-label]="'স্টাফ অংশ' | tr" />
 
 @switch (tab()) {
   @case ('list') {
-    <m-data-table [rows]="rows() ?? []" [columns]="cols" [loading]="!rows()" exportName="staff" searchPlaceholder="নাম, আইডি বা পদবি"
-      emptyTitle="এখনও কোনো উস্তাদ বা স্টাফ নেই" emptyText="উপরের বোতাম থেকে যোগ করুন।" (rowClick)="edit($event.id)">
+    <m-data-table [rows]="rows() ?? []" [columns]="cols" [loading]="!rows()" exportName="staff" [searchPlaceholder]="'নাম, আইডি বা পদবি' | tr"
+      [emptyTitle]="'এখনও কোনো উস্তাদ বা স্টাফ নেই' | tr" [emptyText]="'উপরের বোতাম থেকে যোগ করুন।' | tr" (rowClick)="edit($event.id)">
       <ng-template mCell="name" let-r>
         <span class="flex items-center gap-3">
           <m-avatar [name]="r.name" [src]="photo(r.photoPath)" [size]="38" />
-          <span class="leading-tight"><b class="font-semibold">{{ r.name }}</b> @if (!r.isActive) { <m-badge>নিষ্ক্রিয়</m-badge> }
+          <span class="leading-tight"><b class="font-semibold">{{ r.name }}</b> @if (!r.isActive) { <m-badge>{{ 'নিষ্ক্রিয়' | tr }}</m-badge> }
             <small class="block text-mut text-[13px]">{{ r.staffCode }} · {{ r.designation }}</small></span>
         </span>
       </ng-template>
       <ng-template mCell="phone" let-r>@if (r.phone) { <a [href]="'tel:' + r.phone" class="tabular no-underline" (click)="$event.stopPropagation()">{{ r.phone | digits }}</a> }</ng-template>
-      <ng-template mCell="subjects" let-r>{{ r.subjects ? (r.subjects | num) + 'টি' : '—' }}</ng-template>
+      <ng-template mCell="subjects" let-r>{{ r.subjects ? (r.subjects | num) + ('টি' | tr) : '—' }}</ng-template>
       <ng-template mCell="basicSalary" let-r><span class="tabular">{{ r.basicSalary | money }}</span></ng-template>
-      <ng-template mCell="today" let-r>@if (statusOf(r.today); as s) { <m-badge [tone]="s.tone" [dot]="true">{{ s.label }}</m-badge> } @else { <span class="text-mut text-sm">দেওয়া হয়নি</span> }</ng-template>
+      <ng-template mCell="today" let-r>@if (statusOf(r.today); as s) { <m-badge [tone]="s.tone" [dot]="true">{{ s.label }}</m-badge> } @else { <span class="text-mut text-sm">{{ 'দেওয়া হয়নি' | tr }}</span> }</ng-template>
     </m-data-table>
   }
 
   @case ('attendance') {
     <m-card [padded]="false">
       <div class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line">
-        <input type="date" class="ctl !w-auto" [max]="today" [ngModel]="date()" (ngModelChange)="dateInput($event)" aria-label="তারিখ">
+        <input type="date" class="ctl !w-auto" [max]="today" [ngModel]="date()" (ngModelChange)="dateInput($event)" [attr.aria-label]="'তারিখ' | tr">
         <span class="text-sm text-mut">{{ date() | bdate }}</span>
         <div class="flex flex-wrap gap-1.5 ml-auto" aria-live="polite">
           @for (t of tally(); track t.label) { <m-badge [tone]="t.tone">{{ t.label }} {{ t.n | num }}</m-badge> }
@@ -40,7 +40,7 @@
               <li class="flex flex-wrap items-center gap-3 px-4 py-2.5 border-b border-line last:border-0">
                 <m-avatar [name]="r.name" [src]="photo(r.photoPath)" [size]="38" />
                 <span class="flex-1 min-w-[10rem] leading-tight"><b class="font-semibold">{{ r.name }}</b><small class="block text-mut text-[13px]">{{ r.designation }}@if (r.checkIn) { · {{ r.checkIn | btime }} }</small></span>
-                <div class="flex gap-1" role="group" [attr.aria-label]="r.name + ' হাজিরা'">
+                <div class="flex gap-1" role="group" [attr.aria-label]="r.name + (' হাজিরা' | tr)">
                   @for (s of status; track s.value) {
                     <button type="button" class="att-btn !w-auto px-3 text-sm" [attr.data-s]="s.value" [attr.aria-pressed]="marks()[r.staffId] === s.value" (click)="setMark(r.staffId, s.value)">{{ s.label }}</button>
                   }
@@ -49,30 +49,30 @@
             }
           </ul>
           <div class="flex flex-wrap items-center gap-2 px-4 py-3 border-t border-line bg-soft/40 sticky bottom-0">
-            <button mButton variant="outline" (click)="allPresent()"><m-icon name="check" [size]="18" /> বাকি সবাই উপস্থিত</button>
-            <button mButton class="ml-auto" [disabled]="!dirty()" [loading]="marking()" (click)="saveMarks()">হাজিরা সংরক্ষণ</button>
+            <button mButton variant="outline" (click)="allPresent()"><m-icon name="check" [size]="18" /> {{ 'বাকি সবাই উপস্থিত' | tr }}</button>
+            <button mButton class="ml-auto" [disabled]="!dirty()" [loading]="marking()" (click)="saveMarks()">{{ 'হাজিরা সংরক্ষণ' | tr }}</button>
           </div>
-        } @else { <m-empty-state title="কোনো সক্রিয় স্টাফ নেই" icon="user" /> }
+        } @else { <m-empty-state [title]="'কোনো সক্রিয় স্টাফ নেই' | tr" icon="user" /> }
       } @else { <div class="p-4 grid gap-2"><m-skeleton height="48px" /><m-skeleton height="48px" /><m-skeleton height="48px" /></div> }
     </m-card>
   }
 
   @case ('salary') {
     <div class="flex flex-wrap items-center gap-3 mb-3">
-      <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" aria-label="মাস">
-      <span class="text-sm text-mut">{{ month() | month }} মাসের বেতন</span>
+      <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" [attr.aria-label]="'মাস' | tr">
+      <span class="text-sm text-mut">{{ '{m} মাসের বেতন' | tr: { m: (month() | month) } }}</span>
       @if (sheet()) {
-        <span class="ml-auto text-sm tabular">দেওয়া হয়েছে <b class="text-g2">{{ sheetTotals().paid | money }}</b> ({{ sheetTotals().paidN | num }}/{{ sheetTotals().n | num }} জন) · বাকি <b class="text-red">{{ sheetTotals().due | money }}</b></span>
-        <button mButton variant="outline" size="sm" [disabled]="!sheetTotals().paidN" (click)="printSlips(sheet()!)"><m-icon name="print" [size]="16" /> সব স্লিপ</button>
+        <span class="ml-auto text-sm tabular">{{ 'দেওয়া হয়েছে' | tr }} <b class="text-g2">{{ sheetTotals().paid | money }}</b> {{ '({a}/{b} জন)' | tr: { a: (sheetTotals().paidN | num), b: (sheetTotals().n | num) } }} · {{ 'বাকি' | tr }} <b class="text-red">{{ sheetTotals().due | money }}</b></span>
+        <button mButton variant="outline" size="sm" [disabled]="!sheetTotals().paidN" (click)="printSlips(sheet()!)"><m-icon name="print" [size]="16" /> {{ 'সব স্লিপ' | tr }}</button>
       }
     </div>
     <m-card [padded]="false">
       @if (sheet(); as s) {
-        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" aria-label="বেতন শিট">
+        <div class="overflow-x-auto scroll-region" tabindex="0" role="region" [attr.aria-label]="'বেতন শিট' | tr">
           <table class="w-full text-sm">
             <thead><tr class="text-left text-mut border-b border-line">
-              <th class="px-4 py-2.5 font-semibold">নাম</th><th class="px-3 py-2.5 font-semibold text-right">উপস্থিতি</th><th class="px-3 py-2.5 font-semibold text-right">মূল</th>
-              <th class="px-3 py-2.5 font-semibold text-right">ভাতা</th><th class="px-3 py-2.5 font-semibold text-right">কর্তন</th><th class="px-3 py-2.5 font-semibold text-right">প্রদান</th><th class="px-4 py-2.5"><span class="sr-only">কাজ</span></th></tr></thead>
+              <th class="px-4 py-2.5 font-semibold">{{ 'নাম' | tr }}</th><th class="px-3 py-2.5 font-semibold text-right">{{ 'উপস্থিতি' | tr }}</th><th class="px-3 py-2.5 font-semibold text-right">{{ 'মূল' | tr }}</th>
+              <th class="px-3 py-2.5 font-semibold text-right">{{ 'ভাতা' | tr }}</th><th class="px-3 py-2.5 font-semibold text-right">{{ 'কর্তন' | tr }}</th><th class="px-3 py-2.5 font-semibold text-right">{{ 'প্রদান' | tr }}</th><th class="px-4 py-2.5"><span class="sr-only">{{ 'কাজ' | tr }}</span></th></tr></thead>
             <tbody>
               @for (r of s; track r.staffId) {
                 <tr class="border-b border-line last:border-0">
@@ -81,15 +81,15 @@
                   <td class="px-3 py-2.5 text-right tabular">{{ r.basic | money }}</td>
                   <td class="px-3 py-2.5 text-right tabular">{{ r.paymentId ? (r.allowance | money) : '' }}</td>
                   <td class="px-3 py-2.5 text-right tabular">{{ r.paymentId ? (r.deduction | money) : '' }}</td>
-                  <td class="px-3 py-2.5 text-right tabular">@if (r.paymentId) { <b class="text-g2">{{ r.netPaid | money }}</b><small class="block text-mut text-[12px]">{{ r.paidOn | bdate }}</small> } @else { <m-badge tone="warning">বাকি</m-badge> }</td>
+                  <td class="px-3 py-2.5 text-right tabular">@if (r.paymentId) { <b class="text-g2">{{ r.netPaid | money }}</b><small class="block text-mut text-[12px]">{{ r.paidOn | bdate }}</small> } @else { <m-badge tone="warning">{{ 'বাকি' | tr }}</m-badge> }</td>
                   <td class="px-4 py-2.5 text-right whitespace-nowrap">
                     @if (r.paymentId) {
-                      <button mButton size="sm" variant="ghost" (click)="printSlips([r])" [attr.aria-label]="r.name + ' বেতন স্লিপ'"><m-icon name="print" [size]="16" /></button>
-                      <button mButton size="sm" variant="ghost" class="!text-red" (click)="cancelPay(r)" [attr.aria-label]="r.name + ' বেতন বাতিল'"><m-icon name="x" [size]="16" /></button>
-                    } @else { <button mButton size="sm" variant="gold" [disabled]="!r.basic" (click)="openPay(r)">বেতন দিন</button> }
+                      <button mButton size="sm" variant="ghost" (click)="printSlips([r])" [attr.aria-label]="r.name + (' বেতন স্লিপ' | tr)"><m-icon name="print" [size]="16" /></button>
+                      <button mButton size="sm" variant="ghost" class="!text-red" (click)="cancelPay(r)" [attr.aria-label]="r.name + (' বেতন বাতিল' | tr)"><m-icon name="x" [size]="16" /></button>
+                    } @else { <button mButton size="sm" variant="gold" [disabled]="!r.basic" (click)="openPay(r)">{{ 'বেতন দিন' | tr }}</button> }
                   </td>
                 </tr>
-              } @empty { <tr><td colspan="7"><m-empty-state title="কোনো স্টাফ নেই" icon="user" /></td></tr> }
+              } @empty { <tr><td colspan="7"><m-empty-state [title]="'কোনো স্টাফ নেই' | tr" icon="user" /></td></tr> }
             </tbody>
           </table>
         </div>
@@ -98,66 +98,66 @@
   }
 }
 
-<m-modal [(open)]="open" [title]="editId() ? 'স্টাফের তথ্য' : 'নতুন উস্তাদ / স্টাফ'" width="min(720px, calc(100vw - 24px))">
+<m-modal [(open)]="open" [title]="editId() ? ('স্টাফের তথ্য' | tr) : ('নতুন উস্তাদ / স্টাফ' | tr)" width="min(720px, calc(100vw - 24px))">
   @if (editId() && !detail()) { <m-skeleton height="240px" /> } @else {
     @if (detail(); as d) {
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-        <div class="rounded-xl bg-soft px-3 py-2.5"><small class="text-mut">আইডি</small><b class="block tabular">{{ d.staffCode }}</b></div>
-        <div class="rounded-xl bg-soft px-3 py-2.5"><small class="text-mut">এ মাসে উপস্থিত</small><b class="block tabular">{{ d.presentThisMonth | num }} / {{ d.workDaysThisMonth | num }} দিন</b></div>
-        <div class="rounded-xl bg-soft px-3 py-2.5 col-span-2 sm:col-span-1"><small class="text-mut">পড়ান</small>
+        <div class="rounded-xl bg-soft px-3 py-2.5"><small class="text-mut">{{ 'আইডি' | tr }}</small><b class="block tabular">{{ d.staffCode }}</b></div>
+        <div class="rounded-xl bg-soft px-3 py-2.5"><small class="text-mut">{{ 'এ মাসে উপস্থিত' | tr }}</small><b class="block tabular">{{ '{a}/{b} দিন' | tr: { a: (d.presentThisMonth | num), b: (d.workDaysThisMonth | num) } }}</b></div>
+        <div class="rounded-xl bg-soft px-3 py-2.5 col-span-2 sm:col-span-1"><small class="text-mut">{{ 'পড়ান' | tr }}</small>
           <b class="block text-sm">@for (s of d.subjects; track s.classSubjectId; let last = $last) { {{ s.subjectName }} ({{ s.className }}){{ last ? '' : ', ' }} } @empty { — }</b></div>
       </div>
     }
     <form id="staffForm" autocomplete="off" class="grid gap-3 sm:grid-cols-2" (ngSubmit)="save()">
       <div class="sm:col-span-2 flex items-center gap-4">
         <m-avatar [name]="form().name" [src]="preview() ?? photo(detail()?.photoPath ?? null)" [size]="64" />
-        <label class="cursor-pointer"><span class="text-sm font-semibold text-g2 underline">ছবি বাছাই করুন</span><input type="file" accept="image/*" class="sr-only" (change)="pickPhoto($event)"></label>
+        <label class="cursor-pointer"><span class="text-sm font-semibold text-g2 underline">{{ 'ছবি বাছাই করুন' | tr }}</span><input type="file" accept="image/*" class="sr-only" (change)="pickPhoto($event)"></label>
         @if (errs()['photo']) { <small class="text-red" role="alert">{{ errs()['photo'] }}</small> }
       </div>
-      <m-field label="নাম" for="s-name" [required]="true" [error]="errs()['name']"><input id="s-name" class="ctl" name="name" [ngModel]="form().name" (ngModelChange)="patch({ name: $event })" [attr.aria-invalid]="!!errs()['name']"></m-field>
-      <m-field label="পদবি" for="s-des" [required]="true" [error]="errs()['designation']" hint="যেমন: মুহাদ্দিস, হিফজ শিক্ষক, বাবুর্চি"><input id="s-des" class="ctl" name="designation" [ngModel]="form().designation" (ngModelChange)="patch({ designation: $event })" [attr.aria-invalid]="!!errs()['designation']"></m-field>
-      <m-field label="মোবাইল" for="s-ph" [error]="errs()['phone']"><input id="s-ph" class="ctl tabular" inputmode="tel" name="phone" [ngModel]="form().phone" (ngModelChange)="patch({ phone: $event })"></m-field>
-      <m-field label="ইমেইল" for="s-em" [error]="errs()['email']"><input id="s-em" class="ctl" type="email" name="email" [ngModel]="form().email" (ngModelChange)="patch({ email: $event })"></m-field>
-      <m-field label="মূল বেতন (মাসিক)" for="s-sal" [error]="errs()['basicSalary']"><input id="s-sal" class="ctl tabular" inputmode="numeric" name="basicSalary" [ngModel]="form().basicSalary" (ngModelChange)="patch({ basicSalary: $event })"></m-field>
-      <m-field label="যোগদানের তারিখ" for="s-jd" [error]="errs()['joinDate']"><input id="s-jd" class="ctl" type="date" name="joinDate" [ngModel]="form().joinDate" (ngModelChange)="patch({ joinDate: $event || null })"></m-field>
-      <m-field label="শিক্ষাগত যোগ্যতা" for="s-q"><input id="s-q" class="ctl" name="qualification" [ngModel]="form().qualification" (ngModelChange)="patch({ qualification: $event })" placeholder="যেমন: দাওরায়ে হাদীস, তাকমীল"></m-field>
-      <m-field label="জাতীয় পরিচয়পত্র নম্বর" for="s-nid"><input id="s-nid" class="ctl tabular" name="nid" [ngModel]="form().nid" (ngModelChange)="patch({ nid: $event })"></m-field>
-      <m-field label="ঠিকানা" for="s-ad" class="sm:col-span-2"><input id="s-ad" class="ctl" name="address" [ngModel]="form().address" (ngModelChange)="patch({ address: $event })"></m-field>
-      <label class="flex items-center gap-2 sm:col-span-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="form().isActive" (ngModelChange)="patch({ isActive: $event })"> কর্মরত আছেন</label>
+      <m-field [label]="'নাম' | tr" for="s-name" [required]="true" [error]="errs()['name']"><input id="s-name" class="ctl" name="name" [ngModel]="form().name" (ngModelChange)="patch({ name: $event })" [attr.aria-invalid]="!!errs()['name']"></m-field>
+      <m-field [label]="'পদবি' | tr" for="s-des" [required]="true" [error]="errs()['designation']" [hint]="'যেমন: মুহাদ্দিস, হিফজ শিক্ষক, বাবুর্চি' | tr"><input id="s-des" class="ctl" name="designation" [ngModel]="form().designation" (ngModelChange)="patch({ designation: $event })" [attr.aria-invalid]="!!errs()['designation']"></m-field>
+      <m-field [label]="'মোবাইল' | tr" for="s-ph" [error]="errs()['phone']"><input id="s-ph" class="ctl tabular" inputmode="tel" name="phone" [ngModel]="form().phone" (ngModelChange)="patch({ phone: $event })"></m-field>
+      <m-field [label]="'ইমেইল' | tr" for="s-em" [error]="errs()['email']"><input id="s-em" class="ctl" type="email" name="email" [ngModel]="form().email" (ngModelChange)="patch({ email: $event })"></m-field>
+      <m-field [label]="'মূল বেতন (মাসিক)' | tr" for="s-sal" [error]="errs()['basicSalary']"><input id="s-sal" class="ctl tabular" inputmode="numeric" name="basicSalary" [ngModel]="form().basicSalary" (ngModelChange)="patch({ basicSalary: $event })"></m-field>
+      <m-field [label]="'যোগদানের তারিখ' | tr" for="s-jd" [error]="errs()['joinDate']"><input id="s-jd" class="ctl" type="date" name="joinDate" [ngModel]="form().joinDate" (ngModelChange)="patch({ joinDate: $event || null })"></m-field>
+      <m-field [label]="'শিক্ষাগত যোগ্যতা' | tr" for="s-q"><input id="s-q" class="ctl" name="qualification" [ngModel]="form().qualification" (ngModelChange)="patch({ qualification: $event })" [placeholder]="'যেমন: দাওরায়ে হাদীস, তাকমীল' | tr"></m-field>
+      <m-field [label]="'জাতীয় পরিচয়পত্র নম্বর' | tr" for="s-nid"><input id="s-nid" class="ctl tabular" name="nid" [ngModel]="form().nid" (ngModelChange)="patch({ nid: $event })"></m-field>
+      <m-field [label]="'ঠিকানা' | tr" for="s-ad" class="sm:col-span-2"><input id="s-ad" class="ctl" name="address" [ngModel]="form().address" (ngModelChange)="patch({ address: $event })"></m-field>
+      <label class="flex items-center gap-2 sm:col-span-2 cursor-pointer"><input type="checkbox" class="size-5 accent-[var(--g2)]" name="isActive" [ngModel]="form().isActive" (ngModelChange)="patch({ isActive: $event })"> {{ 'কর্মরত আছেন' | tr }}</label>
     </form>
     @if (detail()?.salaries?.length) {
-      <h4 class="mt-5 mb-2 font-semibold">বেতনের ইতিহাস</h4>
+      <h4 class="mt-5 mb-2 font-semibold">{{ 'বেতনের ইতিহাস' | tr }}</h4>
       <ul class="m-0 p-0 list-none text-sm">
         @for (s of detail()!.salaries; track s.paymentId) { <li class="flex justify-between py-1.5 border-b border-line last:border-0"><span>{{ s.month | month }} <small class="text-mut">· {{ s.paidOn | bdate }}</small></span><b class="tabular">{{ s.netPaid | money }}</b></li> }
       </ul>
     }
   }
   <div modalFooter class="flex gap-2 w-full">
-    @if (detail()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="remove()"><m-icon name="trash" [size]="16" /> সরিয়ে দিন</button> }
-    <button mButton variant="ghost" (click)="open.set(false)">বাতিল</button>
-    <button mButton type="submit" form="staffForm" [loading]="saving()">সংরক্ষণ</button>
+    @if (detail()) { <button mButton variant="ghost" class="!text-red mr-auto" (click)="remove()"><m-icon name="trash" [size]="16" /> {{ 'সরিয়ে দিন' | tr }}</button> }
+    <button mButton variant="ghost" (click)="open.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton type="submit" form="staffForm" [loading]="saving()">{{ 'সংরক্ষণ' | tr }}</button>
   </div>
 </m-modal>
 
-<m-modal [(open)]="payOpen" title="বেতন প্রদান">
+<m-modal [(open)]="payOpen" [title]="'বেতন প্রদান' | tr">
   @if (payRow(); as r) {
-    <div class="rounded-xl bg-soft px-4 py-3 mb-4"><b>{{ r.name }}</b><small class="block text-mut">{{ r.designation }} · {{ r.month | month }} · উপস্থিত {{ r.present | num }}/{{ r.workDays | num }} দিন</small></div>
+    <div class="rounded-xl bg-soft px-4 py-3 mb-4"><b>{{ r.name }}</b><small class="block text-mut">{{ r.designation }} · {{ r.month | month }} · {{ 'উপস্থিত {a}/{b} দিন' | tr: { a: (r.present | num), b: (r.workDays | num) } }}</small></div>
     <form id="payForm" class="grid grid-cols-2 gap-3" (ngSubmit)="confirmPay()">
-      <m-field label="মূল বেতন" for="p-b"><input id="p-b" class="ctl tabular" [value]="r.basic | money" disabled></m-field>
-      <m-field label="প্রদানের তারিখ" for="p-d"><input id="p-d" class="ctl" type="date" name="paidOn" [max]="today" [ngModel]="pay().paidOn" (ngModelChange)="patchPay({ paidOn: $event })"></m-field>
-      <m-field label="ভাতা / বোনাস" for="p-a" [error]="payErrs()['allowance']"><input id="p-a" class="ctl tabular" inputmode="numeric" name="allowance" [ngModel]="pay().allowance" (ngModelChange)="patchPay({ allowance: $event })"></m-field>
-      <m-field label="কর্তন (অগ্রিম/অনুপস্থিতি)" for="p-x" [error]="payErrs()['deduction']"><input id="p-x" class="ctl tabular" inputmode="numeric" name="deduction" [ngModel]="pay().deduction" (ngModelChange)="patchPay({ deduction: $event })"></m-field>
-      <m-field label="কোন ফান্ড থেকে" for="p-f" class="col-span-2" [error]="payErrs()['fundId']">
+      <m-field [label]="'মূল বেতন' | tr" for="p-b"><input id="p-b" class="ctl tabular" [value]="r.basic | money" disabled></m-field>
+      <m-field [label]="'প্রদানের তারিখ' | tr" for="p-d"><input id="p-d" class="ctl" type="date" name="paidOn" [max]="today" [ngModel]="pay().paidOn" (ngModelChange)="patchPay({ paidOn: $event })"></m-field>
+      <m-field [label]="'ভাতা / বোনাস' | tr" for="p-a" [error]="payErrs()['allowance']"><input id="p-a" class="ctl tabular" inputmode="numeric" name="allowance" [ngModel]="pay().allowance" (ngModelChange)="patchPay({ allowance: $event })"></m-field>
+      <m-field [label]="'কর্তন (অগ্রিম/অনুপস্থিতি)' | tr" for="p-x" [error]="payErrs()['deduction']"><input id="p-x" class="ctl tabular" inputmode="numeric" name="deduction" [ngModel]="pay().deduction" (ngModelChange)="patchPay({ deduction: $event })"></m-field>
+      <m-field [label]="'কোন ফান্ড থেকে' | tr" for="p-f" class="col-span-2" [error]="payErrs()['fundId']">
         <select id="p-f" class="ctl" name="fundId" [ngModel]="pay().fundId" (ngModelChange)="patchPay({ fundId: +$event })">
-          @for (f of funds(); track f.id) { <option [ngValue]="f.id">{{ f.nameBn }} (জের {{ f.balance | money }})</option> }
+          @for (f of funds(); track f.id) { <option [ngValue]="f.id">{{ f.nameBn }} ({{ 'জের {n}' | tr: { n: (f.balance | money) } }})</option> }
         </select>
       </m-field>
       @if (payErrs()['month'] || payErrs()['basic']) { <p class="col-span-2 m-0 text-red text-sm" role="alert">{{ payErrs()['month'] || payErrs()['basic'] }}</p> }
     </form>
-    <div class="flex items-baseline justify-between mt-4 pt-3 border-t border-line"><span class="text-mut">মোট প্রদান</span><b class="font-serif text-[26px] font-extrabold tabular">{{ payNet() | money }}</b></div>
+    <div class="flex items-baseline justify-between mt-4 pt-3 border-t border-line"><span class="text-mut">{{ 'মোট প্রদান' | tr }}</span><b class="font-serif text-[26px] font-extrabold tabular">{{ payNet() | money }}</b></div>
   }
   <div modalFooter class="flex gap-2">
-    <button mButton variant="ghost" (click)="payOpen.set(false)">বাতিল</button>
-    <button mButton variant="gold" type="submit" form="payForm" [loading]="paying()" [disabled]="payNet() <= 0"><m-icon name="check" [size]="18" /> বেতন দিন ও স্লিপ</button>
+    <button mButton variant="ghost" (click)="payOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton variant="gold" type="submit" form="payForm" [loading]="paying()" [disabled]="payNet() <= 0"><m-icon name="check" [size]="18" /> {{ 'বেতন দিন ও স্লিপ' | tr }}</button>
   </div>
 </m-modal>

@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 import { Lang } from './i18n';
+import { setCodeDigits } from './format';
 
 export type Theme = 'system' | 'light' | 'dark';
 export type Digits = 'bn' | 'en';
@@ -28,13 +29,20 @@ export class PreferencesService {
       if (t === 'system') { delete root.dataset['theme']; write('mms.theme', ''); }
       else { root.dataset['theme'] = t; write('mms.theme', t); }
     });
+    const startLang = this.lang();
     effect(() => {
       const l = this.lang();
       this.transloco.setActiveLang(l);
       this.doc.documentElement.lang = l;
       write('mms.lang', l);
+      if (l !== startLang) {
+        // Text written in code is translated once at load, so a switch reloads the
+        // page. Digits follow the language; they can still be changed after.
+        write('mms.digits', l);
+        this.doc.defaultView?.location.reload();
+      }
     });
-    effect(() => write('mms.digits', this.digits()));
+    effect(() => { const d = this.digits(); setCodeDigits(d); write('mms.digits', d); });
   }
 
   /** Cycles system → light → dark. */

@@ -2,25 +2,26 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { MonthPipe, NumPipe } from '../../core/format';
 import { Icon } from '../../shared/ui';
 import { DayMark, StudentMonth } from './student.models';
+import { TrPipe, tr } from '../../core/tr';
 
-const DOW = ['শনি', 'রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র'];
+const DOW = [tr('শনি'), tr('রবি'), tr('সোম'), tr('মঙ্গল'), tr('বুধ'), tr('বৃহঃ'), tr('শুক্র')];
 const CELL: Record<string, string> = {
   Present: 'bg-g2 cal-on', Late: 'bg-[var(--warn)] cal-on', Absent: 'bg-red cal-on', Leave: 'bg-[var(--info)] cal-on',
 };
-const LABEL: Record<string, string> = { Present: 'উপস্থিত', Late: 'দেরি', Absent: 'অনুপস্থিত', Leave: 'ছুটি' };
+const LABEL: Record<string, string> = { Present: tr('উপস্থিত'), Late: tr('দেরি'), Absent: tr('অনুপস্থিত'), Leave: tr('ছুটি') };
 
 /** Month heatmap: one cell per day; status is also written in the cell's label so colour is never the only cue. */
 @Component({
   selector: 'app-attendance-calendar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MonthPipe, NumPipe, Icon],
+  imports: [TrPipe, MonthPipe, NumPipe, Icon],
   template: `
     <div class="flex items-center justify-between gap-3 mb-3">
-      <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft cursor-pointer" (click)="move.emit(-1)" aria-label="আগের মাস"><m-icon name="chevronLeft" /></button>
+      <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft cursor-pointer" (click)="move.emit(-1)" [attr.aria-label]="'আগের মাস' | tr"><m-icon name="chevronLeft" /></button>
       <b class="font-serif text-lg">{{ data().month | month }}</b>
-      <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft cursor-pointer disabled:opacity-30" [disabled]="isCurrent()" (click)="move.emit(1)" aria-label="পরের মাস"><m-icon name="chevronRight" /></button>
+      <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft cursor-pointer disabled:opacity-30" [disabled]="isCurrent()" (click)="move.emit(1)" [attr.aria-label]="'পরের মাস' | tr"><m-icon name="chevronRight" /></button>
     </div>
-    <div class="grid grid-cols-7 gap-1.5 text-center" role="list" [attr.aria-label]="'হাজিরা, ' + (data().month | month)">
+    <div class="grid grid-cols-7 gap-1.5 text-center" role="list" [attr.aria-label]="('হাজিরা, ' | tr) + (data().month | month)">
       @for (d of dow; track d) { <div class="text-xs text-mut font-semibold pb-1" aria-hidden="true">{{ d }}</div> }
       @for (b of blanks(); track $index) { <div aria-hidden="true"></div> }
       @for (d of data().days; track d.date) {
@@ -29,11 +30,11 @@ const LABEL: Record<string, string> = { Present: 'উপস্থিত', Late: 
       }
     </div>
     <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-sm text-mut">
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-g2"></i>উপস্থিত {{ data().present | num }}</span>
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-[var(--warn)]"></i>দেরি {{ data().late | num }}</span>
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-red"></i>অনুপস্থিত {{ data().absent | num }}</span>
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-[var(--info)]"></i>ছুটি {{ data().leave | num }}</span>
-      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded border border-line bg-soft"></i>বন্ধ</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-g2"></i>{{ 'উপস্থিত {n}' | tr: { n: (data().present | num) } }}</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-[var(--warn)]"></i>{{ 'দেরি {n}' | tr: { n: (data().late | num) } }}</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-red"></i>{{ 'অনুপস্থিত {n}' | tr: { n: (data().absent | num) } }}</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded bg-[var(--info)]"></i>{{ 'ছুটি {n}' | tr: { n: (data().leave | num) } }}</span>
+      <span class="inline-flex items-center gap-1.5"><i class="size-3 rounded border border-line bg-soft"></i>{{ 'বন্ধ' | tr }}</span>
     </div>
   `,
 })
@@ -56,7 +57,7 @@ export class AttendanceCalendar {
     return 'bg-redbg text-red';   // a passed school day without a mark counts as absent
   }
   protected title(d: DayMark) {
-    const label = d.status ? LABEL[d.status] : !d.isWorkDay ? 'বন্ধ' : d.date > this.today() ? '' : d.date === this.today() ? 'আজ, এখনো হাজিরা হয়নি' : 'অনুপস্থিত (হাজিরা নেই)';
+    const label = d.status ? LABEL[d.status] : !d.isWorkDay ? tr('বন্ধ') : d.date > this.today() ? '' : d.date === this.today() ? tr('আজ, এখনো হাজিরা হয়নি') : tr('অনুপস্থিত (হাজিরা নেই)');
     return `${d.date}${label ? ': ' + label : ''}${d.checkIn ? ' ' + d.checkIn.slice(0, 5) : ''}`;
   }
 }

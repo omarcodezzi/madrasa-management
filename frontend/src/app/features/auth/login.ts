@@ -6,11 +6,12 @@ import { errorMessage } from '../../core/api';
 import { AuthService } from '../../core/auth/auth.service';
 import { Button, FormField, Icon } from '../../shared/ui';
 import { AuthLayout } from './auth-layout';
+import { TrPipe } from '../../core/tr';
 
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, TranslocoPipe, AuthLayout, Button, FormField, Icon],
+  imports: [TrPipe, FormsModule, RouterLink, TranslocoPipe, AuthLayout, Button, FormField, Icon],
   template: `
     <app-auth-layout>
       <h2 class="!text-[26px]">{{ 'auth.signInTitle' | transloco }}</h2>
@@ -52,7 +53,7 @@ import { AuthLayout } from './auth-layout';
         </div>
         <button mButton type="submit" size="lg" [block]="true" [loading]="busy()">{{ 'auth.signIn' | transloco }}</button>
       </form>
-      <p class="mt-5 mb-0 text-center text-sm"><a routerLink="/site">মাদরাসার ওয়েবসাইট ও অনলাইন ভর্তি</a></p>
+      <p class="mt-5 mb-0 text-center text-sm"><a routerLink="/site">{{ 'মাদরাসার ওয়েবসাইট ও অনলাইন ভর্তি' | tr }}</a></p>
     </app-auth-layout>
   `,
 })

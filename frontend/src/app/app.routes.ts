@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard, guestGuard, permGuard } from './core/auth/guards';
 import { unsavedGuard } from './core/unsaved.guard';
 import { ALL_NAV } from './layout/nav';
+import { tr } from './core/tr';
 
 const studentForm = () => import('./features/students/student-form').then((m) => m.StudentFormPage);
 const placeholder = () => import('./features/placeholder/placeholder').then((m) => m.PlaceholderPage);
@@ -28,8 +29,8 @@ const BUILT: Record<string, () => Promise<unknown>> = {
 };
 
 export const routes: Routes = [
-  { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/auth/login').then((m) => m.LoginPage), title: 'লগইন' },
-  { path: 'site', loadComponent: () => import('./features/public/public-site').then((m) => m.PublicSite), title: 'মাদরাসা' },
+  { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./features/auth/login').then((m) => m.LoginPage), title: tr('লগইন') },
+  { path: 'site', loadComponent: () => import('./features/public/public-site').then((m) => m.PublicSite), title: tr('মাদরাসা') },
   { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password').then((m) => m.ForgotPasswordPage) },
   {
     path: '',

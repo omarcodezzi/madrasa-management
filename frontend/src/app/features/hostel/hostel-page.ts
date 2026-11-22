@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { errorMessage, fileUrl, Gender } from '../../core/api';
-import { DatePipe, DigitsPipe, NumPipe, toBnDigits, toEnDigits, todayIso } from '../../core/format';
+import { DatePipe, DigitsPipe, NumPipe, toEnDigits, todayIso } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { Avatar, Badge, Button, Card, ConfirmService, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { HostelSummary, LeaveRow, Occupant, Resident, Room } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'rooms' | 'leaves';
 interface RoomForm { building: string; roomNo: string; seats: string; forGender: Gender; }
@@ -15,7 +16,7 @@ interface RoomForm { building: string; roomNo: string; seats: string; forGender:
 @Component({
   selector: 'app-hostel-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, DigitsPipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, FormField, Icon, LoadError, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './hostel-page.html',
 })
 export class HostelPage {
@@ -24,14 +25,14 @@ export class HostelPage {
   private confirm = inject(ConfirmService);
 
   protected tab = signal<Tab>('rooms');
-  protected tabs = [{ value: 'rooms' as Tab, label: 'রুম ও সিট' }, { value: 'leaves' as Tab, label: 'ছুটির রেজিস্টার' }];
+  protected tabs = [{ value: 'rooms' as Tab, label: tr('রুম ও সিট') }, { value: 'leaves' as Tab, label: tr('ছুটির রেজিস্টার') }];
   protected data = signal<HostelSummary | null>(null);
   protected gender = signal<'' | Gender>('');
-  protected genders = [{ value: '' as '' | Gender, label: 'সব' }, { value: 'Male' as '' | Gender, label: 'ছাত্র' }, { value: 'Female' as '' | Gender, label: 'ছাত্রী' }];
+  protected genders = [{ value: '' as '' | Gender, label: tr('সব') }, { value: 'Male' as '' | Gender, label: tr('ছাত্র') }, { value: 'Female' as '' | Gender, label: tr('ছাত্রী') }];
   protected rooms = computed(() => (this.data()?.roomList ?? []).filter((r) => !this.gender() || r.forGender === this.gender()));
   protected buildings = computed(() => {
     const map = new Map<string, Room[]>();
-    for (const r of this.rooms()) { const k = r.building || 'অন্যান্য'; map.set(k, [...(map.get(k) ?? []), r]); }
+    for (const r of this.rooms()) { const k = r.building || tr('অন্যান্য'); map.set(k, [...(map.get(k) ?? []), r]); }
     return [...map.entries()].map(([name, rooms]) => ({ name, rooms }));
   });
   protected photo = (p: string | null) => fileUrl(p);
@@ -67,7 +68,7 @@ export class HostelPage {
   protected today = todayIso();
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.load(); if (this.tab() === 'leaves') this.loadLeaves(this.openOnly()); }
 
   constructor() {
@@ -87,14 +88,14 @@ export class HostelPage {
     const f = this.roomForm(); this.savingRoom.set(true); this.roomErrs.set({});
     try {
       await this.api.saveRoom(this.roomId(), { building: f.building.trim() || null, roomNo: f.roomNo, seats: +toEnDigits(f.seats) || 0, forGender: f.forGender });
-      this.toast.success('রুম সংরক্ষণ হয়েছে'); this.roomOpen.set(false); this.load();
+      this.toast.success(tr('রুম সংরক্ষণ হয়েছে')); this.roomOpen.set(false); this.load();
     } catch (e) { const fe = fieldErrors(e); this.roomErrs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.savingRoom.set(false); }
   }
   protected async deleteRoom() {
     const id = this.roomId(); if (!id) return;
-    if (!(await this.confirm.ask({ message: 'রুমটি তালিকা থেকে মুছে যাবে।', itemName: `রুম ${toBnDigits(this.roomForm().roomNo)}`, confirmLabel: 'মুছে ফেলুন' }))) return;
-    try { await this.api.deleteRoom(id); this.toast.success('রুম মুছে ফেলা হয়েছে'); this.roomOpen.set(false); this.load(); }
+    if (!(await this.confirm.ask({ message: tr('রুমটি তালিকা থেকে মুছে যাবে।'), itemName: tr('রুম {no}', { no: this.roomForm().roomNo }), confirmLabel: tr('মুছে ফেলুন') }))) return;
+    try { await this.api.deleteRoom(id); this.toast.success(tr('রুম মুছে ফেলা হয়েছে')); this.roomOpen.set(false); this.load(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 
@@ -106,14 +107,14 @@ export class HostelPage {
     const r = this.allocRoom(); if (!r) return;
     try {
       await this.api.allocate({ studentId: c.studentId, roomId: r.id, seatNo: this.allocSeat() });
-      this.toast.success(`${c.name}-কে রুম ${toBnDigits(r.roomNo)}, সিট ${toBnDigits(String(this.allocSeat() ?? ''))} দেওয়া হয়েছে`);
+      this.toast.success(tr('{name}-কে রুম {room}, সিট {seat} দেওয়া হয়েছে', { name: c.name, room: r.roomNo, seat: this.allocSeat() ?? '' }));
       this.allocOpen.set(false); this.load();
     } catch (e) { this.toast.error(errorMessage(e)); }
   }
   protected async vacate() {
     const x = this.occ(); if (!x) return;
-    if (!(await this.confirm.ask({ message: 'সিট খালি হবে এবং শিক্ষার্থী আর আবাসিক থাকবে না।', itemName: `${x.o.name} · রুম ${toBnDigits(x.room.roomNo)}`, confirmLabel: 'সিট খালি করুন' }))) return;
-    try { await this.api.vacate(x.o.allocationId); this.toast.success('সিট খালি করা হয়েছে'); this.occOpen.set(false); this.load(); }
+    if (!(await this.confirm.ask({ message: tr('সিট খালি হবে এবং শিক্ষার্থী আর আবাসিক থাকবে না।'), itemName: `${x.o.name} · ` + tr('রুম {no}', { no: x.room.roomNo }), confirmLabel: tr('সিট খালি করুন') }))) return;
+    try { await this.api.vacate(x.o.allocationId); this.toast.success(tr('সিট খালি করা হয়েছে')); this.occOpen.set(false); this.load(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 
@@ -126,17 +127,17 @@ export class HostelPage {
   protected patchLeave(p: Partial<{ studentId: number; fromDate: string; toDate: string; reason: string; takenBy: string }>) { this.leaveForm.update((f) => ({ ...f, ...p })); }
   protected async saveLeave() {
     const f = this.leaveForm();
-    if (!f.studentId) { this.leaveErrs.set({ studentId: 'শিক্ষার্থী বাছাই করুন' }); return; }
+    if (!f.studentId) { this.leaveErrs.set({ studentId: tr('শিক্ষার্থী বাছাই করুন') }); return; }
     this.savingLeave.set(true); this.leaveErrs.set({});
     try {
       await this.api.addLeave({ studentId: +f.studentId, fromDate: f.fromDate, toDate: f.toDate || null, reason: f.reason.trim() || null, takenBy: f.takenBy.trim() || null });
-      this.toast.success('ছুটি লেখা হয়েছে'); this.leaveOpen.set(false); this.tab.set('leaves'); this.loadLeaves(this.openOnly()); this.load();
+      this.toast.success(tr('ছুটি লেখা হয়েছে')); this.leaveOpen.set(false); this.tab.set('leaves'); this.loadLeaves(this.openOnly()); this.load();
     } catch (e) { const fe = fieldErrors(e); this.leaveErrs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.savingLeave.set(false); }
   }
   protected async back(l: LeaveRow) {
-    try { await this.api.returned(l.id); this.toast.success(`${l.name} ফিরে এসেছে`); this.loadLeaves(this.openOnly()); this.load(); }
+    try { await this.api.returned(l.id); this.toast.success(tr('{name} ফিরে এসেছে', { name: l.name })); this.loadLeaves(this.openOnly()); this.load(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
-  protected genderLabel = (g: Gender) => (g === 'Male' ? 'ছাত্র' : 'ছাত্রী');
+  protected genderLabel = (g: Gender) => (g === 'Male' ? tr('ছাত্র') : tr('ছাত্রী'));
 }

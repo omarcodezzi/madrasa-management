@@ -8,13 +8,14 @@ import { ToastService } from '../../core/toast.service';
 import { Badge, Button, Card, ConfirmService, EmptyState, Icon, IconButton, Modal, PageHeader, Segmented, Skeleton } from '../../shared/ui';
 import { ClassOverview, ClassSubject, DAY_NAME, DepartmentOverview, Period, Routine, SubjectDto, TeacherDto } from './academic.models';
 import { AcademicApi, fieldErrors } from './academic.service';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'subjects' | 'routine';
 
 @Component({
   selector: 'app-classes-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MoneyPipe, NumPipe, TimePipe, Badge, Button, Card, EmptyState, Icon, IconButton, Modal, PageHeader, Segmented, Skeleton],
+  imports: [TrPipe, FormsModule, MoneyPipe, NumPipe, TimePipe, Badge, Button, Card, EmptyState, Icon, IconButton, Modal, PageHeader, Segmented, Skeleton],
   templateUrl: './classes-page.html',
 })
 export class ClassesPage {
@@ -32,7 +33,7 @@ export class ClassesPage {
   protected selected = computed(() => this.depts()?.flatMap((d) => d.classes).find((c) => c.id === this.selectedId()) ?? null);
   protected deptOf = computed(() => this.depts()?.find((d) => d.id === this.selected()?.departmentId) ?? null);
   protected tab = signal<Tab>('subjects');
-  protected tabs = [{ value: 'subjects' as Tab, label: 'কিতাব ও উস্তাদ' }, { value: 'routine' as Tab, label: 'সাপ্তাহিক রুটিন' }];
+  protected tabs = [{ value: 'subjects' as Tab, label: tr('কিতাব ও উস্তাদ') }, { value: 'routine' as Tab, label: tr('সাপ্তাহিক রুটিন') }];
 
   protected subjects = signal<ClassSubject[] | null>(null);
   protected allSubjects = signal<SubjectDto[]>([]);
@@ -100,7 +101,7 @@ export class ClassesPage {
     try {
       const input = { departmentId: +f.departmentId, nameBn: f.nameBn, nameAr: f.nameAr || null, monthlyFee: f.monthlyFee === '' ? null : +f.monthlyFee };
       const r = f.id ? await this.api.updateClass(f.id, input) : await this.api.createClass(input);
-      this.toast.success(f.id ? 'শ্রেণির তথ্য হালনাগাদ হয়েছে' : `${f.nameBn} শ্রেণি যোগ হয়েছে`);
+      this.toast.success(f.id ? tr('শ্রেণির তথ্য হালনাগাদ হয়েছে') : tr('{name} শ্রেণি যোগ হয়েছে', { name: f.nameBn }));
       this.classOpen.set(false);
       await this.load(); this.lookups.reload();
       this.selectedId.set(r.id);
@@ -108,10 +109,10 @@ export class ClassesPage {
     finally { this.savingClass.set(false); }
   }
   protected async removeClass(c: ClassOverview) {
-    if (!(await this.confirm.ask({ message: 'শ্রেণিটি, এর কিতাব ও রুটিন মুছে যাবে।', itemName: c.nameBn }))) return;
+    if (!(await this.confirm.ask({ message: tr('শ্রেণিটি, এর কিতাব ও রুটিন মুছে যাবে।'), itemName: c.nameBn }))) return;
     try {
       await this.api.deleteClass(c.id);
-      this.toast.success(`${c.nameBn} মুছে ফেলা হয়েছে`);
+      this.toast.success(tr('{name} মুছে ফেলা হয়েছে', { name: c.nameBn }));
       this.selectedId.set(null); await this.load(); this.lookups.reload();
     } catch (e) { this.toast.error(errorMessage(e)); }
   }
@@ -137,7 +138,7 @@ export class ClassesPage {
         subjectId: +f.subjectId || null, newSubjectName: +f.subjectId ? null : f.newName, newSubjectNameAr: +f.subjectId ? null : f.newNameAr || null,
         teacherId: +f.teacherId || null, fullMarks: +f.fullMarks, passMarks: +f.passMarks,
       });
-      this.toast.success('কিতাব সংরক্ষণ হয়েছে');
+      this.toast.success(tr('কিতাব সংরক্ষণ হয়েছে'));
       this.subjOpen.set(false);
       this.subjects.set(await this.api.classSubjects(c.id));
       this.api.subjects().then((s) => this.allSubjects.set(s));
@@ -147,7 +148,7 @@ export class ClassesPage {
   }
   protected async removeSubject(s: ClassSubject) {
     const c = this.selected(); if (!c) return;
-    if (!(await this.confirm.ask({ message: 'কিতাবটি এই শ্রেণি ও রুটিন থেকে সরানো হবে।', itemName: s.subjectName, confirmLabel: 'সরিয়ে দিন' }))) return;
+    if (!(await this.confirm.ask({ message: tr('কিতাবটি এই শ্রেণি ও রুটিন থেকে সরানো হবে।'), itemName: s.subjectName, confirmLabel: tr('সরিয়ে দিন') }))) return;
     try {
       await this.api.removeClassSubject(c.id, s.id);
       this.subjects.set(await this.api.classSubjects(c.id));
@@ -189,7 +190,7 @@ export class ClassesPage {
     try {
       this.routine.set(await this.api.saveRoutine(c.id, periods, slots));
       this.editing.set(false);
-      this.toast.success('রুটিন সংরক্ষণ হয়েছে');
+      this.toast.success(tr('রুটিন সংরক্ষণ হয়েছে'));
     } catch (e) {
       const errs = fieldErrors(e);
       this.routineErr.set(errs);

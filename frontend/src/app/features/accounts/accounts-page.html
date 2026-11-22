@@ -1,26 +1,26 @@
-<m-page-header title="হিসাব ও দান" [description]="(month() | month) + ' · আয়-ব্যয় খাতা, ফান্ড ও দাতা'">
-  <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" aria-label="মাস">
-  <button mButton variant="outline" (click)="openEntry('expense')"><m-icon name="plus" [size]="18" /> খরচ লিখুন</button>
-  <button mButton variant="gold" (click)="openEntry('donation')"><m-icon name="coins" [size]="18" /> দান গ্রহণ</button>
+<m-page-header [title]="'হিসাব ও দান' | tr" [description]="(month() | month) + (' · আয়-ব্যয় খাতা, ফান্ড ও দাতা' | tr)">
+  <input type="month" class="ctl !w-auto" [ngModel]="month()" (ngModelChange)="monthInput($event)" [attr.aria-label]="'মাস' | tr">
+  <button mButton variant="outline" (click)="openEntry('expense')"><m-icon name="plus" [size]="18" /> {{ 'খরচ লিখুন' | tr }}</button>
+  <button mButton variant="gold" (click)="openEntry('donation')"><m-icon name="coins" [size]="18" /> {{ 'দান গ্রহণ' | tr }}</button>
 </m-page-header>
 @if (loadError(); as e) { <m-load-error [message]="e" (retry)="retry()" /> }
 
 
 <!-- Fund balances: Zakat, Lillah etc. are kept apart and can never be overspent -->
-<section aria-label="ফান্ডের জের" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+<section [attr.aria-label]="'ফান্ডের জের' | tr" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
   @if (summary(); as s) {
     @for (f of s.funds; track f.id) {
       <div class="bg-card border border-line rounded-[var(--radius-card)] px-4 py-3.5">
-        <div class="flex items-center justify-between gap-2"><span class="text-sm text-mut">{{ f.nameBn }}</span>@if (f.isRestricted) { <m-badge tone="gold">নির্দিষ্ট খাত</m-badge> }</div>
+        <div class="flex items-center justify-between gap-2"><span class="text-sm text-mut">{{ f.nameBn }}</span>@if (f.isRestricted) { <m-badge tone="gold">{{ 'নির্দিষ্ট খাত' | tr }}</m-badge> }</div>
         <b class="block font-serif font-extrabold text-[24px] tabular" [class.text-red]="f.balance < 0">{{ f.balance | money }}</b>
-        <small class="text-[13px] text-mut tabular">এ মাসে আয় {{ f.inThisMonth | money }} · ব্যয় {{ f.outThisMonth | money }}</small>
+        <small class="text-[13px] text-mut tabular">{{ 'এ মাসে আয় {a} · ব্যয় {b}' | tr: { a: (f.inThisMonth | money), b: (f.outThisMonth | money) } }}</small>
       </div>
     }
   } @else { @for (i of [1,2,3,4]; track i) { <m-skeleton height="96px" /> } }
 </section>
 
 <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] mb-5">
-  <m-card title="এ মাসের আয়" [subtitle]="'মোট ' + ((summary()?.income ?? 0) | money)">
+  <m-card [title]="'এ মাসের আয়' | tr" [subtitle]="('মোট ' | tr) + ((summary()?.income ?? 0) | money)">
     @if (summary()) {
       @if (income().length) {
         <ul class="m-0 p-0 list-none grid gap-2.5">
@@ -32,10 +32,10 @@
             </li>
           }
         </ul>
-      } @else { <p class="m-0 text-mut text-sm">এ মাসে কোনো আয় নেই</p> }
+      } @else { <p class="m-0 text-mut text-sm">{{ 'এ মাসে কোনো আয় নেই' | tr }}</p> }
     } @else { <m-skeleton height="120px" /> }
   </m-card>
-  <m-card title="এ মাসের ব্যয়" [subtitle]="'মোট ' + ((summary()?.expense ?? 0) | money)">
+  <m-card [title]="'এ মাসের ব্যয়' | tr" [subtitle]="('মোট ' | tr) + ((summary()?.expense ?? 0) | money)">
     @if (summary()) {
       @if (expense().length) {
         <ul class="m-0 p-0 list-none grid gap-2.5">
@@ -47,73 +47,73 @@
             </li>
           }
         </ul>
-      } @else { <p class="m-0 text-mut text-sm">এ মাসে কোনো ব্যয় নেই</p> }
+      } @else { <p class="m-0 text-mut text-sm">{{ 'এ মাসে কোনো ব্যয় নেই' | tr }}</p> }
     } @else { <m-skeleton height="120px" /> }
   </m-card>
 </div>
 
-<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" aria-label="হিসাবের অংশ" />
+<m-segmented class="mb-4 inline-flex" [options]="tabs" [value]="tab()" (valueChange)="tab.set($event)" [attr.aria-label]="'হিসাবের অংশ' | tr" />
 
 @if (tab() === 'ledger') {
   <div class="flex flex-wrap items-center gap-3 mb-3">
-    <m-chips [options]="fundOptions()" [value]="fund()" (valueChange)="fund.set($event)" aria-label="ফান্ড" />
-    <m-segmented [options]="dirOptions" [value]="dir()" (valueChange)="dir.set($event)" aria-label="আয় না ব্যয়" />
-    @if (ledger(); as l) { <span class="ml-auto text-sm text-mut tabular">আয় <b class="text-g2">{{ l.totalIn | money }}</b> · ব্যয় <b class="text-red">{{ l.totalOut | money }}</b></span> }
+    <m-chips [options]="fundOptions()" [value]="fund()" (valueChange)="fund.set($event)" [attr.aria-label]="'ফান্ড' | tr" />
+    <m-segmented [options]="dirOptions" [value]="dir()" (valueChange)="dir.set($event)" [attr.aria-label]="'আয় না ব্যয়' | tr" />
+    @if (ledger(); as l) { <span class="ml-auto text-sm text-mut tabular">{{ 'আয়' | tr }} <b class="text-g2">{{ l.totalIn | money }}</b> {{ '· ব্যয়' | tr }} <b class="text-red">{{ l.totalOut | money }}</b></span> }
   </div>
   <m-data-table [rows]="ledger()?.items ?? []" [columns]="cols" [loading]="!ledger()" exportName="ledger"
-    searchPlaceholder="বিবরণ, দাতা বা ভাউচার নং" emptyTitle="এ মাসে কোনো এন্ট্রি নেই" emptyText="দান গ্রহণ বা খরচ লিখলে এখানে দেখাবে।">
+    [searchPlaceholder]="'বিবরণ, দাতা বা ভাউচার নং' | tr" [emptyTitle]="'এ মাসে কোনো এন্ট্রি নেই' | tr" [emptyText]="'দান গ্রহণ বা খরচ লিখলে এখানে দেখাবে।' | tr">
     <ng-template mCell="date" let-r><span class="tabular">{{ r.date | bdate }}</span></ng-template>
     <ng-template mCell="description" let-r>
       <b class="font-semibold">{{ r.description || r.category }}</b>
-      <small class="block text-mut text-[13px]">{{ r.voucherNo }}@if (r.donor) { · {{ r.donor }} }@if (sourceLabel(r.source)) { · {{ sourceLabel(r.source) }} থেকে }</small>
+      <small class="block text-mut text-[13px]">{{ r.voucherNo }}@if (r.donor) { · {{ r.donor }} }@if (sourceLabel(r.source)) { · {{ '{s} থেকে' | tr: { s: sourceLabel(r.source) } }} }</small>
     </ng-template>
     <ng-template mCell="amount" let-r><b class="tabular" [class.text-g2]="r.direction === 'In'" [class.text-red]="r.direction === 'Out'">{{ r.direction === 'In' ? '+' : '−' }}{{ r.amount | money }}</b></ng-template>
     <ng-template mRowActions let-r>
-      @if (r.direction === 'In' && r.source === 'Manual') { <button mButton size="sm" variant="ghost" (click)="printVoucher(r)" [attr.aria-label]="r.voucherNo + ' রসিদ প্রিন্ট'"><m-icon name="print" [size]="16" /></button> }
-      @if (r.canDelete) { <button mButton size="sm" variant="ghost" class="!text-red" (click)="remove(r)" [attr.aria-label]="r.voucherNo + ' মুছুন'"><m-icon name="trash" [size]="16" /></button> }
+      @if (r.direction === 'In' && r.source === 'Manual') { <button mButton size="sm" variant="ghost" (click)="printVoucher(r)" [attr.aria-label]="r.voucherNo + (' রসিদ প্রিন্ট' | tr)"><m-icon name="print" [size]="16" /></button> }
+      @if (r.canDelete) { <button mButton size="sm" variant="ghost" class="!text-red" (click)="remove(r)" [attr.aria-label]="r.voucherNo + (' মুছুন' | tr)"><m-icon name="trash" [size]="16" /></button> }
     </ng-template>
   </m-data-table>
 } @else {
-  <m-data-table [rows]="donors() ?? []" [columns]="donorCols" [loading]="!donors()" exportName="donors" searchPlaceholder="নাম বা মোবাইল" emptyTitle="এখনও কোনো দাতা নেই">
+  <m-data-table [rows]="donors() ?? []" [columns]="donorCols" [loading]="!donors()" exportName="donors" [searchPlaceholder]="'নাম বা মোবাইল' | tr" [emptyTitle]="'এখনও কোনো দাতা নেই' | tr">
     <ng-template mCell="name" let-r><b class="font-semibold">{{ r.name }}</b>@if (r.address) { <small class="block text-mut text-[13px]">{{ r.address }}</small> }</ng-template>
     <ng-template mCell="phone" let-r>@if (r.phone) { <a [href]="'tel:' + r.phone" class="tabular no-underline">{{ r.phone | digits }}</a> }</ng-template>
-    <ng-template mCell="count" let-r>{{ r.count | num }} বার</ng-template>
+    <ng-template mCell="count" let-r>{{ '{n} বার' | tr: { n: (r.count | num) } }}</ng-template>
     <ng-template mCell="last" let-r>{{ r.last | bdate }}</ng-template>
     <ng-template mCell="total" let-r><b class="tabular">{{ r.total | money }}</b></ng-template>
   </m-data-table>
 }
 
-<m-modal [(open)]="entryOpen" [title]="kind() === 'donation' ? 'দান / আয় গ্রহণ' : 'খরচ লিখুন'">
+<m-modal [(open)]="entryOpen" [title]="kind() === 'donation' ? ('দান / আয় গ্রহণ' | tr) : ('খরচ লিখুন' | tr)">
   <form class="grid gap-4" (ngSubmit)="saveEntry()" id="entryForm">
-    <m-segmented [options]="kinds" [value]="kind()" (valueChange)="setKind($event)" aria-label="ধরন" />
+    <m-segmented [options]="kinds" [value]="kind()" (valueChange)="setKind($event)" [attr.aria-label]="'ধরন' | tr" />
     <div class="grid grid-cols-2 gap-3">
-      <m-field label="ফান্ড" for="e-fund" [error]="errs()['fundId']" [required]="true">
+      <m-field [label]="'ফান্ড' | tr" for="e-fund" [error]="errs()['fundId']" [required]="true">
         <select id="e-fund" class="ctl" [ngModel]="form().fundId" (ngModelChange)="patch({ fundId: +$event })" name="fundId">
           @for (f of summary()?.funds ?? []; track f.id) { <option [ngValue]="f.id">{{ f.nameBn }}</option> }
         </select>
       </m-field>
-      <m-field label="খাত" for="e-cat" [error]="errs()['categoryId']" [required]="true">
+      <m-field [label]="'খাত' | tr" for="e-cat" [error]="errs()['categoryId']" [required]="true">
         <select id="e-cat" class="ctl" [ngModel]="form().categoryId" (ngModelChange)="patch({ categoryId: +$event })" name="categoryId">
           @for (c of kindCats(); track c.id) { <option [ngValue]="c.id">{{ c.nameBn }}</option> }
         </select>
       </m-field>
-      <m-field label="টাকা" for="e-amt" [error]="errs()['amount']" [required]="true"
-        [hint]="kind() === 'expense' && selectedFund() ? 'এই ফান্ডে আছে ' + (selectedFund()!.balance | money) : undefined">
+      <m-field [label]="'টাকা' | tr" for="e-amt" [error]="errs()['amount']" [required]="true"
+        [hint]="kind() === 'expense' && selectedFund() ? ('এই ফান্ডে আছে ' | tr) + (selectedFund()!.balance | money) : undefined">
         <input id="e-amt" class="ctl tabular" inputmode="decimal" [ngModel]="form().amount" (ngModelChange)="patch({ amount: $event })" name="amount" autocomplete="off" [attr.aria-invalid]="!!errs()['amount']">
       </m-field>
-      <m-field label="তারিখ" for="e-date" [error]="errs()['date']">
+      <m-field [label]="'তারিখ' | tr" for="e-date" [error]="errs()['date']">
         <input id="e-date" type="date" class="ctl" [max]="form().date" [ngModel]="form().date" (ngModelChange)="patch({ date: $event })" name="date">
       </m-field>
     </div>
-    <m-field label="বিবরণ" for="e-desc" [error]="errs()['description']" [required]="kind() === 'expense'">
+    <m-field [label]="'বিবরণ' | tr" for="e-desc" [error]="errs()['description']" [required]="kind() === 'expense'">
       <input id="e-desc" class="ctl" [ngModel]="form().description" (ngModelChange)="patch({ description: $event })" name="description"
-        [placeholder]="kind() === 'expense' ? 'যেমন: বিদ্যুৎ বিল, অক্টোবর' : 'যেমন: মাসিক দান'" [attr.aria-invalid]="!!errs()['description']">
+        [placeholder]="kind() === 'expense' ? ('যেমন: বিদ্যুৎ বিল, অক্টোবর' | tr) : ('যেমন: মাসিক দান' | tr)" [attr.aria-invalid]="!!errs()['description']">
     </m-field>
     @if (kind() === 'donation') {
       <fieldset class="border border-line rounded-xl p-3 m-0 grid gap-3">
-        <legend class="px-1 text-sm font-semibold text-mut">দাতার তথ্য (ঐচ্ছিক)</legend>
+        <legend class="px-1 text-sm font-semibold text-mut">{{ 'দাতার তথ্য (ঐচ্ছিক)' | tr }}</legend>
         <div class="relative">
-          <m-field label="দাতার নাম" for="e-dn"><input id="e-dn" class="ctl" [ngModel]="form().donorName" (ngModelChange)="patch({ donorName: $event })" name="donorName" autocomplete="off"></m-field>
+          <m-field [label]="'দাতার নাম' | tr" for="e-dn"><input id="e-dn" class="ctl" [ngModel]="form().donorName" (ngModelChange)="patch({ donorName: $event })" name="donorName" autocomplete="off"></m-field>
           @if (donorHits().length && form().donorName !== donorHits()[0].name) {
             <ul class="absolute z-10 left-0 right-0 mt-1 m-0 p-1 list-none bg-card border border-line rounded-xl shadow-lg">
               @for (d of donorHits(); track d.id) { <li><button type="button" class="w-full text-left px-3 py-2 rounded-lg hover:bg-soft bg-transparent border-0 text-ink cursor-pointer" (click)="pickDonor(d)">{{ d.name }} <small class="text-mut tabular">{{ d.phone | digits }}</small></button></li> }
@@ -121,15 +121,15 @@
           }
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <m-field label="মোবাইল" for="e-dp" [error]="errs()['donorPhone']"><input id="e-dp" class="ctl tabular" inputmode="tel" [ngModel]="form().donorPhone" (ngModelChange)="patch({ donorPhone: $event })" name="donorPhone"></m-field>
-          <m-field label="ঠিকানা" for="e-da"><input id="e-da" class="ctl" [ngModel]="form().donorAddress" (ngModelChange)="patch({ donorAddress: $event })" name="donorAddress"></m-field>
+          <m-field [label]="'মোবাইল' | tr" for="e-dp" [error]="errs()['donorPhone']"><input id="e-dp" class="ctl tabular" inputmode="tel" [ngModel]="form().donorPhone" (ngModelChange)="patch({ donorPhone: $event })" name="donorPhone"></m-field>
+          <m-field [label]="'ঠিকানা' | tr" for="e-da"><input id="e-da" class="ctl" [ngModel]="form().donorAddress" (ngModelChange)="patch({ donorAddress: $event })" name="donorAddress"></m-field>
         </div>
-        <small class="text-mut text-[13px]">দাতার নাম দিলে জমার পর দানের রসিদ প্রিন্ট হবে।</small>
+        <small class="text-mut text-[13px]">{{ 'দাতার নাম দিলে জমার পর দানের রসিদ প্রিন্ট হবে।' | tr }}</small>
       </fieldset>
     }
   </form>
   <div modalFooter class="flex gap-2">
-    <button mButton variant="ghost" (click)="entryOpen.set(false)">বাতিল</button>
-    <button mButton [variant]="kind() === 'donation' ? 'gold' : 'primary'" type="submit" form="entryForm" [loading]="saving()"><m-icon name="check" [size]="18" /> {{ kind() === 'donation' ? 'জমা নিন' : 'খরচ লিখুন' }}</button>
+    <button mButton variant="ghost" (click)="entryOpen.set(false)">{{ 'বাতিল' | tr }}</button>
+    <button mButton [variant]="kind() === 'donation' ? 'gold' : 'primary'" type="submit" form="entryForm" [loading]="saving()"><m-icon name="check" [size]="18" /> {{ kind() === 'donation' ? ('জমা নিন' | tr) : ('খরচ লিখুন' | tr) }}</button>
   </div>
 </m-modal>

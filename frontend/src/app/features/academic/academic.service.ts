@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { API } from '../../core/api';
 import { ClassInput, ClassSubject, ClassSubjectInput, DepartmentOverview, Period, Routine, SubjectDto, TeacherDto } from './academic.models';
+import { trApi } from '../../core/tr';
 
 @Injectable({ providedIn: 'root' })
 export class AcademicApi {
@@ -27,5 +28,6 @@ export class AcademicApi {
 
 /** Field errors from a 400 ProblemDetails, keyed as the API sends them. */
 export function fieldErrors(e: unknown): Record<string, string> {
-  return ((e as { error?: { errors?: Record<string, string> } })?.error?.errors) ?? {};
+  const errs = ((e as { error?: { errors?: Record<string, string> } })?.error?.errors) ?? {};
+  return Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, trApi(v)]));
 }

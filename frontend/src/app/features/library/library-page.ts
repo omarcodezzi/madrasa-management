@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { errorMessage } from '../../core/api';
-import { DatePipe, DigitsPipe, MoneyPipe, NumPipe, toEnDigits } from '../../core/format';
+import { DatePipe, DigitsPipe, MoneyPipe, NumPipe, fmt, fmtMoney, toEnDigits } from '../../core/format';
 import { ToastService } from '../../core/toast.service';
 import { Badge, Button, CellDef, Chips, Column, ConfirmService, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton } from '../../shared/ui';
 import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Book, BookInput, BookLanguage, Borrower, Issue, LANG_LABEL, LibrarySummary } from '../office/office.models';
+import { TrPipe, tr } from '../../core/tr';
 
 type Tab = 'books' | 'out' | 'overdue' | 'fines' | 'returned';
 const blank = (): BookInput => ({ title: '', titleAr: null, author: null, language: 'Arabic', category: null, shelfNo: null, totalCopies: 1 });
@@ -14,7 +15,7 @@ const blank = (): BookInput => ({ title: '', titleAr: null, author: null, langua
 @Component({
   selector: 'app-library-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
+  imports: [TrPipe, FormsModule, DatePipe, DigitsPipe, MoneyPipe, NumPipe, Badge, Button, CellDef, Chips, DataTable, FormField, Icon, LoadError, Modal, PageHeader, RowActionsDef, Segmented, Skeleton],
   templateUrl: './library-page.html',
 })
 export class LibraryPage {
@@ -25,28 +26,28 @@ export class LibraryPage {
   protected summary = signal<LibrarySummary | null>(null);
   protected tab = signal<Tab>('books');
   protected tabs = computed(() => [
-    { value: 'books' as Tab, label: 'বই' }, { value: 'out' as Tab, label: `ইস্যু করা (${(this.summary()?.out ?? 0).toLocaleString('bn-BD')})` },
-    { value: 'overdue' as Tab, label: `মেয়াদোত্তীর্ণ (${(this.summary()?.overdue ?? 0).toLocaleString('bn-BD')})` }, { value: 'fines' as Tab, label: `জরিমানা বাকি (${(this.summary()?.finesPending ?? 0).toLocaleString('bn-BD')})` }, { value: 'returned' as Tab, label: 'ফেরত' },
+    { value: 'books' as Tab, label: tr('বই') }, { value: 'out' as Tab, label: tr('ইস্যু করা ({n})', { n: fmt(this.summary()?.out) }) },
+    { value: 'overdue' as Tab, label: tr('মেয়াদোত্তীর্ণ ({n})', { n: fmt(this.summary()?.overdue) }) }, { value: 'fines' as Tab, label: tr('জরিমানা বাকি ({n})', { n: fmt(this.summary()?.finesPending) }) }, { value: 'returned' as Tab, label: tr('ফেরত') },
   ]);
   protected lLabel = (l: string) => (LANG_LABEL as Record<string, string>)[l] ?? l;
   protected lang = signal<'' | BookLanguage>('');
-  protected langs = [{ value: '' as '' | BookLanguage, label: 'সব ভাষা' }, ...(Object.keys(LANG_LABEL) as BookLanguage[]).map((l) => ({ value: l as '' | BookLanguage, label: LANG_LABEL[l] }))];
+  protected langs = [{ value: '' as '' | BookLanguage, label: tr('সব ভাষা') }, ...(Object.keys(LANG_LABEL) as BookLanguage[]).map((l) => ({ value: l as '' | BookLanguage, label: LANG_LABEL[l] }))];
   protected category = signal('');
   protected books = signal<Book[] | null>(null);
   protected issues = signal<Issue[] | null>(null);
   protected bookCols: Column<Book>[] = [
-    { key: 'title', label: 'বই', sortable: true, primary: true, value: (b) => `${b.title} ${b.titleAr ?? ''} ${b.author ?? ''}` },
-    { key: 'category', label: 'বিষয়', sortable: true },
-    { key: 'language', label: 'ভাষা', value: (b) => LANG_LABEL[b.language] },
-    { key: 'shelfNo', label: 'তাক', sortable: true },
-    { key: 'available', label: 'তাকে আছে', sortable: true, align: 'end' },
+    { key: 'title', label: tr('বই'), sortable: true, primary: true, value: (b) => `${b.title} ${b.titleAr ?? ''} ${b.author ?? ''}` },
+    { key: 'category', label: tr('বিষয়'), sortable: true },
+    { key: 'language', label: tr('ভাষা'), value: (b) => LANG_LABEL[b.language] },
+    { key: 'shelfNo', label: tr('তাক'), sortable: true },
+    { key: 'available', label: tr('তাকে আছে'), sortable: true, align: 'end' },
   ];
   protected issueCols: Column<Issue>[] = [
-    { key: 'title', label: 'বই', sortable: true, primary: true, value: (i) => `${i.title} ${i.borrowerName} ${i.borrowerCode}` },
-    { key: 'borrowerName', label: 'নিয়েছেন', sortable: true },
-    { key: 'issuedOn', label: 'ইস্যু', sortable: true },
-    { key: 'dueOn', label: 'ফেরতের তারিখ', sortable: true },
-    { key: 'fineDue', label: 'জরিমানা', sortable: true, align: 'end', value: (i) => (i.returnedOn ? (this.tab() === 'fines' ? i.fineOutstanding : i.fine) : i.fineDue) },
+    { key: 'title', label: tr('বই'), sortable: true, primary: true, value: (i) => `${i.title} ${i.borrowerName} ${i.borrowerCode}` },
+    { key: 'borrowerName', label: tr('নিয়েছেন'), sortable: true },
+    { key: 'issuedOn', label: tr('ইস্যু'), sortable: true },
+    { key: 'dueOn', label: tr('ফেরতের তারিখ'), sortable: true },
+    { key: 'fineDue', label: tr('জরিমানা'), sortable: true, align: 'end', value: (i) => (i.returnedOn ? (this.tab() === 'fines' ? i.fineOutstanding : i.fine) : i.fineDue) },
   ];
 
   // book modal
@@ -73,7 +74,7 @@ export class LibraryPage {
   protected returning = signal(false);
 
   protected loadError = signal<string | null>(null);
-  private failed(e: unknown) { this.loadError.set(errorMessage(e, 'তথ্য লোড করা যায়নি।')); }
+  private failed(e: unknown) { this.loadError.set(errorMessage(e, tr('তথ্য লোড করা যায়নি।'))); }
   protected retry() { this.loadError.set(null); this.loadSummary(); this.loadTab(this.tab(), this.lang(), this.category()); }
 
   constructor() {
@@ -105,14 +106,14 @@ export class LibraryPage {
     const f = this.form(); this.saving.set(true); this.errs.set({});
     try {
       await this.api.saveBook(this.bookId(), { ...f, totalCopies: +toEnDigits(String(f.totalCopies)) || 0 });
-      this.toast.success('বই সংরক্ষণ হয়েছে'); this.bookOpen.set(false); this.refresh();
+      this.toast.success(tr('বই সংরক্ষণ হয়েছে')); this.bookOpen.set(false); this.refresh();
     } catch (e) { const fe = fieldErrors(e); this.errs.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.saving.set(false); }
   }
   protected async deleteBook() {
     const id = this.bookId(); if (!id) return;
-    if (!(await this.confirm.ask({ message: 'বইটি ও তার ইস্যুর পুরনো রেকর্ড মুছে যাবে।', itemName: this.form().title, confirmLabel: 'মুছে ফেলুন' }))) return;
-    try { await this.api.deleteBook(id); this.toast.success('বই মুছে ফেলা হয়েছে'); this.bookOpen.set(false); this.refresh(); }
+    if (!(await this.confirm.ask({ message: tr('বইটি ও তার ইস্যুর পুরনো রেকর্ড মুছে যাবে।'), itemName: this.form().title, confirmLabel: tr('মুছে ফেলুন') }))) return;
+    try { await this.api.deleteBook(id); this.toast.success(tr('বই মুছে ফেলা হয়েছে')); this.bookOpen.set(false); this.refresh(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 
@@ -122,7 +123,7 @@ export class LibraryPage {
     this.issuing.set(true);
     try {
       await this.api.issue({ bookId: b.id, studentId: p.kind === 'student' ? p.id : null, staffId: p.kind === 'staff' ? p.id : null, days: +toEnDigits(this.days()) || 14 });
-      this.toast.success(`"${b.title}" ${p.name}-কে দেওয়া হয়েছে`); this.issueOpen.set(false); this.refresh();
+      this.toast.success(tr('"{book}" {name}-কে দেওয়া হয়েছে', { book: b.title, name: p.name })); this.issueOpen.set(false); this.refresh();
     } catch (e) { this.toast.error(errorMessage(e)); }
     finally { this.issuing.set(false); }
   }
@@ -133,8 +134,8 @@ export class LibraryPage {
     try {
       const fine = +toEnDigits(this.retFine()) || 0;
       const r = await this.api.returnBook(i.id, fine, fine > 0 && this.retCollect());
-      const amt = r.fine.toLocaleString('bn-BD');
-      this.toast.success(!r.fine ? 'বই ফেরত নেওয়া হয়েছে' : r.finePaid ? `বই ফেরত নেওয়া হয়েছে, জরিমানা ${amt} টাকা আয়ে জমা হয়েছে` : `বই ফেরত নেওয়া হয়েছে, জরিমানা ${amt} টাকা বাকি রইল`);
+      const amt = fmtMoney(r.fine);
+      this.toast.success(!r.fine ? tr('বই ফেরত নেওয়া হয়েছে') : r.finePaid ? tr('বই ফেরত নেওয়া হয়েছে, জরিমানা {amt} আয়ে জমা হয়েছে', { amt }) : tr('বই ফেরত নেওয়া হয়েছে, জরিমানা {amt} বাকি রইল', { amt }));
       this.retOpen.set(false); this.refresh();
     } catch (e) { this.toast.error(errorMessage(e)); }
     finally { this.returning.set(false); }
@@ -151,15 +152,15 @@ export class LibraryPage {
     this.fineBusy.set(true);
     try {
       const r = await this.api.collectFine(i.id, +toEnDigits(this.fineAmt()) || null);
-      this.toast.success(r.fineOutstanding ? `জমা হয়েছে, এখনও বাকি ${r.fineOutstanding.toLocaleString('bn-BD')} টাকা` : 'জরিমানা আদায় হয়ে আয়ে জমা হয়েছে');
+      this.toast.success(r.fineOutstanding ? tr('জমা হয়েছে, এখনও বাকি {amt}', { amt: fmtMoney(r.fineOutstanding) }) : tr('জরিমানা আদায় হয়ে আয়ে জমা হয়েছে'));
       this.fineOpen.set(false); this.refresh();
     } catch (e) { const fe = fieldErrors(e); this.toast.error(Object.values(fe)[0] ?? errorMessage(e)); }
     finally { this.fineBusy.set(false); }
   }
   protected async waiveFine() {
     const i = this.fineIssue(); if (!i) return;
-    if (!(await this.confirm.ask({ message: 'বাকি জরিমানা মাফ হয়ে যাবে। আগে যা আদায় হয়েছে তা হিসাবে থেকে যাবে।', itemName: `${i.borrowerName} · ${i.fineOutstanding.toLocaleString('bn-BD')} টাকা`, confirmLabel: 'মাফ করুন' }))) return;
-    try { await this.api.waiveFine(i.id); this.toast.success('জরিমানা মাফ করা হয়েছে'); this.fineOpen.set(false); this.refresh(); }
+    if (!(await this.confirm.ask({ message: tr('বাকি জরিমানা মাফ হয়ে যাবে। আগে যা আদায় হয়েছে তা হিসাবে থেকে যাবে।'), itemName: `${i.borrowerName} · ${fmtMoney(i.fineOutstanding)}`, confirmLabel: tr('মাফ করুন') }))) return;
+    try { await this.api.waiveFine(i.id); this.toast.success(tr('জরিমানা মাফ করা হয়েছে')); this.fineOpen.set(false); this.refresh(); }
     catch (e) { this.toast.error(errorMessage(e)); }
   }
 }

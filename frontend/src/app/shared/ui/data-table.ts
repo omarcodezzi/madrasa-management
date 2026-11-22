@@ -7,6 +7,7 @@ import { DigitsPipe, NumPipe } from '../../core/format';
 import { Icon } from './icon';
 import { Skeleton } from './skeleton';
 import { EmptyState } from './empty-state';
+import { TrPipe, tr } from '../../core/tr';
 
 export interface Column<T> {
   key: string;
@@ -44,7 +45,7 @@ type SortDir = 'asc' | 'desc';
 @Component({
   selector: 'm-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, FormsModule, Icon, Skeleton, EmptyState, NumPipe, DigitsPipe],
+  imports: [TrPipe, NgTemplateOutlet, FormsModule, Icon, Skeleton, EmptyState, NumPipe, DigitsPipe],
   host: { class: 'block' },
   templateUrl: './data-table.html',
 })
@@ -55,9 +56,9 @@ export class DataTable<T extends object> {
   readonly loading = input(false);
   readonly selectable = input(false);
   readonly searchable = input(true);
-  readonly searchPlaceholder = input('খুঁজুন…');
+  readonly searchPlaceholder = input(tr('খুঁজুন…'));
   readonly exportName = input<string | null>('export');
-  readonly emptyTitle = input('কোনো তথ্য নেই');
+  readonly emptyTitle = input(tr('কোনো তথ্য নেই'));
   readonly emptyText = input<string>();
   readonly pageSizes = input([10, 25, 50, 100]);
   readonly rowClick = output<T>();

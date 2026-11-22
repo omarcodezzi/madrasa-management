@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, input, model, viewChild } from '@angular/core';
 import { Icon } from './icon';
+import { TrPipe } from '../../core/tr';
 
 /**
  * Native <dialog>: focus trap, Esc to close and backdrop come from the browser.
@@ -8,14 +9,14 @@ import { Icon } from './icon';
 @Component({
   selector: 'm-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon],
+  imports: [TrPipe, Icon],
   template: `
     <dialog #dlg (close)="open.set(false)" (click)="onBackdrop($event)" [attr.aria-labelledby]="'dlg-t'"
       class="m-auto w-[min(560px,calc(100vw-24px))] max-h-[calc(100dvh-24px)] p-0 rounded-2xl border border-line bg-card text-ink shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-[2px]"
       [style.width]="width()">
       <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-line">
         <h3 id="dlg-t">{{ title() }}</h3>
-        <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft text-mut cursor-pointer" (click)="open.set(false)" aria-label="বন্ধ করুন">
+        <button type="button" class="size-10 grid place-items-center rounded-lg hover:bg-soft text-mut cursor-pointer" (click)="open.set(false)" [attr.aria-label]="'বন্ধ করুন' | tr">
           <m-icon name="x" />
         </button>
       </div>

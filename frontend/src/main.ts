@@ -1,5 +1,11 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { loadTranslations } from './app/core/tr';
 
-bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+// English text must be in place before any module builds its labels (routes, menus,
+// column titles), so it loads first and the app is imported after it.
+loadTranslations()
+  .then(async () => {
+    const [{ appConfig }, { App }] = await Promise.all([import('./app/app.config'), import('./app/app')]);
+    await bootstrapApplication(App, appConfig);
+  })
+  .catch((err) => console.error(err));

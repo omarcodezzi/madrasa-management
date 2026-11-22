@@ -11,11 +11,13 @@ import { Avatar, Button, Card, FormField, Icon, PageHeader, resizePhoto, Skeleto
 import { Guardian, StudentDetail, StudentInput, GENDER_LABEL } from './student.models';
 import { StudentsApi } from './students.service';
 import { OfficeApi } from '../office/office.api';
+import { TrPipe, tr } from '../../core/tr';
 
 const DRAFT_KEY = 'mms.admission-draft';
-const STEPS = ['শিক্ষার্থীর তথ্য', 'অভিভাবক ও ঠিকানা', 'শ্রেণি ও বেতন', 'যাচাই করুন'] as const;
+const STEPS = [tr('শিক্ষার্থীর তথ্য'), tr('অভিভাবক ও ঠিকানা'), tr('শ্রেণি ও বেতন'), tr('যাচাই করুন')] as const;
 
-const blankGuardian = (relation = 'পিতা', isPrimary = true): Guardian => ({ name: '', relation, phone: '', isPrimary });
+// The relation is stored in Bangla and translated only on screen.
+const blankGuardian = (relation = 'পিতা', isPrimary = true): Guardian => ({ name: '', relation, phone: '', isPrimary }); // i18n-ignore
 const blank = (): StudentInput => ({
   name: '', gender: 'Male', isOrphan: false, isResidential: false, classId: null, roll: null, admissionDate: todayIso(),
   guardians: [blankGuardian()], fatherName: '', motherName: '', phone: '', presentAddress: '', permanentAddress: '',
@@ -25,7 +27,7 @@ const blank = (): StudentInput => ({
 @Component({
   selector: 'app-student-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DigitsPipe, NumPipe, MoneyPipe, DatePipe, Avatar, Button, Card, FormField, Icon, PageHeader, Skeleton],
+  imports: [TrPipe, FormsModule, RouterLink, DigitsPipe, NumPipe, MoneyPipe, DatePipe, Avatar, Button, Card, FormField, Icon, PageHeader, Skeleton],
   templateUrl: './student-form.html',
 })
 export class StudentFormPage implements HasUnsavedChanges {
@@ -54,7 +56,7 @@ export class StudentFormPage implements HasUnsavedChanges {
   protected sameAddress = signal(false);
   protected isEdit = computed(() => !!this.id());
   protected genders: { v: Gender; l: string }[] = [{ v: 'Male', l: GENDER_LABEL.Male }, { v: 'Female', l: GENDER_LABEL.Female }];
-  protected relations = ['পিতা', 'মাতা', 'চাচা', 'মামা', 'ভাই', 'দাদা', 'নানা', 'অন্যান্য'];
+  protected relations = ['পিতা', 'মাতা', 'চাচা', 'মামা', 'ভাই', 'দাদা', 'নানা', 'অন্যান্য']; // i18n-ignore
   protected bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   protected selectedClass = computed(() => this.lookups.classes().find((c) => c.id === this.f().classId));
 
@@ -127,7 +129,7 @@ export class StudentFormPage implements HasUnsavedChanges {
     this.f.update((x) => ({ ...x, guardians: x.guardians.map((g, j) => (j === i ? { ...g, [k]: v } : k === 'isPrimary' && v ? { ...g, isPrimary: false } : g)) }));
     this.dirty.set(true);
   }
-  protected addGuardian() { this.set('guardians', [...this.f().guardians, blankGuardian('মাতা', false)]); }
+  protected addGuardian() { this.set('guardians', [...this.f().guardians, blankGuardian(tr('মাতা'), false)]); }
   protected removeGuardian(i: number) {
     const l = this.f().guardians.filter((_, j) => j !== i);
     if (l.length && !l.some((g) => g.isPrimary)) l[0] = { ...l[0], isPrimary: true };
@@ -137,7 +139,7 @@ export class StudentFormPage implements HasUnsavedChanges {
   protected fatherChanged(v: string) {
     this.set('fatherName', v);
     const g = this.f().guardians[0];
-    if (g && g.relation === 'পিতা' && (!g.name || g.name === this.prevFather)) this.setG(0, 'name', v);
+    if (g && g.relation === 'পিতা' && (!g.name || g.name === this.prevFather)) this.setG(0, 'name', v); // i18n-ignore
     this.prevFather = v;
   }
   private prevFather = '';
@@ -153,17 +155,17 @@ export class StudentFormPage implements HasUnsavedChanges {
   private phoneOk = (p?: string | null) => { const d = toEnDigits(p ?? '').replace(/\D/g, '').replace(/^88/, ''); return /^01[3-9]\d{8}$/.test(d); };
   protected errors = computed(() => {
     const v = this.f(), e: Record<string, string> = { ...this.serverErrors() };
-    if (!v.name.trim()) e['name'] ??= 'শিক্ষার্থীর নাম লিখুন';
-    if (v.dateOfBirth && v.dateOfBirth > todayIso()) e['dateOfBirth'] ??= 'জন্ম তারিখ ভবিষ্যতে হতে পারে না';
-    if (v.phone && !this.phoneOk(v.phone)) e['phone'] ??= 'সঠিক মোবাইল নম্বর লিখুন (১১ সংখ্যা)';
-    if (!v.fatherName?.trim()) e['fatherName'] ??= 'পিতার নাম লিখুন';
-    if (!v.guardians.length) e['guardians'] ??= 'অন্তত একজন অভিভাবক যোগ করুন';
+    if (!v.name.trim()) e['name'] ??= tr('শিক্ষার্থীর নাম লিখুন');
+    if (v.dateOfBirth && v.dateOfBirth > todayIso()) e['dateOfBirth'] ??= tr('জন্ম তারিখ ভবিষ্যতে হতে পারে না');
+    if (v.phone && !this.phoneOk(v.phone)) e['phone'] ??= tr('সঠিক মোবাইল নম্বর লিখুন (১১ সংখ্যা)');
+    if (!v.fatherName?.trim()) e['fatherName'] ??= tr('পিতার নাম লিখুন');
+    if (!v.guardians.length) e['guardians'] ??= tr('অন্তত একজন অভিভাবক যোগ করুন');
     v.guardians.forEach((g, i) => {
-      if (!g.name.trim()) e[`guardians[${i}].name`] ??= 'অভিভাবকের নাম লিখুন';
-      if (!this.phoneOk(g.phone)) e[`guardians[${i}].phone`] ??= 'সঠিক মোবাইল নম্বর লিখুন (১১ সংখ্যা)';
+      if (!g.name.trim()) e[`guardians[${i}].name`] ??= tr('অভিভাবকের নাম লিখুন');
+      if (!this.phoneOk(g.phone)) e[`guardians[${i}].phone`] ??= tr('সঠিক মোবাইল নম্বর লিখুন (১১ সংখ্যা)');
     });
-    if (!v.classId) e['classId'] ??= 'শ্রেণি বাছাই করুন';
-    if (v.monthlyFeeOverride != null && v.monthlyFeeOverride < 0) e['monthlyFeeOverride'] ??= 'বেতন ঋণাত্মক হতে পারে না';
+    if (!v.classId) e['classId'] ??= tr('শ্রেণি বাছাই করুন');
+    if (v.monthlyFeeOverride != null && v.monthlyFeeOverride < 0) e['monthlyFeeOverride'] ??= tr('বেতন ঋণাত্মক হতে পারে না');
     return e;
   });
   private stepOf(key: string) {
@@ -176,7 +178,7 @@ export class StudentFormPage implements HasUnsavedChanges {
 
   protected next() {
     this.tried.update((s) => new Set(s).add(this.step()));
-    if (!this.stepValid(this.step())) { this.toast.error('লাল চিহ্নিত ঘরগুলো ঠিক করুন'); this.focusFirstError(); return; }
+    if (!this.stepValid(this.step())) { this.toast.error(tr('লাল চিহ্নিত ঘরগুলো ঠিক করুন')); this.focusFirstError(); return; }
     this.step.update((s) => Math.min(s + 1, STEPS.length - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -191,7 +193,7 @@ export class StudentFormPage implements HasUnsavedChanges {
   protected async save(printAfter = false) {
     this.tried.set(new Set([0, 1, 2]));
     const bad = [0, 1, 2].find((s) => !this.stepValid(s));
-    if (bad !== undefined) { this.step.set(bad); this.toast.error('লাল চিহ্নিত ঘরগুলো ঠিক করুন'); this.focusFirstError(); return; }
+    if (bad !== undefined) { this.step.set(bad); this.toast.error(tr('লাল চিহ্নিত ঘরগুলো ঠিক করুন')); this.focusFirstError(); return; }
     this.saving.set(true);
     const v = this.f();
     const payload: StudentInput = {
@@ -204,7 +206,7 @@ export class StudentFormPage implements HasUnsavedChanges {
       this.dirty.set(false);
       if (!this.isEdit() && !this.application()) try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       if (!this.isEdit() && this.application()) await this.office.admitted(+this.application()!, s.id).catch(() => {});
-      this.toast.success(this.isEdit() ? 'পরিবর্তন সংরক্ষণ হয়েছে' : `${s.name} এর ভর্তি সম্পন্ন হয়েছে (আইডি ${s.studentCode})`);
+      this.toast.success(this.isEdit() ? tr('পরিবর্তন সংরক্ষণ হয়েছে') : tr('{name} এর ভর্তি সম্পন্ন হয়েছে (আইডি {code})', { name: s.name, code: s.studentCode }));
       if (printAfter) this.print.print({ kind: 'admission', data: s });
       this.router.navigate(['/students', s.id]);
     } catch (e) {

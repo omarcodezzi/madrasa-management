@@ -1,4 +1,5 @@
 import { AttendanceStatus } from '../../core/api';
+import { tr } from '../../core/tr';
 
 export interface AttendanceRow {
   studentId: number; studentCode: string; name: string; photoPath?: string; classId: number; className: string; roll: number;
@@ -8,5 +9,5 @@ export interface ClassTally { classId: number; className: string; total: number;
 export interface AttendanceDay { date: string; isWorkDay: boolean; holidayTitle?: string; rows: AttendanceRow[]; classes: ClassTally[]; }
 export interface ScanResult { ok: boolean; alreadyMarked: boolean; message: string; studentId?: number; name?: string; className?: string; roll?: number; photoPath?: string; checkIn?: string; }
 
-export const ATT_LABEL: Record<AttendanceStatus, string> = { Present: 'উপস্থিত', Absent: 'অনুপস্থিত', Late: 'দেরি', Leave: 'ছুটি' };
+export const ATT_LABEL: Record<AttendanceStatus, string> = { Present: tr('উপস্থিত'), Absent: tr('অনুপস্থিত'), Late: tr('দেরি'), Leave: tr('ছুটি') };
 export const ATT_TONE = { Present: 'success', Absent: 'danger', Late: 'warning', Leave: 'info' } as const;

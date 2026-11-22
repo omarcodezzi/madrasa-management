@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { errorMessage, fileUrl } from '../../core/api';
-import { DatePipe, formatDate, NumPipe, toBnDigits, toEnDigits, todayIso } from '../../core/format';
+import { DatePipe, formatDate, NumPipe, toBnDigits, toEnDigits, todayIso, fmt } from '../../core/format';
 import { PreferencesService } from '../../core/preferences.service';
 import { ToastService } from '../../core/toast.service';
 import { Avatar, Badge, Button, Card, ConfirmService, EmptyState, Icon, IconButton, PageHeader, Skeleton } from '../../shared/ui';
@@ -11,13 +11,14 @@ import { HifzLog, HifzOverview, HifzStudentDetail, JuzCell, PAGES_PER_JUZ, QUALI
 import { HifzApi } from './hifz.service';
 import { JuzGrid, JuzRing } from './juz-grid';
 import { WeekChart } from './week-chart';
+import { TrPipe, tr } from '../../core/tr';
 
 interface Form { date: string; juz: string; from: string; to: string; sabakText: string; sabqi: string; manzil: string; mistakes: string; quality: number | null; remarks: string; }
 
 @Component({
   selector: 'app-hifz-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, IconButton, PageHeader, Skeleton, JuzGrid, JuzRing, WeekChart],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, NumPipe, Avatar, Badge, Button, Card, EmptyState, Icon, IconButton, PageHeader, Skeleton, JuzGrid, JuzRing, WeekChart],
   templateUrl: './hifz-page.html',
 })
 export class HifzPage {
@@ -99,7 +100,7 @@ export class HifzPage {
     try {
       await this.api.saveLog(id, { date: f.date, sabakJuz: n(f.juz), sabakFromPage: n(f.from), sabakToPage: n(f.to) ?? n(f.from), sabakText: f.sabakText || null,
         sabqiText: f.sabqi || null, manzilText: f.manzil || null, mistakes: n(f.mistakes) ?? 0, quality: f.quality, remarks: f.remarks || null });
-      this.toast.success(`${this.detail()?.name} এর পড়া সংরক্ষণ হয়েছে`);
+      this.toast.success(tr('{name} এর পড়া সংরক্ষণ হয়েছে', { name: this.detail()?.name }));
       await this.loadStudent(id);
       const o = await this.api.overview(); this.overview.set(o);
     } catch (e) {
@@ -110,17 +111,17 @@ export class HifzPage {
 
   protected async removeLog(l: HifzLog) {
     const id = this.selectedId(); if (!id) return;
-    if (!(await this.confirm.ask({ message: 'এই দিনের সবক, সাবকি ও মানজিলের রেকর্ড মুছে যাবে।', itemName: formatDate(l.date) }))) return;
+    if (!(await this.confirm.ask({ message: tr('এই দিনের সবক, সাবকি ও মানজিলের রেকর্ড মুছে যাবে।'), itemName: formatDate(l.date) }))) return;
     try { await this.api.deleteLog(id, l.id); await this.loadStudent(id); this.loadOverview(); } catch (e) { this.toast.error(errorMessage(e)); }
   }
 
   protected async toggleJuz(c: JuzCell) {
     const id = this.selectedId(); if (!id) return;
     const next = c.status === 'Completed' ? (c.pagesDone && c.pagesDone < PAGES_PER_JUZ ? 'InProgress' : null) : 'Completed';
-    if (c.status === 'Completed' && !(await this.confirm.ask({ title: 'পারা সম্পন্ন বাতিল', message: 'এই পারা আর সম্পন্ন হিসেবে দেখাবে না।', itemName: toBnDigits(`পারা ${c.juzNo}`), confirmLabel: 'বাতিল করুন' }))) return;
+    if (c.status === 'Completed' && !(await this.confirm.ask({ title: tr('পারা সম্পন্ন বাতিল'), message: tr('এই পারা আর সম্পন্ন হিসেবে দেখাবে না।'), itemName: tr('পারা {n}', { n: fmt(c.juzNo) }), confirmLabel: tr('বাতিল করুন') }))) return;
     try {
       await this.api.setJuz(id, c.juzNo, next);
-      if (next === 'Completed') this.toast.success(toBnDigits(`মাশাআল্লাহ! ${c.juzNo} নং পারা সম্পন্ন`));
+      if (next === 'Completed') this.toast.success(tr('মাশাআল্লাহ! {n} নং পারা সম্পন্ন', { n: fmt(c.juzNo) }));
       await this.loadStudent(id); this.loadOverview();
     } catch (e) { this.toast.error(errorMessage(e)); }
   }

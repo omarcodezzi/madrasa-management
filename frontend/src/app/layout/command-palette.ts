@@ -6,9 +6,10 @@ import { Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { API, PagedResult } from '../core/api';
 import { AuthService, P } from '../core/auth/auth.service';
-import { DigitsPipe, toEnDigits } from '../core/format';
+import { DigitsPipe, toEnDigits, fmt } from '../core/format';
 import { Avatar, Icon, IconName } from '../shared/ui';
 import { ALL_NAV } from './nav';
+import { TrPipe, tr } from '../core/tr';
 
 interface StudentHit { id: number; studentCode: string; name: string; className?: string; roll?: number; phone?: string; }
 interface Item { kind: 'page' | 'action' | 'student'; label: string; sub?: string; icon: IconName; url: string; student?: StudentHit; }
@@ -17,9 +18,9 @@ interface Item { kind: 'page' | 'action' | 'student'; label: string; sub?: strin
 @Component({
   selector: 'app-command-palette',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DigitsPipe, Icon, Avatar],
+  imports: [TrPipe, TranslocoPipe, DigitsPipe, Icon, Avatar],
   template: `
-    <dialog #dlg (close)="open.set(false)" (click)="$event.target === dlg && open.set(false)" aria-label="খুঁজুন"
+    <dialog #dlg (close)="open.set(false)" (click)="$event.target === dlg && open.set(false)" [attr.aria-label]="'খুঁজুন' | tr"
       class="mx-auto mt-[10vh] w-[min(640px,calc(100vw-24px))] p-0 rounded-2xl border border-line bg-card text-ink shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-[2px]">
       <div class="flex items-center gap-3 px-4 border-b border-line">
         <m-icon name="search" class="text-mut" />
@@ -90,7 +91,7 @@ export class CommandPalette {
     const match = (i: Item) => !q || i.label.toLowerCase().includes(q) || (i.sub ?? '').toLowerCase().includes(q);
     const stu = this.students().map<Item>((s) => ({
       kind: 'student', label: s.name, icon: 'users', url: `/students/${s.id}`, student: s,
-      sub: [s.studentCode, s.className, s.roll ? `রোল ${s.roll}` : '', s.phone].filter(Boolean).join(' · '),
+      sub: [s.studentCode, s.className, s.roll ? tr('রোল {n}', { n: fmt(s.roll) }) : '', s.phone].filter(Boolean).join(' · '),
     }));
     return [...stu, ...this.actions().filter(match), ...this.pages().filter(match).slice(0, q ? 6 : 8)];
   });

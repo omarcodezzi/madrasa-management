@@ -3,6 +3,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { PreferencesService } from '../../core/preferences.service';
 import { SessionService } from '../../core/session.service';
 import { Segmented } from '../../shared/ui';
+import { tr } from '../../core/tr';
 
 /** Green panel with the star pattern and a mihrab arch (spec 2.3: pattern allowed on login). */
 @Component({
@@ -41,5 +42,5 @@ import { Segmented } from '../../shared/ui';
 export class AuthLayout {
   protected prefs = inject(PreferencesService);
   protected session = inject(SessionService);
-  protected langs = [{ value: 'bn' as const, label: 'বাংলা' }, { value: 'en' as const, label: 'English' }];
+  protected langs = [{ value: 'bn' as const, label: tr('বাংলা') }, { value: 'en' as const, label: 'English' }];
 }

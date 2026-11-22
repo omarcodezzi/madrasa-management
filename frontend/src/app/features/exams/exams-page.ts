@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { errorMessage } from '../../core/api';
 import { AuthService, P } from '../../core/auth/auth.service';
-import { DatePipe, NumPipe, toBnDigits, toEnDigits } from '../../core/format';
+import { DatePipe, NumPipe, toBnDigits, toEnDigits, fmt } from '../../core/format';
 import { LookupsService } from '../../core/lookups.service';
 import { PreferencesService } from '../../core/preferences.service';
 import { ToastService } from '../../core/toast.service';
@@ -13,13 +13,14 @@ import { fieldErrors } from '../academic/academic.service';
 import { StudentsApi } from '../students/students.service';
 import { computeResults, ExamDto, gradeTone, MarkCell, ResultSheet } from './exam.models';
 import { ExamsApi } from './exams.service';
+import { TrPipe, tr } from '../../core/tr';
 
 type Save = 'idle' | 'saving' | 'saved' | 'error';
 
 @Component({
   selector: 'app-exams-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, DatePipe, NumPipe, Badge, Button, Card, Chips, EmptyState, Icon, IconButton, Modal, PageHeader, Skeleton],
+  imports: [TrPipe, FormsModule, RouterLink, DatePipe, NumPipe, Badge, Button, Card, Chips, EmptyState, Icon, IconButton, Modal, PageHeader, Skeleton],
   templateUrl: './exams-page.html',
 })
 export class ExamsPage implements OnDestroy {
@@ -108,11 +109,11 @@ export class ExamsPage implements OnDestroy {
   protected pickClass(id: number) { if (id !== this.classId()) this.classId.set(id); }
 
   // ---- marks entry ----
-  private show(c: MarkCell) { return c.isAbsent ? 'অ' : c.marks == null ? '' : this.prefs.digits() === 'bn' ? toBnDigits(String(c.marks)) : String(c.marks); }
+  private show(c: MarkCell) { return c.isAbsent ? tr('অ') : c.marks == null ? '' : this.prefs.digits() === 'bn' ? toBnDigits(String(c.marks)) : String(c.marks); }
   private parse(v: string): { marks: number | null; isAbsent: boolean } {
     const t = toEnDigits(v.trim());
     if (!t) return { marks: null, isAbsent: false };
-    if (/^(অ|a|ab|abs|অনু)/i.test(t)) return { marks: null, isAbsent: true };
+    if (/^(অ|a|ab|abs|অনু)/i.test(t)) return { marks: null, isAbsent: true }; // i18n-ignore
     const n = Number(t);
     return { marks: Number.isFinite(n) ? n : null, isAbsent: false };
   }
@@ -157,7 +158,7 @@ export class ExamsPage implements OnDestroy {
     for (const e of entries) {
       const sub = s.subjects.find((x) => x.id === e.classSubjectId)!;
       const raw = toEnDigits((this.input()[`${e.studentId}:${e.classSubjectId}`] ?? '').trim());
-      if (raw && !e.isAbsent && (e.marks == null || e.marks < 0 || e.marks > sub.fullMarks)) local[`${e.studentId}:${e.classSubjectId}`] = `০ থেকে ${toBnDigits(String(sub.fullMarks))} এর মধ্যে নম্বর দিন, অনুপস্থিত হলে "অ" লিখুন`;
+      if (raw && !e.isAbsent && (e.marks == null || e.marks < 0 || e.marks > sub.fullMarks)) local[`${e.studentId}:${e.classSubjectId}`] = tr('০ থেকে {max} এর মধ্যে নম্বর দিন, অনুপস্থিত হলে "অ" লিখুন', { max: fmt(sub.fullMarks) });
     }
     const send = entries.filter((e) => !local[`${e.studentId}:${e.classSubjectId}`]);
     this.cellErr.update((x) => ({ ...x, ...local }));
@@ -178,7 +179,7 @@ export class ExamsPage implements OnDestroy {
   /** Route guard: save what is pending; only ask if some marks could not be saved. */
   async leave() {
     await this.flush();
-    return this.save() !== 'error' || window.confirm('কিছু নম্বর সংরক্ষণ হয়নি (লাল ঘর)। পাতা ছেড়ে গেলে সেগুলো হারিয়ে যাবে। তবুও যাবেন?');
+    return this.save() !== 'error' || window.confirm(tr('কিছু নম্বর সংরক্ষণ হয়নি (লাল ঘর)। পাতা ছেড়ে গেলে সেগুলো হারিয়ে যাবে। তবুও যাবেন?'));
   }
   ngOnDestroy() { this.flush(); }
   protected errText = computed(() => Object.values(this.cellErr())[0] ?? null);
@@ -193,25 +194,25 @@ export class ExamsPage implements OnDestroy {
     try {
       const e = await this.api.save(f.id || null, { name: f.name, startDate: f.startDate || null });
       this.examOpen.set(false);
-      this.toast.success(f.id ? 'পরীক্ষার তথ্য হালনাগাদ হয়েছে' : `${e.name} যোগ হয়েছে`);
+      this.toast.success(f.id ? tr('পরীক্ষার তথ্য হালনাগাদ হয়েছে') : tr('{name} যোগ হয়েছে', { name: e.name }));
       await this.loadExams(); this.examId.set(e.id);
     } catch (e) { const fe = fieldErrors(e); this.examErr.set(fe); if (!Object.keys(fe).length) this.toast.error(errorMessage(e)); }
     finally { this.savingExam.set(false); }
   }
   protected async removeExam(e: ExamDto) {
-    if (!(await this.confirm.ask({ message: 'পরীক্ষাটি মুছে যাবে। নম্বর দেওয়া থাকলে মুছা যাবে না।', itemName: e.name }))) return;
+    if (!(await this.confirm.ask({ message: tr('পরীক্ষাটি মুছে যাবে। নম্বর দেওয়া থাকলে মুছা যাবে না।'), itemName: e.name }))) return;
     try { await this.api.remove(e.id); this.examId.set(null); this.sheet.set(null); await this.loadExams(); }
     catch (err) { this.toast.error(errorMessage(err)); }
   }
   protected async publish(value: boolean) {
     const e = this.exam(); if (!e) return;
     await this.flush();
-    const msg = value ? 'ফলাফল প্রকাশ হলে নম্বর আর বদলানো যাবে না, আর মার্কশিট ও অভিভাবক পোর্টালে ফলাফল দেখা যাবে।' : 'প্রকাশ বাতিল করলে নম্বর আবার বদলানো যাবে।';
-    if (!(await this.confirm.ask({ title: value ? 'ফলাফল প্রকাশ' : 'প্রকাশ বাতিল', message: msg, itemName: e.name, confirmLabel: value ? 'প্রকাশ করুন' : 'প্রকাশ বাতিল করুন' }))) return;
+    const msg = value ? tr('ফলাফল প্রকাশ হলে নম্বর আর বদলানো যাবে না, আর মার্কশিট ও অভিভাবক পোর্টালে ফলাফল দেখা যাবে।') : tr('প্রকাশ বাতিল করলে নম্বর আবার বদলানো যাবে।');
+    if (!(await this.confirm.ask({ title: value ? tr('ফলাফল প্রকাশ') : tr('প্রকাশ বাতিল'), message: msg, itemName: e.name, confirmLabel: value ? tr('প্রকাশ করুন') : tr('প্রকাশ বাতিল করুন') }))) return;
     try {
       const updated = await this.api.publish(e.id, value);
       this.exams.update((l) => l?.map((x) => (x.id === e.id ? updated : x)) ?? l);
-      this.toast.success(value ? 'ফলাফল প্রকাশিত হয়েছে' : 'প্রকাশ বাতিল হয়েছে');
+      this.toast.success(value ? tr('ফলাফল প্রকাশিত হয়েছে') : tr('প্রকাশ বাতিল হয়েছে'));
       this.loadSheet(e.id, this.classId());
     } catch (err) { this.toast.error(errorMessage(err)); }
   }
@@ -227,7 +228,7 @@ export class ExamsPage implements OnDestroy {
     const s = this.sheet(); if (!s) return;
     try {
       const [res, st] = await Promise.all([this.api.student(studentId, s.examId), this.students.get(studentId)]);
-      if (!res.length) { this.toast.error('এই শিক্ষার্থীর কোনো নম্বর নেই'); return; }
+      if (!res.length) { this.toast.error(tr('এই শিক্ষার্থীর কোনো নম্বর নেই')); return; }
       this.printer.print({ kind: 'marksheet', data: [{ student: st, result: res[0] }] });
     } catch (e) { this.toast.error(errorMessage(e)); }
   }

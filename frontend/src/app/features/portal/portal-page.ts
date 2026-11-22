@@ -8,6 +8,7 @@ import { JuzGrid, JuzRing } from '../hifz/juz-grid';
 import { OfficeApi } from '../office/office.api';
 import { PortalHome } from '../office/office.models';
 import { AttendanceCalendar } from '../students/attendance-calendar';
+import { TrPipe } from '../../core/tr';
 
 type Detail = Awaited<ReturnType<OfficeApi['portalStudent']>>;
 
@@ -15,7 +16,7 @@ type Detail = Awaited<ReturnType<OfficeApi['portalStudent']>>;
 @Component({
   selector: 'app-portal-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Card, EmptyState, PageHeader, Skeleton, AttendanceCalendar, JuzGrid, JuzRing],
+  imports: [TrPipe, DatePipe, DigitsPipe, MoneyPipe, MonthPipe, NumPipe, Avatar, Badge, Card, EmptyState, PageHeader, Skeleton, AttendanceCalendar, JuzGrid, JuzRing],
   templateUrl: './portal-page.html',
 })
 export class PortalPage {
