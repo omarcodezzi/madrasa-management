@@ -107,6 +107,7 @@
     "back": "Back to sign in",
     "badCredentials": "User name or password is incorrect",
     "locked": "After 5 wrong tries, sign-in is blocked for 15 minutes.",
+    "sessionEnded": "Your session ended (it expired or was closed for security). Please sign in again.",
     "currentPassword": "Current password",
     "newPassword": "New password",
     "newPasswordHint": "At least 8 characters",

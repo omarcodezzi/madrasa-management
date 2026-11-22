@@ -1,6 +1,7 @@
 using Madrasa.Application.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Madrasa.Api.Controllers;
 
@@ -8,7 +9,7 @@ namespace Madrasa.Api.Controllers;
 [Route("api/auth")]
 public class AuthController(IAuthService auth) : ControllerBase
 {
-    [HttpPost("login"), AllowAnonymous]
+    [HttpPost("login"), AllowAnonymous, EnableRateLimiting("login")]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest req, CancellationToken ct)
     {
         var res = await auth.LoginAsync(req, ct);
@@ -24,11 +25,13 @@ public class AuthController(IAuthService auth) : ControllerBase
     }
 
     [HttpPost("change-password"), Authorize]
-    public async Task<IActionResult> ChangePassword(ChangePasswordRequest req, CancellationToken ct)
+    public async Task<ActionResult<LoginResponse>> ChangePassword(ChangePasswordRequest req, CancellationToken ct)
     {
         var id = User.FindFirst("sub")?.Value;
         if (id is null) return Unauthorized();
         var err = await auth.ChangePasswordAsync(id, req, ct);
-        return err is null ? NoContent() : Problem(title: err, statusCode: 400);
+        if (err is not null) return Problem(title: err, statusCode: 400);
+        // The change ends every other session; this device gets a fresh token
+        return Ok(await auth.IssueAsync(id, ct));
     }
 }

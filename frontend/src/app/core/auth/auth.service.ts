@@ -45,14 +45,19 @@ export class AuthService {
     this.save({ ...this.state()!, user: u });
   }
 
-  changePassword(currentPassword: string, newPassword: string) {
-    return firstValueFrom(this.http.post<void>(`${API}/auth/change-password`, { currentPassword, newPassword }));
+  /** The server ends every other session on a password change and returns a fresh token for this one. */
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const r = await firstValueFrom(this.http.post<LoginResponse>(`${API}/auth/change-password`, { currentPassword, newPassword }));
+    if (r?.accessToken) this.save({ token: r.accessToken, expiresAt: r.expiresAt, user: r.user });
   }
 
-  logout(redirect = true) {
+  /** expired: the server ended the session (time-out, password or role change); the login page says so and returns here. */
+  logout(redirect = true, expired = false) {
     this.state.set(null);
     try { localStorage.removeItem(KEY); } catch { /* ignore */ }
-    if (redirect) this.router.navigate(['/login']);
+    if (!redirect) return;
+    const here = this.router.url;
+    this.router.navigate(['/login'], expired && here && !here.startsWith('/login') ? { queryParams: { expired: 1, returnUrl: here } } : {});
   }
 
   /** Home page for this user: staff → dashboard, students/guardians → portal. */

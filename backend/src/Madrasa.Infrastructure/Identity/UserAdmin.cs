@@ -75,8 +75,11 @@ public class UserAdmin(UserManager<AppUser> users, RoleManager<IdentityRole> rol
             if (!string.IsNullOrEmpty(input.Password)) await ResetPasswordAsync(u.Id, input.Password, ct);
         }
         var have = await users.GetRolesAsync(u);
+        var rolesChanged = have.Except(input.Roles!).Any() || input.Roles!.Except(have).Any();
         await users.RemoveFromRolesAsync(u, have.Except(input.Roles!));
         await users.AddToRolesAsync(u, input.Roles!.Except(have));
+        // Signed-in sessions carry roles and permissions, so a change (or deactivation) signs the user out everywhere
+        if (id is not null && (rolesChanged || !input.IsActive)) await users.UpdateSecurityStampAsync(u);
         return (await UsersAsync(ct)).First(x => x.Id == u.Id);
     }
 
@@ -90,11 +93,8 @@ public class UserAdmin(UserManager<AppUser> users, RoleManager<IdentityRole> rol
     {
         var u = await users.FindByIdAsync(id) ?? throw AppException.NotFound("ইউজার");
         if ((password ?? "").Length < 8) throw AppException.Invalid(new Dictionary<string, string> { ["password"] = "পাসওয়ার্ড অন্তত ৮ অক্ষর" });
-        var token = await users.GeneratePasswordResetTokenAsync(u);
-        var r = await users.ResetPasswordAsync(u, token, password!);
+        var r = await users.SetPasswordAsync(u, password!);
         if (!r.Succeeded) throw AppException.Invalid(new Dictionary<string, string> { ["password"] = PasswordError(r) });
-        await users.SetLockoutEndDateAsync(u, null);
-        await users.ResetAccessFailedCountAsync(u);
     }
 
     public async Task<List<RoleRow>> RolesAsync(CancellationToken ct)
@@ -116,6 +116,9 @@ public class UserAdmin(UserManager<AppUser> users, RoleManager<IdentityRole> rol
         var have = (await roles.GetClaimsAsync(role)).Where(c => c.Type == "perm").ToList();
         foreach (var c in have.Where(c => !permissions.Contains(c.Value))) await roles.RemoveClaimAsync(role, c);
         foreach (var p in permissions.Where(p => have.All(c => c.Value != p))) await roles.AddClaimAsync(role, new Claim("perm", p));
+        // Members must sign in again to pick up the new permissions (a removed one must stop working now, not at token expiry)
+        if (have.Count != permissions.Length || have.Any(c => !permissions.Contains(c.Value)))
+            foreach (var m in await users.GetUsersInRoleAsync(roleName)) await users.UpdateSecurityStampAsync(m);
         return (await RolesAsync(ct)).First(r => r.Name == roleName);
     }
 
