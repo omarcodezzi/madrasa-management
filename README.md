@@ -6,7 +6,7 @@ Angular + .NET 8 + Microsoft SQL Server. Built from [`docs/UI_SPEC.md`](docs/UI_
 |---|---|
 | `backend/` | .NET 8 Web API, clean architecture: `Domain` → `Application` → `Infrastructure` (EF Core, SQL Server, Identity) → `Api` |
 | `frontend/` | Angular 22 app: Tailwind CSS tokens from the prototype, Bangla/English (Transloco), shared UI library |
-| `database/` | `schema.sql` — idempotent SQL script generated from the EF Core migrations |
+| `database/` | `MMS.sql` — full script for the **MMS** database (tables, seed data, views, stored procedures); see [`docs/DATABASE.md`](docs/DATABASE.md) |
 | `docs/` | Spec, prototype, Phase 1 plan (table → screen map), screenshots |
 
 ## Run locally
@@ -19,7 +19,7 @@ docker compose up -d --build
 The API applies migrations on start, creates 9 roles with permissions and the first admin (`admin` / `ADMIN_PASSWORD`).
 In Development it also adds sample classes, 18 students and a notice. Swagger: http://localhost:5080/swagger
 
-**Without Docker:** set `ConnectionStrings__Default`, `Jwt__Key` (32+ chars) and `Seed__AdminPassword`, then
+**Without Docker (Visual Studio / `dotnet run`):** `appsettings.Development.json` already has a dev JWT key, admin password `Admin12345` and a Windows-auth connection string to `localhost` database `MMS` (edit it if your SQL Server is `.\SQLEXPRESS` or uses a sa password). Then
 ```bash
 cd backend && dotnet run --project src/Madrasa.Api
 ```
@@ -47,7 +47,7 @@ cd frontend && npm test            # number / money formatting
 cd backend
 dotnet tool restore
 dotnet ef migrations add <Name> -p src/Madrasa.Infrastructure -s src/Madrasa.Infrastructure -o Persistence/Migrations
-dotnet ef migrations script -p src/Madrasa.Infrastructure -s src/Madrasa.Infrastructure -o ../database/schema.sql --idempotent
+cd .. && bash database/build.sh   # regenerates database/schema.sql and database/MMS.sql
 ```
 
 ## Phases
