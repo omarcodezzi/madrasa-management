@@ -6,7 +6,7 @@ export type LedgerKind = 'Income' | 'Expense';
 export interface FundBalance { id: number; nameBn: string; code: string; isRestricted: boolean; in: number; out: number; balance: number; inThisMonth: number; outThisMonth: number; }
 export interface Category { id: number; nameBn: string; kind: LedgerKind; }
 export interface LedgerRow { id: number; date: string; fundId: number; fund: string; categoryId: number; category: string; kind: LedgerKind; direction: Direction; amount: number;
-  description: string | null; voucherNo: string | null; donor: string | null; donorPhone: string | null; source: 'Fee' | 'Salary' | 'Manual'; canDelete: boolean; }
+  description: string | null; voucherNo: string | null; donor: string | null; donorPhone: string | null; source: 'Fee' | 'Salary' | 'Library' | 'Manual'; canDelete: boolean; }
 export interface LedgerPage { items: LedgerRow[]; total: number; page: number; pageSize: number; totalIn: number; totalOut: number; }
 export interface LedgerFilter { from?: string; to?: string; fundId?: number; categoryId?: number; direction?: Direction; q?: string; page?: number; pageSize?: number; }
 export interface EntryInput { date: string; fundId: number; categoryId: number; amount: number; description: string | null; donorName: string | null; donorPhone: string | null; donorAddress: string | null; }
@@ -40,9 +40,10 @@ export const LANG_LABEL: Record<BookLanguage, string> = { Arabic: 'আরবি'
 export interface Book { id: number; title: string; titleAr: string | null; author: string | null; language: BookLanguage; category: string | null; shelfNo: string | null; totalCopies: number; available: number; }
 export interface BookInput { title: string; titleAr: string | null; author: string | null; language: BookLanguage; category: string | null; shelfNo: string | null; totalCopies: number; }
 export interface Issue { id: number; bookId: number; title: string; titleAr: string | null; borrowerKind: 'student' | 'staff'; borrowerId: number; borrowerCode: string; borrowerName: string;
-  issuedOn: string; dueOn: string; returnedOn: string | null; fine: number; lateDays: number; fineDue: number; }
+  issuedOn: string; dueOn: string; returnedOn: string | null; fine: number; lateDays: number; fineDue: number;
+  finePaid: number; fineWaived: number; fineOutstanding: number; }
 export interface Borrower { kind: 'student' | 'staff'; id: number; code: string; name: string; detail: string | null; }
-export interface LibrarySummary { titles: number; copies: number; out: number; overdue: number; finePerDay: number; categories: string[]; }
+export interface LibrarySummary { titles: number; copies: number; out: number; overdue: number; finePerDay: number; categories: string[]; finesPending: number; fineOutstanding: number; }
 
 // ---- notices ----
 export type Audience = 'All' | 'Students' | 'Guardians' | 'Staff';

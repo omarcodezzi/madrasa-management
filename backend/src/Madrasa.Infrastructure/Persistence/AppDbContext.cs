@@ -162,6 +162,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
         b.Entity<LedgerEntry>().HasOne<Donor>().WithMany().HasForeignKey(x => x.DonorId);
         b.Entity<LedgerEntry>().HasOne(x => x.FeeReceipt).WithMany().HasForeignKey(x => x.FeeReceiptId);
         b.Entity<LedgerEntry>().HasOne<SalaryPayment>().WithMany().HasForeignKey(x => x.SalaryPaymentId);
+        b.Entity<LedgerEntry>().HasOne<BookIssue>().WithMany().HasForeignKey(x => x.BookIssueId);
         b.Entity<HostelAllocation>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
         b.Entity<HostelLeave>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);
         b.Entity<BookIssue>().HasOne<Student>().WithMany().HasForeignKey(x => x.StudentId);

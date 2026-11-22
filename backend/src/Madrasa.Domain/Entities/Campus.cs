@@ -51,7 +51,10 @@ public class BookIssue : BaseEntity
     public DateOnly IssuedOn { get; set; }
     public DateOnly DueOn { get; set; }
     public DateOnly? ReturnedOn { get; set; }
+    /// <summary>Fine charged at return; FinePaid went into the ledger, FineWaived was forgiven.</summary>
     public decimal Fine { get; set; }
+    public decimal FinePaid { get; set; }
+    public decimal FineWaived { get; set; }
 }
 
 public class Notice : BaseEntity

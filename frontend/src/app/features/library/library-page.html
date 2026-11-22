@@ -9,7 +9,7 @@
     <div class="px-5 py-4"><span class="text-sm text-mut">বইয়ের নাম</span><b class="block font-serif font-extrabold text-[26px]">{{ s.titles | num }}টি</b><em class="not-italic text-[13px] text-mut">মোট কপি {{ s.copies | num }}</em></div>
     <div class="px-5 py-4 border-l border-line"><span class="text-sm text-mut">তাকে আছে</span><b class="block font-serif font-extrabold text-[26px] text-g2">{{ (s.copies - s.out) | num }} কপি</b></div>
     <div class="px-5 py-4 max-lg:border-t lg:border-l border-line"><span class="text-sm text-mut">ইস্যু করা</span><b class="block font-serif font-extrabold text-[26px]">{{ s.out | num }} কপি</b></div>
-    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">মেয়াদ পেরিয়েছে</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="s.overdue">{{ s.overdue | num }} কপি</b><em class="not-italic text-[13px] text-mut">জরিমানা দিনে {{ s.finePerDay | money }}</em></div>
+    <div class="px-5 py-4 border-l max-lg:border-t border-line"><span class="text-sm text-mut">মেয়াদ পেরিয়েছে</span><b class="block font-serif font-extrabold text-[26px]" [class.text-red]="s.overdue">{{ s.overdue | num }} কপি</b><em class="not-italic text-[13px] text-mut">জরিমানা দিনে {{ s.finePerDay | money }}@if (s.fineOutstanding) { · বাকি {{ s.fineOutstanding | money }} }</em></div>
   } @else { @for (i of [1,2,3,4]; track i) { <div class="px-5 py-4"><m-skeleton height="64px" /></div> } }
 </div>
 
@@ -34,7 +34,7 @@
   </m-data-table>
 } @else {
   <m-data-table [rows]="issues() ?? []" [columns]="issueCols" [loading]="!issues()" [exportName]="'library-' + tab()" searchPlaceholder="বই বা নাম"
-    [emptyTitle]="tab() === 'overdue' ? 'মেয়াদ পেরোনো কোনো বই নেই' : tab() === 'out' ? 'কোনো বই ইস্যু করা নেই' : 'এখনও কোনো বই ফেরত আসেনি'">
+    [emptyTitle]="tab() === 'overdue' ? 'মেয়াদ পেরোনো কোনো বই নেই' : tab() === 'out' ? 'কোনো বই ইস্যু করা নেই' : tab() === 'fines' ? 'কোনো জরিমানা বাকি নেই' : 'এখনও কোনো বই ফেরত আসেনি'">
     <ng-template mCell="title" let-i><b class="font-semibold">{{ i.title }}</b></ng-template>
     <ng-template mCell="borrowerName" let-i>{{ i.borrowerName }}<small class="block text-mut text-[13px]">{{ i.borrowerCode }} · {{ i.borrowerKind === 'staff' ? 'স্টাফ' : 'শিক্ষার্থী' }}</small></ng-template>
     <ng-template mCell="issuedOn" let-i><span class="tabular">{{ i.issuedOn | bdate }}</span></ng-template>
@@ -42,7 +42,8 @@
       @if (i.returnedOn) { <small class="block text-mut text-[13px]">ফেরত {{ i.returnedOn | bdate }}</small> }
       @else if (i.lateDays) { <m-badge tone="danger">{{ i.lateDays | num }} দিন দেরি</m-badge> }</ng-template>
     <ng-template mCell="fineDue" let-i><span class="tabular">{{ (i.returnedOn ? i.fine : i.fineDue) ? ((i.returnedOn ? i.fine : i.fineDue) | money) : '—' }}</span></ng-template>
-    <ng-template mRowActions let-i>@if (!i.returnedOn) { <button mButton size="sm" variant="outline" (click)="openReturn(i)">ফেরত নিন</button> }</ng-template>
+    <ng-template mRowActions let-i>@if (!i.returnedOn) { <button mButton size="sm" variant="outline" (click)="openReturn(i)">ফেরত নিন</button> }
+      @else if (i.fineOutstanding > 0) { <button mButton size="sm" variant="outline" (click)="openFine(i)">জরিমানা আদায়</button> }</ng-template>
   </m-data-table>
 }
 
@@ -99,9 +100,27 @@
     <p class="mt-0"><b>{{ i.title }}</b><br><span class="text-mut text-sm">{{ i.borrowerName }} · ফেরতের তারিখ ছিল {{ i.dueOn | bdate }}</span></p>
     @if (i.lateDays) { <p class="text-sm">{{ i.lateDays | num }} দিন দেরি হয়েছে। নিয়ম অনুযায়ী জরিমানা {{ i.fineDue | money }}।</p> }
     <m-field label="জরিমানা (টাকা)" for="r-f" hint="মাফ করলে ০ লিখুন"><input id="r-f" class="ctl !w-40 tabular" inputmode="numeric" [ngModel]="retFine()" (ngModelChange)="retFine.set($event)"></m-field>
+    @if (+retFine()) {
+      <label class="flex items-start gap-2 mt-3 cursor-pointer"><input type="checkbox" class="mt-1.5 size-4 accent-[var(--g2)]" [ngModel]="retCollect()" (ngModelChange)="retCollect.set($event)">
+        <span>জরিমানা এখনই আদায় করছি<small class="block text-mut text-[13px]">সাধারণ ফান্ডে "লাইব্রেরি জরিমানা" খাতে আয় হিসেবে জমা হবে। না দিলে "জরিমানা বাকি" তালিকায় থাকবে।</small></span></label>
+    }
   }
   <div modalFooter class="flex gap-2">
     <button mButton variant="ghost" (click)="retOpen.set(false)">বাতিল</button>
     <button mButton [loading]="returning()" (click)="doReturn()"><m-icon name="check" [size]="18" /> ফেরত নিন</button>
+  </div>
+</m-modal>
+
+<m-modal [(open)]="fineOpen" title="জরিমানা আদায়">
+  @if (fineIssue(); as i) {
+    <p class="mt-0"><b>{{ i.borrowerName }}</b><span class="text-mut text-sm ml-2">{{ i.borrowerCode }}</span><br><span class="text-mut text-sm">"{{ i.title }}" · {{ i.lateDays | num }} দিন দেরি · ফেরত {{ i.returnedOn | bdate }}</span></p>
+    <p class="text-sm">মোট জরিমানা {{ i.fine | money }}@if (i.finePaid) { · আদায় হয়েছে {{ i.finePaid | money }} } · <b>বাকি {{ i.fineOutstanding | money }}</b></p>
+    <m-field label="এখন নিচ্ছি (টাকা)" for="f-a" hint="কিছু অংশ নিলে বাকিটা তালিকায় থাকবে"><input id="f-a" class="ctl !w-40 tabular" inputmode="numeric" [ngModel]="fineAmt()" (ngModelChange)="fineAmt.set($event)"></m-field>
+  }
+  <div modalFooter class="flex flex-wrap gap-2">
+    <button mButton variant="ghost" (click)="waiveFine()">বাকিটা মাফ করুন</button>
+    <span class="flex-1"></span>
+    <button mButton variant="ghost" (click)="fineOpen.set(false)">বাতিল</button>
+    <button mButton [loading]="fineBusy()" (click)="collectFine()"><m-icon name="check" [size]="18" /> আদায় করুন</button>
   </div>
 </m-modal>

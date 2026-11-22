@@ -24,4 +24,6 @@ public class LibraryController(LibraryService library) : ControllerBase
     [HttpPost("issues")]
     public async Task<IActionResult> Issue(IssueInput input, CancellationToken ct) { await library.IssueAsync(input, ct); return NoContent(); }
     [HttpPost("issues/{id:int}/return")] public Task<IssueRow> Return(int id, ReturnInput input, CancellationToken ct) => library.ReturnAsync(id, input, ct);
+    [HttpPost("issues/{id:int}/fine/collect")] public Task<IssueRow> CollectFine(int id, FineInput input, CancellationToken ct) => library.CollectFineAsync(id, input, ct);
+    [HttpPost("issues/{id:int}/fine/waive")] public Task<IssueRow> WaiveFine(int id, CancellationToken ct) => library.WaiveFineAsync(id, ct);
 }
