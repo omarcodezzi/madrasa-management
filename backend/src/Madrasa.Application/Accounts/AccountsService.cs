@@ -65,10 +65,10 @@ public class AccountsService(IAppDbContext db, IClock clock, ICurrentUser user)
             .Select(l => new
             {
                 l.Id, l.Date, l.FundId, Fund = l.Fund!.NameBn, l.CategoryId, Category = l.Category!.NameBn, l.Category.Kind, l.Direction, l.Amount, l.Description, l.VoucherNo,
-                Donor = db.Donors.Where(x => x.Id == l.DonorId).Select(x => new { x.Name, x.Phone }).FirstOrDefault(), l.FeeReceiptId, l.SalaryPaymentId,
+                Donor = db.Donors.Where(x => x.Id == l.DonorId).Select(x => new { x.Name, x.Phone }).FirstOrDefault(), l.FeeReceiptId, l.SalaryPaymentId, l.BookIssueId,
             }).ToListAsync(ct);
         return new LedgerPage(items.Select(l => new LedgerRow(l.Id, l.Date, l.FundId, l.Fund, l.CategoryId, l.Category, l.Kind, l.Direction, l.Amount, l.Description, l.VoucherNo,
-            l.Donor?.Name, l.Donor?.Phone, l.FeeReceiptId != null ? "Fee" : l.SalaryPaymentId != null ? "Salary" : "Manual",
+            l.Donor?.Name, l.Donor?.Phone, l.FeeReceiptId != null ? "Fee" : l.SalaryPaymentId != null ? "Salary" : l.BookIssueId != null ? "Library" : "Manual",
             l.FeeReceiptId == null && l.SalaryPaymentId == null)).ToList(), total, page, size, tin, tout);
     }
 
@@ -84,6 +84,7 @@ public class AccountsService(IAppDbContext db, IClock clock, ICurrentUser user)
         var date = input.Date ?? clock.Today;
         if (date > clock.Today) err["date"] = "ভবিষ্যতের তারিখে এন্ট্রি দেওয়া যাবে না";
         if (cat?.Id == 1) err["categoryId"] = "ছাত্র বেতন বেতন-ফি পাতা থেকে আদায় করুন, যাতে রসিদ তৈরি হয়";
+        if (cat?.Id == Library.LibraryService.FineCategoryId) err["categoryId"] = "লাইব্রেরির জরিমানা লাইব্রেরি পাতা থেকে আদায় করুন";
         if (cat is { Kind: LedgerKind.Expense } && string.IsNullOrWhiteSpace(input.Description)) err["description"] = "খরচের বিবরণ লিখুন";
         if (input.DonorPhone is { Length: > 0 } ph && !Digits.IsBdMobile(ph)) err["donorPhone"] = "সঠিক মোবাইল নম্বর দিন (০১ দিয়ে শুরু, ১১ সংখ্যা)";
         if (err.Count > 0) throw AppException.Invalid(err);
@@ -124,6 +125,9 @@ public class AccountsService(IAppDbContext db, IClock clock, ICurrentUser user)
         if (e.SalaryPaymentId != null) throw new AppException("বেতন প্রদানের এন্ট্রি স্টাফ পাতা থেকে বাতিল করুন।", 409);
         if (e.Direction == Direction.In && await BalanceAsync(e.FundId, ct) < e.Amount)
             throw new AppException("এই টাকা থেকে খরচ হয়ে গেছে, তাই এন্ট্রিটি মুছলে ফান্ড ঋণাত্মক হবে।", 409);
+        // Deleting a collected library fine puts it back on the borrower's pending list
+        if (e.BookIssueId is int iid && await db.BookIssues.FirstOrDefaultAsync(i => i.Id == iid, ct) is { } issue)
+            issue.FinePaid = Math.Max(0, issue.FinePaid - e.Amount);
         db.LedgerEntries.Remove(e);
         await db.SaveChangesAsync(ct);
     }

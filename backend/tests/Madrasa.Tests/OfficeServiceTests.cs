@@ -111,7 +111,7 @@ public class OfficeServiceTests
     {
         using var db = Db();
         var (boy, girl) = await StudentsAsync(db);
-        var lib = new LibraryService(db, C);
+        var lib = new LibraryService(db, C, new User());
         var book = await lib.SaveBookAsync(null, new("নাহবেমীর", null, null, BookLanguage.Urdu, "নাহু", "D-1", 1), default);
         await lib.IssueAsync(new(book.Id, boy.Id, null, 14), default);
         var none = await Assert.ThrowsAsync<AppException>(() => lib.IssueAsync(new(book.Id, girl.Id, null, 14), default));
@@ -128,5 +128,47 @@ public class OfficeServiceTests
         var back = await lib.ReturnAsync(issue.Id, new(null), default);
         Assert.Equal(12, back.Fine);
         Assert.Equal(1, (await lib.BooksAsync(null, null, null, default)).Single().Available);
+        Assert.Equal(12, back.FineOutstanding);
+        Assert.Single(await lib.IssuesAsync("fines", default));
+    }
+
+    [Fact]
+    public async Task Library_fine_goes_to_the_ledger_and_can_be_waived()
+    {
+        using var db = Db();
+        var (boy, girl) = await StudentsAsync(db);
+        var lib = new LibraryService(db, C, new User());
+        var acc = new AccountsService(db, C, new User());
+        var book = await lib.SaveBookAsync(null, new("মিজান", null, null, BookLanguage.Arabic, null, null, 2), default);
+        await lib.IssueAsync(new(book.Id, boy.Id, null, 7), default);
+        await lib.IssueAsync(new(book.Id, girl.Id, null, 7), default);
+        foreach (var x in db.BookIssues) { x.IssuedOn = C.Today.AddDays(-17); x.DueOn = C.Today.AddDays(-10); }
+        await db.SaveChangesAsync();
+        var ids = db.BookIssues.OrderBy(x => x.Id).Select(x => x.Id).ToList();
+
+        // Collected at the counter: 20 taka into the general fund as library-fine income
+        var paid = await lib.ReturnAsync(ids[0], new(null, Collect: true), default);
+        Assert.Equal(20, paid.FinePaid);
+        Assert.Equal(0, paid.FineOutstanding);
+        var entry = await db.LedgerEntries.SingleAsync(l => l.BookIssueId == ids[0]);
+        Assert.Equal((LibraryService.FineCategoryId, Direction.In, 20m, 1), (entry.CategoryId, entry.Direction, entry.Amount, entry.FundId));
+        Assert.StartsWith("L-", entry.VoucherNo);
+        Assert.Equal(20, await acc.BalanceAsync(1, default));
+
+        // Left owing, then part paid and the rest forgiven
+        var owed = await lib.ReturnAsync(ids[1], new(null), default);
+        Assert.Equal(20, owed.FineOutstanding);
+        await Assert.ThrowsAsync<AppException>(() => lib.CollectFineAsync(ids[1], new(25, null), default));
+        var part = await lib.CollectFineAsync(ids[1], new(5, null), default);
+        Assert.Equal(15, part.FineOutstanding);
+        var waived = await lib.WaiveFineAsync(ids[1], default);
+        Assert.Equal((0m, 15m), (waived.FineOutstanding, waived.FineWaived));
+        Assert.Equal(25, await acc.BalanceAsync(1, default));
+        Assert.Equal(0, (await lib.SummaryAsync(default)).FinesPending);
+
+        // A fine can't be entered by hand, and deleting a collected one puts it back on the list
+        await Assert.ThrowsAsync<AppException>(() => acc.AddAsync(new(null, 1, LibraryService.FineCategoryId, 10, "জরিমানা", null, null, null), default));
+        await acc.DeleteAsync(entry.Id, default);
+        Assert.Equal(20, (await lib.IssuesAsync("fines", default)).Single().FineOutstanding);
     }
 }

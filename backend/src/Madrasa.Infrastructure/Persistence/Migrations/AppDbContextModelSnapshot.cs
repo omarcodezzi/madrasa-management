@@ -251,6 +251,14 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("decimal(12,2)");
 
+                    b.Property<decimal>("FinePaid")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<decimal>("FineWaived")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
                     b.Property<DateOnly>("IssuedOn")
                         .HasColumnType("date");
 
@@ -1137,6 +1145,12 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                             Id = 7,
                             Kind = (byte)2,
                             NameBn = "অন্যান্য"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Kind = (byte)1,
+                            NameBn = "লাইব্রেরি জরিমানা"
                         });
                 });
 
@@ -1151,6 +1165,9 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasPrecision(12, 2)
                         .HasColumnType("decimal(12,2)");
+
+                    b.Property<int?>("BookIssueId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -1186,6 +1203,8 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookIssueId");
 
                     b.HasIndex("CategoryId");
 
@@ -2323,6 +2342,10 @@ namespace Madrasa.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Madrasa.Domain.Entities.LedgerEntry", b =>
                 {
+                    b.HasOne("Madrasa.Domain.Entities.BookIssue", null)
+                        .WithMany()
+                        .HasForeignKey("BookIssueId");
+
                     b.HasOne("Madrasa.Domain.Entities.LedgerCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")

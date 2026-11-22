@@ -54,6 +54,7 @@ internal static class SeedData
             new LedgerCategory { Id = 4, NameBn = "বোর্ডিং ও খাবার", Kind = LedgerKind.Expense },
             new LedgerCategory { Id = 5, NameBn = "বিদ্যুৎ ও ইউটিলিটি", Kind = LedgerKind.Expense },
             new LedgerCategory { Id = 6, NameBn = "নির্মাণ ও মেরামত", Kind = LedgerKind.Expense },
-            new LedgerCategory { Id = 7, NameBn = "অন্যান্য", Kind = LedgerKind.Expense });
+            new LedgerCategory { Id = 7, NameBn = "অন্যান্য", Kind = LedgerKind.Expense },
+            new LedgerCategory { Id = 8, NameBn = "লাইব্রেরি জরিমানা", Kind = LedgerKind.Income });
     }
 }

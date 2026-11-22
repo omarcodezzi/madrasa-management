@@ -109,6 +109,8 @@ public class LedgerEntry
     public int? FeeReceiptId { get; set; }
     public FeeReceipt? FeeReceipt { get; set; }
     public int? SalaryPaymentId { get; set; }
+    /// <summary>Set when the entry is a library fine collected for this issue.</summary>
+    public int? BookIssueId { get; set; }
     public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -2051,3 +2051,78 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    ALTER TABLE [LedgerEntries] ADD [BookIssueId] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    ALTER TABLE [BookIssues] ADD [FinePaid] decimal(12,2) NOT NULL DEFAULT 0.0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    ALTER TABLE [BookIssues] ADD [FineWaived] decimal(12,2) NOT NULL DEFAULT 0.0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Kind', N'NameBn') AND [object_id] = OBJECT_ID(N'[LedgerCategories]'))
+        SET IDENTITY_INSERT [LedgerCategories] ON;
+    EXEC(N'INSERT INTO [LedgerCategories] ([Id], [Kind], [NameBn])
+    VALUES (8, CAST(1 AS tinyint), N''লাইব্রেরি জরিমানা'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Kind', N'NameBn') AND [object_id] = OBJECT_ID(N'[LedgerCategories]'))
+        SET IDENTITY_INSERT [LedgerCategories] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    CREATE INDEX [IX_LedgerEntries_BookIssueId] ON [LedgerEntries] ([BookIssueId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    ALTER TABLE [LedgerEntries] ADD CONSTRAINT [FK_LedgerEntries_BookIssues_BookIssueId] FOREIGN KEY ([BookIssueId]) REFERENCES [BookIssues] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122180305_LibraryFines'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261122180305_LibraryFines', N'8.0.11');
+END;
+GO
+
+COMMIT;
+GO
+

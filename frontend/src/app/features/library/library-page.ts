@@ -8,7 +8,7 @@ import { fieldErrors } from '../academic/academic.service';
 import { OfficeApi } from '../office/office.api';
 import { Book, BookInput, BookLanguage, Borrower, Issue, LANG_LABEL, LibrarySummary } from '../office/office.models';
 
-type Tab = 'books' | 'out' | 'overdue' | 'returned';
+type Tab = 'books' | 'out' | 'overdue' | 'fines' | 'returned';
 const blank = (): BookInput => ({ title: '', titleAr: null, author: null, language: 'Arabic', category: null, shelfNo: null, totalCopies: 1 });
 
 @Component({
@@ -26,7 +26,7 @@ export class LibraryPage {
   protected tab = signal<Tab>('books');
   protected tabs = computed(() => [
     { value: 'books' as Tab, label: 'বই' }, { value: 'out' as Tab, label: `ইস্যু করা (${(this.summary()?.out ?? 0).toLocaleString('bn-BD')})` },
-    { value: 'overdue' as Tab, label: `মেয়াদোত্তীর্ণ (${(this.summary()?.overdue ?? 0).toLocaleString('bn-BD')})` }, { value: 'returned' as Tab, label: 'ফেরত' },
+    { value: 'overdue' as Tab, label: `মেয়াদোত্তীর্ণ (${(this.summary()?.overdue ?? 0).toLocaleString('bn-BD')})` }, { value: 'fines' as Tab, label: `জরিমানা বাকি (${(this.summary()?.finesPending ?? 0).toLocaleString('bn-BD')})` }, { value: 'returned' as Tab, label: 'ফেরত' },
   ]);
   protected lLabel = (l: string) => (LANG_LABEL as Record<string, string>)[l] ?? l;
   protected lang = signal<'' | BookLanguage>('');
@@ -46,7 +46,7 @@ export class LibraryPage {
     { key: 'borrowerName', label: 'নিয়েছেন', sortable: true },
     { key: 'issuedOn', label: 'ইস্যু', sortable: true },
     { key: 'dueOn', label: 'ফেরতের তারিখ', sortable: true },
-    { key: 'fineDue', label: 'জরিমানা', sortable: true, align: 'end', value: (i) => (i.returnedOn ? i.fine : i.fineDue) },
+    { key: 'fineDue', label: 'জরিমানা', sortable: true, align: 'end', value: (i) => (i.returnedOn ? (this.tab() === 'fines' ? i.fineOutstanding : i.fine) : i.fineDue) },
   ];
 
   // book modal
@@ -69,6 +69,7 @@ export class LibraryPage {
   protected retOpen = signal(false);
   protected retIssue = signal<Issue | null>(null);
   protected retFine = signal('0');
+  protected retCollect = signal(true);
   protected returning = signal(false);
 
   protected loadError = signal<string | null>(null);
@@ -125,15 +126,40 @@ export class LibraryPage {
     } catch (e) { this.toast.error(errorMessage(e)); }
     finally { this.issuing.set(false); }
   }
-  protected openReturn(i: Issue) { this.retIssue.set(i); this.retFine.set(String(i.fineDue)); this.retOpen.set(true); }
+  protected openReturn(i: Issue) { this.retIssue.set(i); this.retFine.set(String(i.fineDue)); this.retCollect.set(true); this.retOpen.set(true); }
   protected async doReturn() {
     const i = this.retIssue(); if (!i) return;
     this.returning.set(true);
     try {
-      const r = await this.api.returnBook(i.id, +toEnDigits(this.retFine()) || 0);
-      this.toast.success(r.fine ? `বই ফেরত নেওয়া হয়েছে, জরিমানা ${r.fine.toLocaleString('bn-BD')} টাকা` : 'বই ফেরত নেওয়া হয়েছে');
+      const fine = +toEnDigits(this.retFine()) || 0;
+      const r = await this.api.returnBook(i.id, fine, fine > 0 && this.retCollect());
+      const amt = r.fine.toLocaleString('bn-BD');
+      this.toast.success(!r.fine ? 'বই ফেরত নেওয়া হয়েছে' : r.finePaid ? `বই ফেরত নেওয়া হয়েছে, জরিমানা ${amt} টাকা আয়ে জমা হয়েছে` : `বই ফেরত নেওয়া হয়েছে, জরিমানা ${amt} টাকা বাকি রইল`);
       this.retOpen.set(false); this.refresh();
     } catch (e) { this.toast.error(errorMessage(e)); }
     finally { this.returning.set(false); }
+  }
+
+  // pending fines
+  protected fineOpen = signal(false);
+  protected fineIssue = signal<Issue | null>(null);
+  protected fineAmt = signal('');
+  protected fineBusy = signal(false);
+  protected openFine(i: Issue) { this.fineIssue.set(i); this.fineAmt.set(String(i.fineOutstanding)); this.fineOpen.set(true); }
+  protected async collectFine() {
+    const i = this.fineIssue(); if (!i) return;
+    this.fineBusy.set(true);
+    try {
+      const r = await this.api.collectFine(i.id, +toEnDigits(this.fineAmt()) || null);
+      this.toast.success(r.fineOutstanding ? `জমা হয়েছে, এখনও বাকি ${r.fineOutstanding.toLocaleString('bn-BD')} টাকা` : 'জরিমানা আদায় হয়ে আয়ে জমা হয়েছে');
+      this.fineOpen.set(false); this.refresh();
+    } catch (e) { const fe = fieldErrors(e); this.toast.error(Object.values(fe)[0] ?? errorMessage(e)); }
+    finally { this.fineBusy.set(false); }
+  }
+  protected async waiveFine() {
+    const i = this.fineIssue(); if (!i) return;
+    if (!(await this.confirm.ask({ message: 'বাকি জরিমানা মাফ হয়ে যাবে। আগে যা আদায় হয়েছে তা হিসাবে থেকে যাবে।', itemName: `${i.borrowerName} · ${i.fineOutstanding.toLocaleString('bn-BD')} টাকা`, confirmLabel: 'মাফ করুন' }))) return;
+    try { await this.api.waiveFine(i.id); this.toast.success('জরিমানা মাফ করা হয়েছে'); this.fineOpen.set(false); this.refresh(); }
+    catch (e) { this.toast.error(errorMessage(e)); }
   }
 }

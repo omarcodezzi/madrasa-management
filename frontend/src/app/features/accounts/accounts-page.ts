@@ -60,7 +60,7 @@ export class AccountsPage {
   protected form = signal<EntryForm>({ date: todayIso(), fundId: 1, categoryId: 2, amount: '', description: '', donorName: '', donorPhone: '', donorAddress: '' });
   protected errs = signal<Record<string, string>>({});
   protected saving = signal(false);
-  protected kindCats = computed(() => this.categories().filter((c) => (this.kind() === 'donation' ? c.kind === 'Income' && c.id !== 1 : c.kind === 'Expense')));
+  protected kindCats = computed(() => this.categories().filter((c) => (this.kind() === 'donation' ? c.kind === 'Income' && c.id !== 1 && c.id !== 8 : c.kind === 'Expense')));
   protected donorHits = computed(() => {
     const t = this.form().donorName.trim(); const all = this.donors() ?? [];
     return t.length < 2 ? [] : all.filter((d) => d.name.includes(t) || (d.phone ?? '').includes(toEnDigits(t))).slice(0, 5);
@@ -133,5 +133,5 @@ export class AccountsPage {
     catch (e) { this.toast.error(errorMessage(e)); }
   }
   protected monthInput(v: string) { if (v) this.month.set(v); }
-  protected sourceLabel = (s: string) => (s === 'Fee' ? 'রসিদ' : s === 'Salary' ? 'বেতন' : '');
+  protected sourceLabel = (s: string) => (s === 'Fee' ? 'রসিদ' : s === 'Salary' ? 'বেতন' : s === 'Library' ? 'লাইব্রেরি' : '');
 }

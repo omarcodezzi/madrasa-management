@@ -62,7 +62,9 @@ export class OfficeApi {
   borrowers(q: string) { return this.get<M.Borrower[]>('library/borrowers', { q }); }
   issues(filter: string) { return this.get<M.Issue[]>('library/issues', { filter }); }
   issue(i: { bookId: number; studentId: number | null; staffId: number | null; days: number }) { return this.post<void>('library/issues', i); }
-  returnBook(id: number, fine: number | null) { return this.post<M.Issue>(`library/issues/${id}/return`, { fine }); }
+  returnBook(id: number, fine: number | null, collect = false) { return this.post<M.Issue>(`library/issues/${id}/return`, { fine, collect }); }
+  collectFine(id: number, amount: number | null) { return this.post<M.Issue>(`library/issues/${id}/fine/collect`, { amount }); }
+  waiveFine(id: number) { return this.post<M.Issue>(`library/issues/${id}/fine/waive`, {}); }
 
   // notices
   notices() { return this.get<M.Notice[]>('notices'); }
