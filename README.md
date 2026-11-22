@@ -30,6 +30,12 @@ cd frontend && npm install && npm start     # http://localhost:4200
 ```
 Sign in with `admin` and the password you set. The design-system page is at `/design-system`.
 
+## Production
+Docker Compose with SQL Server, the API, Caddy (automatic HTTPS) and nightly backups: see [`docs/DEPLOY.md`](docs/DEPLOY.md) (Bangla).
+```bash
+cd deploy && ./setup.sh && docker compose up -d --build
+```
+
 ## Tests
 ```bash
 cd backend && dotnet test          # grading (Befaq division) rules

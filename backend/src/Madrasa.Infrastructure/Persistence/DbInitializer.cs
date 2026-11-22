@@ -49,6 +49,8 @@ public static class DbInitializer
             var pwd = cfg["Seed:AdminPassword"];
             if (string.IsNullOrWhiteSpace(pwd))
                 throw new InvalidOperationException("Set Seed:AdminPassword (env Seed__AdminPassword) for the first admin account.");
+            if (!env.IsDevelopment() && (pwd.Length < 12 || pwd.Distinct().Count() < 6))
+                throw new InvalidOperationException("Seed:AdminPassword is too weak for production: use at least 12 varied characters (deploy/setup.sh generates one).");
             var admin = new AppUser { UserName = adminName, FullName = "সুপার অ্যাডমিন" };
             var r = await users.CreateAsync(admin, pwd);
             if (!r.Succeeded) throw new InvalidOperationException(string.Join("; ", r.Errors.Select(e => e.Description)));

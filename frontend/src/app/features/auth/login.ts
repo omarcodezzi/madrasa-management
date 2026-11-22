@@ -16,6 +16,12 @@ import { AuthLayout } from './auth-layout';
       <h2 class="!text-[26px]">{{ 'auth.signInTitle' | transloco }}</h2>
       <p class="m-0 mt-1.5 mb-6 text-mut">{{ 'auth.signInDesc' | transloco }}</p>
 
+      @if (expired() && !error()) {
+        <div class="mb-4 flex gap-2.5 items-start px-4 py-3 rounded-xl bg-soft text-ink" role="status">
+          <m-icon name="info" class="mt-0.5 text-g2" />
+          <span>{{ 'auth.sessionEnded' | transloco }}</span>
+        </div>
+      }
       @if (error()) {
         <div class="mb-4 flex gap-2.5 items-start px-4 py-3 rounded-xl bg-redbg text-red" role="alert">
           <m-icon name="alert" class="mt-0.5" />
@@ -55,6 +61,7 @@ export class LoginPage {
   private router = inject(Router);
   private t = inject(TranslocoService);
   readonly returnUrl = input<string>();
+  readonly expired = input<string>();
 
   protected userName = signal('');
   protected password = signal('');

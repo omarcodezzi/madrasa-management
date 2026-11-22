@@ -11,6 +11,8 @@ public interface IAuthService
     Task<AuthUser?> GetUserAsync(string userId, CancellationToken ct = default);
     /// <summary>Returns null on success, otherwise a Bangla error message.</summary>
     Task<string?> ChangePasswordAsync(string userId, ChangePasswordRequest req, CancellationToken ct = default);
+    /// <summary>A fresh token, e.g. after a password change invalidated the old one.</summary>
+    Task<LoginResponse?> IssueAsync(string userId, CancellationToken ct = default);
 }
 
 /// <summary>Permission keys. The Angular app hides menu items using these.</summary>

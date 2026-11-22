@@ -1,0 +1,82 @@
+# Production: SQL Server + .NET API + Caddy (Angular app, HTTPS) + nightly backups.
+# First time: ./setup.sh   then   docker compose up -d --build
+# See docs/DEPLOY.md
+name: madrasa
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${MSSQL_PID:-Express}          # Express is free for production use (10 GB per database)
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:?run ./setup.sh first}
+      TZ: Asia/Dhaka
+    volumes:
+      - mssql:/var/opt/mssql
+      - backups:/var/opt/mssql/backup
+    # No published port: only the API and the backup job can reach the database
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  api:
+    build: ../backend
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Server=db,1433;Database=MadrasaDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      Jwt__Key: ${JWT_KEY:?run ./setup.sh first}
+      Seed__AdminUser: ${ADMIN_USER:-admin}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?run ./setup.sh first}
+      Cors__Origins__0: https://${DOMAIN}
+      AllowedHosts: ${DOMAIN};api;localhost
+      TimeZone: Asia/Dhaka
+    volumes:
+      - uploads:/data/uploads
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      DOMAIN: ${DOMAIN:?run ./setup.sh first}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env (Let's Encrypt notices)}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data        # certificates — keep this volume
+      - caddy_config:/config
+
+  backup:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    user: root
+    entrypoint: ["/bin/bash", "/backup.sh"]
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD}
+      BACKUP_HOUR: ${BACKUP_HOUR:-2}            # 2 AM, Bangladesh time
+      RETAIN_DAYS: ${RETAIN_DAYS:-14}
+      TZ: Asia/Dhaka
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - backups:/backups
+      - uploads:/uploads:ro
+
+volumes:
+  mssql:
+  backups:
+  uploads:
+  caddy_data:
+  caddy_config:

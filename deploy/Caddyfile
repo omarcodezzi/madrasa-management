@@ -1,0 +1,42 @@
+# Caddy gets and renews the Let's Encrypt certificate for $DOMAIN automatically (ports 80 and 443 must be open).
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# API, uploaded photos and the health check go to the .NET API container
+	@api path /api/* /uploads/* /health
+	handle @api {
+		reverse_proxy api:8080
+	}
+
+	# Everything else is the Angular app; unknown paths fall back to index.html for client-side routes
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), microphone=(), geolocation=(), payment=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		-Server
+	}
+
+	# Hashed build files never change; index.html must always be fresh so updates show up
+	@hashed path_regexp \.[0-9A-Za-z_-]{8,}\.(js|css)$
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@fresh not path_regexp \.[0-9A-Za-z_-]{8,}\.(js|css)$
+	header @fresh Cache-Control "no-cache"
+
+	log {
+		output stdout
+		format console
+	}
+}

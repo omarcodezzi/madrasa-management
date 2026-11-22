@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (token && isApi) req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   return next(req).pipe(
     catchError((e) => {
-      if (isApi && e?.status === 401 && token && !req.url.endsWith('/auth/login')) auth.logout();
+      if (isApi && e?.status === 401 && token && !req.url.endsWith('/auth/login')) auth.logout(true, true);
       return throwError(() => e);
     }),
   );
